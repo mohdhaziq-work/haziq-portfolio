@@ -97,17 +97,41 @@ export const PROJECTS = [
 ] as const
 
 // ==================== SERVICES ====================
-export const SERVICES = PRICING.plans.map((plan) => ({
-  id: plan.id,
-  name: plan.name,
-  price: `${PRICING.currency}${plan.price}`,
-  period: 'one-time',
-  description: plan.description,
-  icon: plan.id === 'starter' ? 'rocket' as const : plan.id === 'business' ? 'briefcase' as const : 'crown' as const,
-  features: [...plan.features],
-  popular: plan.popular,
-  cta: plan.popular ? 'Most Popular' : plan.id === 'starter' ? 'Get Started' : 'Go Premium',
-})) as const
+export const SERVICES = [
+  {
+    id: PRICING.plans[0].id,
+    name: PRICING.plans[0].name,
+    price: `${PRICING.currency}${PRICING.plans[0].price}`,
+    period: 'one-time',
+    description: PRICING.plans[0].description,
+    icon: 'rocket' as const,
+    features: [...PRICING.plans[0].features],
+    popular: PRICING.plans[0].popular,
+    cta: 'Get Started',
+  },
+  {
+    id: PRICING.plans[1].id,
+    name: PRICING.plans[1].name,
+    price: `${PRICING.currency}${PRICING.plans[1].price}`,
+    period: 'one-time',
+    description: PRICING.plans[1].description,
+    icon: 'briefcase' as const,
+    features: [...PRICING.plans[1].features],
+    popular: PRICING.plans[1].popular,
+    cta: 'Most Popular',
+  },
+  {
+    id: PRICING.plans[2].id,
+    name: PRICING.plans[2].name,
+    price: `${PRICING.currency}${PRICING.plans[2].price}`,
+    period: 'one-time',
+    description: PRICING.plans[2].description,
+    icon: 'crown' as const,
+    features: [...PRICING.plans[2].features],
+    popular: PRICING.plans[2].popular,
+    cta: 'Go Premium',
+  },
+] as const
 
 // ==================== STATS ====================
 export const STATS = [
