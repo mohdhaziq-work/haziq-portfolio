@@ -27,10 +27,10 @@ export const PERSONAL = {
   // Professional
   title: 'AI-Powered Web Developer',
   tagline: 'Code. Create. Convert.',
-  bio: 'I combine the speed of AI with real business understanding to create modern, fast, and high-converting websites for local businesses.',
+  bio: 'I combine the speed of AI with real business understanding to create modern, fast, and high-converting websites for businesses.',
 
   // Full Story (About Page ke liye)
-  story: `While others were scrolling reels, I started mastering AI tools to build professional websites for local businesses. I combine the speed of AI with a deep understanding of what local businesses need to grow. My goal isn't just to make websites — it's to create digital tools that bring you more customers.`,
+  story: `While others were scrolling reels, I started mastering AI tools to build professional websites for local businesses. I combine the speed of AI with a deep understanding of what businesses need to grow. My goal isn't just to make websites — it's to create digital tools that bring you more customers.`,
 
   // Philosophy (About Page ke liye)
   philosophy: `Every line of code I write has one purpose: to help your business grow. Whether it's a restaurant that needs more reservations, a coaching center that wants more admissions, or a gym that needs more members — I design with conversion in mind.`,
@@ -108,7 +108,7 @@ export const SOCIAL_LINKS = {
    * EMAIL:
    * Format: 'mailto:your@email.com'
    */
-  email: 'mailto:contact@haziq.dev',
+  email: 'mohdhaziq1962@gmail.com,
 
   /**
    * TWITTER / X (Optional):
@@ -165,7 +165,7 @@ export const CONTACT = {
   /**
    * CONTACT EMAIL:
    */
-  contactEmail: '', // e.g., 'contact@haziq.dev'
+  contactEmail: 'mohdhaziq1962@gmail.com'
 } as const
 
 // ============================================================
