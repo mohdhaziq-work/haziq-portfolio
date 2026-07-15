@@ -1,0 +1,49 @@
+/**
+ * ╔══════════════════════════════════════════════════════════════╗
+ * ║            FIRESTORE SECURITY RULES                         ║
+ * ║                                                              ║
+ * ║  Ye rules Firebase Console mein paste karo:                  ║
+ * ║  Firebase → Firestore Database → Rules tab                   ║
+ * ║                                                              ║
+ * ║  COPY THE CONTENT BELOW (between START and END)             ║
+ * ╚══════════════════════════════════════════════════════════════╝
+ * 
+ * ==================== START COPY ====================
+ 
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // CONTACTS: Anyone can create, only admin can read/update/delete
+    match /contacts/{contactId} {
+      allow create: if true;                    // Contact form submit (public)
+      allow read, update, delete: if false;     // Only via Admin SDK or Console
+    }
+    
+    // PROJECTS: Only admin can read/write
+    match /projects/{projectId} {
+      allow read, write: if false;              // Only via Admin SDK or Console
+    }
+    
+    // TESTIMONIALS: Anyone can read, only admin can write
+    match /testimonials/{testimonialId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    
+    // ANALYTICS: Only admin can read/write
+    match /analytics/{analyticsId} {
+      allow read, write: if false;
+    }
+  }
+}
+
+ * ==================== END COPY ====================
+ * 
+ * WHY THESE RULES?
+ * - Contact form public hai → koi bhi submit kar sakta hai
+ * - Admin data (contacts read, projects) sirf tujhe dikhna chahiye
+ * - Ye rules ensure karti hain ki koi client tera dashboard data nahi dekh sakta
+ * - Admin Dashboard client-side hai with password protection
+ * - Firebase rules extra security layer hain
+ */

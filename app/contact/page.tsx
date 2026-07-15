@@ -29,10 +29,44 @@ export default function ContactPage() {
               <h2 className="text-headline text-text-primary mb-2">Send a Message</h2>
               <p className="text-body-sm text-text-secondary mb-8">Fill out the form and I&apos;ll respond via Instagram DM.</p>
 
-              <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); alert('Thank you! I will reach out to you on Instagram soon.') }}>
+              <form className="space-y-6" onSubmit={async (e) => {
+                e.preventDefault()
+                const form = e.currentTarget
+                const formData = new FormData(form)
+                const data = {
+                  fullName: formData.get('fullName') as string,
+                  businessName: formData.get('businessName') as string,
+                  instagramHandle: formData.get('instagram') as string,
+                  service: formData.get('service') as string,
+                  message: formData.get('message') as string,
+                }
+
+                try {
+                  // Dynamic import to avoid SSR issues
+                  const { submitContactForm } = await import('@/lib/firebase/firestore')
+                  const result = await submitContactForm(data)
+                  
+                  if (result.success && result.instagramDmUrl) {
+                    // Save success - redirect to Instagram DM
+                    form.reset()
+                    window.open(result.instagramDmUrl, '_blank')
+                    alert('Thank you! Your message has been saved. You will now be redirected to Instagram DM to complete the conversation.')
+                  } else {
+                    // Fallback: still open Instagram
+                    const dmText = encodeURIComponent(`Hi Haziq! I'm ${data.fullName} from ${data.businessName || 'my business'}. I'm interested in your ${data.service} plan. ${data.message}`)
+                    window.open(`https://instagram.com/direct/new/?text=${dmText}`, '_blank')
+                    form.reset()
+                  }
+                } catch {
+                  // Firebase not configured - simple fallback
+                  alert('Thank you for reaching out! Please DM me on Instagram to discuss your project further.')
+                  form.reset()
+                }
+              }}>
                 <div>
-                  <label className="block text-body-sm font-medium text-text-primary mb-2">Full Name</label>
+                  <label className="block text-body-sm font-medium text-text-primary mb-2">Full Name *</label>
                   <input
+                    name="fullName"
                     type="text"
                     required
                     placeholder="Your full name"
@@ -42,14 +76,16 @@ export default function ContactPage() {
                 <div>
                   <label className="block text-body-sm font-medium text-text-primary mb-2">Business Name</label>
                   <input
+                    name="businessName"
                     type="text"
                     placeholder="Your business name"
                     className="w-full px-4 py-3 rounded-lg border border-border bg-background text-text-primary text-body-md placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-body-sm font-medium text-text-primary mb-2">Instagram Handle</label>
+                  <label className="block text-body-sm font-medium text-text-primary mb-2">Instagram Handle *</label>
                   <input
+                    name="instagram"
                     type="text"
                     required
                     placeholder="@yourusername"
@@ -58,7 +94,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <label className="block text-body-sm font-medium text-text-primary mb-2">What do you need?</label>
-                  <select className="w-full px-4 py-3 rounded-lg border border-border bg-background text-text-primary text-body-md focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all appearance-none">
+                  <select name="service" className="w-full px-4 py-3 rounded-lg border border-border bg-background text-text-primary text-body-md focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all appearance-none">
                     <option value="">Select a service</option>
                     <option value="starter">Starter — ₹2,500</option>
                     <option value="business">Business — ₹6,000</option>
@@ -68,8 +104,9 @@ export default function ContactPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-body-sm font-medium text-text-primary mb-2">Tell me about your business</label>
+                  <label className="block text-body-sm font-medium text-text-primary mb-2">Tell me about your business *</label>
                   <textarea
+                    name="message"
                     rows={4}
                     required
                     placeholder="What does your business do? What kind of website do you need?"
@@ -80,6 +117,9 @@ export default function ContactPage() {
                   Send Message
                   <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="m9 18 6-6-6-6"/></svg>
                 </button>
+                <p className="text-center text-caption text-text-tertiary">
+                  Your message will be saved and you&apos;ll be redirected to Instagram DM to chat directly.
+                </p>
               </form>
             </div>
           </AnimatedText>
