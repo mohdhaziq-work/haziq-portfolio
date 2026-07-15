@@ -108,7 +108,7 @@ export const SOCIAL_LINKS = {
    * EMAIL:
    * Format: 'mailto:your@email.com'
    */
-  email: 'mohdhaziq1962@gmail.com,
+  email: 'mailto:mohdhaziq1962@gmail.com',
 
   /**
    * TWITTER / X (Optional):
