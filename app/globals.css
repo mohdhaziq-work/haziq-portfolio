@@ -1,0 +1,151 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+  --background: #ffffff;
+  --surface: #f8f9fa;
+  --surface-2: #f1f3f4;
+  --border: #e8eaed;
+  --text-primary: #202124;
+  --text-secondary: #5f6368;
+  --text-tertiary: #80868b;
+  --accent: #1a73e8;
+  --accent-hover: #1557b0;
+  --accent-light: #e8f0fe;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--background);
+  color: var(--text-primary);
+  overflow-x: hidden;
+}
+
+/* Google-style selection */
+::selection {
+  background: var(--accent-light);
+  color: var(--accent);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #dadce0; border-radius: 20px; }
+::-webkit-scrollbar-thumb:hover { background: #bdc1c6; }
+
+/* ===== COMPONENT LAYER ===== */
+@layer components {
+
+  /* Google-style Surface Card */
+  .surface-card {
+    @apply bg-white rounded-lg border border-border p-6 transition-all duration-300;
+    box-shadow: 0 1px 3px 0 rgba(60,64,67,0.1);
+  }
+  .surface-card:hover {
+    box-shadow: 0 2px 6px 0 rgba(60,64,67,0.15), 0 6px 14px 5px rgba(60,64,67,0.1);
+    @apply border-border;
+  }
+
+  /* Google-style Elevated Card */
+  .elevated-card {
+    @apply bg-white rounded-xl border border-border-light p-8 transition-all duration-300;
+    box-shadow: 0 1px 3px 0 rgba(60,64,67,0.15), 0 4px 8px 3px rgba(60,64,67,0.1);
+  }
+  .elevated-card:hover {
+    box-shadow: 0 4px 8px 3px rgba(60,64,67,0.15), 0 1px 3px rgba(60,64,67,0.3);
+    @apply -translate-y-1;
+  }
+
+  /* Google Chip / Badge */
+  .chip {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface-2 text-text-secondary text-body-sm font-medium transition-all duration-200;
+  }
+  .chip:hover {
+    @apply bg-border text-text-primary;
+  }
+  .chip-active {
+    @apply bg-accent-light text-accent;
+  }
+
+  /* Google Button - Primary */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 bg-accent text-white rounded-full font-medium text-body-sm transition-all duration-200;
+    box-shadow: 0 1px 3px 0 rgba(60,64,67,0.3), 0 4px 8px 3px rgba(60,64,67,0.15);
+  }
+  .btn-primary:hover {
+    @apply bg-accent-hover;
+    box-shadow: 0 2px 6px 2px rgba(26,115,232,0.3), 0 4px 12px 4px rgba(26,115,232,0.15);
+  }
+  .btn-primary:active {
+    @apply scale-[0.98];
+  }
+
+  /* Google Button - Secondary */
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 bg-accent-light text-accent rounded-full font-medium text-body-sm transition-all duration-200;
+  }
+  .btn-secondary:hover {
+    @apply bg-accent-surface;
+  }
+
+  /* Google Button - Outline */
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 bg-transparent text-accent rounded-full font-medium text-body-sm border border-accent/30 transition-all duration-200;
+  }
+  .btn-outline:hover {
+    @apply bg-accent-light border-accent;
+  }
+
+  /* Section Container */
+  .section-container {
+    @apply max-w-7xl mx-auto px-6 md:px-8;
+  }
+
+  /* Section Header */
+  .section-overline {
+    @apply text-overline text-accent uppercase tracking-widest font-semibold mb-3 block;
+  }
+
+  /* Divider */
+  .divider {
+    @apply w-16 h-1 bg-accent rounded-full;
+  }
+
+  /* Google-style Gradient Overlay */
+  .gradient-overlay {
+    background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%);
+  }
+
+  /* Placeholder image area */
+  .placeholder-image {
+    @apply bg-surface-2 rounded-lg flex items-center justify-center text-text-tertiary;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2380868b' fill-opacity='0.15'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+}
+
+/* ===== UTILITIES ===== */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .animate-delay-100 { animation-delay: 100ms; }
+  .animate-delay-200 { animation-delay: 200ms; }
+  .animate-delay-300 { animation-delay: 300ms; }
+  .animate-delay-400 { animation-delay: 400ms; }
+  .animate-delay-500 { animation-delay: 500ms; }
+}
