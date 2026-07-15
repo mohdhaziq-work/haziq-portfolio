@@ -178,12 +178,12 @@ export const DATABASE = {
    * Agar Firebase use nahi kar rahe toh sab blank chhod do
    */
   firebase: {
-    apiKey: 'AIzaSyBWaZ4dFCJJ0CW-3lLlf0EP9Ihk5AOl6wI',
-    authDomain: 'my-portfolio-d84d3.firebaseapp.com',
-    projectId: 'my-portfolio-d84d3',
-    storageBucket: 'my-portfolio-d84d3.firebasestorage.app',
-    messagingSenderId: '497943029240',
-    appId: '1:497943029240:web:699bbdf7ce77bcdce6a20d',
+    apiKey: '',  // ⚠️ Add in Render Env: NEXT_PUBLIC_FIREBASE_API_KEY
+    authDomain: '',  // ⚠️ Add in Render Env: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    projectId: '',  // ⚠️ Add in Render Env: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    storageBucket: '',  // ⚠️ Add in Render Env: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    messagingSenderId: '',  // ⚠️ Add in Render Env: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+    appId: '',  // ⚠️ Add in Render Env: NEXT_PUBLIC_FIREBASE_APP_ID
     measurementId: '', // Optional
   },
 
