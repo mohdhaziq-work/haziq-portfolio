@@ -1,22 +1,47 @@
+/**
+ * ╔══════════════════════════════════════════════════════════════╗
+ * ║              AUTO-GENERATED FROM SITE-CONFIG                ║
+ * ║                                                              ║
+ * ║  ⚠️ IS FILE KO EDIT MAT KARO!                               ║
+ * ║  ⚠️ SAB CHANGES 'config/site-config.ts' MEIN KARO           ║
+ * ║  ⚠️ YE FILE CONFIG SE READ KARTA HAI                        ║
+ * ╚══════════════════════════════════════════════════════════════╝
+ */
+
+import {
+  PERSONAL,
+  SOCIAL_LINKS,
+  CONTACT,
+  WEBSITE,
+  PRICING,
+  IMAGES,
+  FAQ,
+} from '@/config/site-config'
+
+// ==================== SITE ====================
 export const SITE = {
-  name: 'Mohd Haziq',
-  title: 'Mohd Haziq — AI-Powered Web Developer',
-  description: 'Building high-converting, AI-powered websites for local businesses. Modern, fast, and designed to grow your business digitally.',
-  url: 'https://haziq.dev',
-  city: 'Sultanpur',
-  state: 'Uttar Pradesh',
-  country: 'India',
-  age: 16,
-  tagline: 'Code. Create. Convert.',
+  name: PERSONAL.fullName,
+  title: WEBSITE.title,
+  description: WEBSITE.description,
+  url: WEBSITE.url,
+  city: PERSONAL.city,
+  state: PERSONAL.state,
+  country: PERSONAL.country,
+  age: PERSONAL.age,
+  tagline: PERSONAL.tagline,
 } as const
 
+// ==================== SOCIAL ====================
 export const SOCIAL = {
-  github: 'https://github.com/mohdhaziq-work',
-  instagram: 'https://instagram.com/',
-  linkedin: 'https://linkedin.com/in/',
-  email: 'mailto:contact@haziq.dev',
+  github: SOCIAL_LINKS.github,
+  instagram: SOCIAL_LINKS.instagram,
+  linkedin: SOCIAL_LINKS.linkedin,
+  email: SOCIAL_LINKS.email,
+  twitter: SOCIAL_LINKS.twitter,
+  youtube: SOCIAL_LINKS.youtube,
 } as const
 
+// ==================== NAV ====================
 export const NAV_LINKS = [
   { label: 'Home', href: '/' },
   { label: 'About', href: '/about' },
@@ -25,6 +50,7 @@ export const NAV_LINKS = [
   { label: 'Contact', href: '/contact' },
 ] as const
 
+// ==================== PROJECTS ====================
 export const PROJECTS = [
   {
     id: 'spice-garden',
@@ -36,7 +62,7 @@ export const PROJECTS = [
     features: ['Digital Menu with Filters', 'Testimonial Slider', 'Newsletter Integration', 'Multi-Page Layout', 'SEO Optimized', 'Mobile Responsive'],
     liveUrl: 'https://mohdhaziq-work.github.io/spice-garden-restaurant/',
     githubUrl: 'https://github.com/mohdhaziq-work/spice-garden-restaurant',
-    thumbnail: '',
+    thumbnail: IMAGES.projectThumbnails.spiceGarden,
     accent: '#d4af37',
     bgColor: '#0c0a09',
   },
@@ -50,7 +76,7 @@ export const PROJECTS = [
     features: ['Multi-Step Admission Form', 'Student/Admin Login Portal', 'CRUD Database System', 'Role-Based Dashboard', 'Enterprise CSS System', 'Progressive UX'],
     liveUrl: 'https://mohdhaziq-work.github.io/success-academy-coaching/',
     githubUrl: 'https://github.com/mohdhaziq-work/success-academy-coaching',
-    thumbnail: '',
+    thumbnail: IMAGES.projectThumbnails.successAcademy,
     accent: '#2563eb',
     bgColor: '#f8fafc',
   },
@@ -64,79 +90,34 @@ export const PROJECTS = [
     features: ['BMI Calculator Tool', '3-Tier Pricing System', 'Member Dashboard Console', 'Component Injection System', 'Glassmorphism Sidebar', 'Neon Dark Theme'],
     liveUrl: 'https://mohdhaziq-work.github.io/power-fitness-gym/',
     githubUrl: 'https://github.com/mohdhaziq-work/power-fitness-gym',
-    thumbnail: '',
+    thumbnail: IMAGES.projectThumbnails.powerFitness,
     accent: '#ff3e3e',
     bgColor: '#000000',
   },
 ] as const
 
-export const SERVICES = [
-  {
-    id: 'starter',
-    name: 'Starter',
-    price: '₹2,500',
-    period: 'one-time',
-    description: 'A clean, professional landing page to get your business online.',
-    icon: 'rocket',
-    features: [
-      'Single Page Design',
-      'Mobile Responsive',
-      'Instagram DM Integration',
-      'Basic SEO Setup',
-      '1 Revision Round',
-      '3-Day Delivery',
-    ],
-    popular: false,
-    cta: 'Get Started',
-  },
-  {
-    id: 'business',
-    name: 'Business',
-    price: '₹6,000',
-    period: 'one-time',
-    description: 'A complete multi-page website with SEO, forms, and professional animations.',
-    icon: 'briefcase',
-    features: [
-      'Up to 5 Pages',
-      'Mobile Responsive',
-      'SEO Optimization',
-      'Contact Form + Instagram DM',
-      'Scroll Animations',
-      '2 Revision Rounds',
-      '7-Day Delivery',
-    ],
-    popular: true,
-    cta: 'Most Popular',
-  },
-  {
-    id: 'premium',
-    name: 'Premium',
-    price: '₹12,000',
-    period: 'one-time',
-    description: 'A full-stack web application with database, dashboards, and custom tools.',
-    icon: 'crown',
-    features: [
-      'Unlimited Pages',
-      'Custom Dashboard/Portal',
-      'Database Integration',
-      'Admin Panel',
-      'Custom Tools (Calculator, Quiz)',
-      'Priority Support',
-      '3 Revision Rounds',
-      '14-Day Delivery',
-    ],
-    popular: false,
-    cta: 'Go Premium',
-  },
-] as const
+// ==================== SERVICES ====================
+export const SERVICES = PRICING.plans.map((plan) => ({
+  id: plan.id,
+  name: plan.name,
+  price: `${PRICING.currency}${plan.price}`,
+  period: 'one-time',
+  description: plan.description,
+  icon: plan.id === 'starter' ? 'rocket' as const : plan.id === 'business' ? 'briefcase' as const : 'crown' as const,
+  features: [...plan.features],
+  popular: plan.popular,
+  cta: plan.popular ? 'Most Popular' : plan.id === 'starter' ? 'Get Started' : 'Go Premium',
+})) as const
 
+// ==================== STATS ====================
 export const STATS = [
   { value: '3+', label: 'Live Projects' },
   { value: '100%', label: 'AI-Powered' },
   { value: '3+', label: 'Niches Covered' },
-  { value: '₹2.5K', label: 'Starting At' },
+  { value: `${PRICING.currency}${PRICING.plans[0].price.split(',')[0]}`, label: 'Starting At' },
 ] as const
 
+// ==================== SKILLS ====================
 export const SKILLS = [
   { category: 'Frontend', items: ['HTML5', 'CSS3', 'JavaScript', 'TypeScript', 'React', 'Next.js', 'Tailwind CSS', 'Alpine.js'] },
   { category: 'Design', items: ['UI/UX Design', 'Responsive Design', 'Figma', 'Glassmorphism', 'Dark Mode', 'Micro-Animations'] },
@@ -144,29 +125,27 @@ export const SKILLS = [
   { category: 'Backend', items: ['Node.js', 'Next.js API', 'Firebase Firestore', 'LocalStorage DB', 'REST APIs'] },
 ] as const
 
+// ==================== PROCESS ====================
 export const PROCESS_STEPS = [
-  {
-    step: 1,
-    title: 'Discovery Call',
-    description: 'We discuss your business, goals, target audience, and what you need from your website.',
-    icon: 'message-circle',
-  },
-  {
-    step: 2,
-    title: 'Design & Prototype',
-    description: 'I create a custom design mockup for your approval. Free of charge, no commitment.',
-    icon: 'palette',
-  },
-  {
-    step: 3,
-    title: 'Development',
-    description: 'Your website gets built with modern tech, smooth animations, and mobile-first approach.',
-    icon: 'code',
-  },
-  {
-    step: 4,
-    title: 'Launch & Support',
-    description: 'We go live! Plus, I provide post-launch support to make sure everything runs smoothly.',
-    icon: 'rocket',
-  },
+  { step: 1, title: 'Discovery Call', description: 'We discuss your business, goals, target audience, and what you need from your website.', icon: 'message-circle' },
+  { step: 2, title: 'Design & Prototype', description: 'I create a custom design mockup for your approval. Free of charge, no commitment.', icon: 'palette' },
+  { step: 3, title: 'Development', description: 'Your website gets built with modern tech, smooth animations, and mobile-first approach.', icon: 'code' },
+  { step: 4, title: 'Launch & Support', description: 'We go live! Plus, I provide post-launch support to make sure everything runs smoothly.', icon: 'rocket' },
 ] as const
+
+// ==================== FAQ ====================
+export { FAQ }
+
+// ==================== CONTACT ====================
+export const CONTACT_INFO = {
+  primaryContact: CONTACT.primaryContact,
+  responseTime: CONTACT.responseTime,
+  workingHours: CONTACT.workingHours,
+  workingDays: CONTACT.workingDays,
+  isAvailable: CONTACT.isAvailable,
+  dmMessage: CONTACT.dmMessage,
+  dmLink: `${CONTACT.primaryContact}?text=${encodeURIComponent(CONTACT.dmMessage)}`,
+} as const
+
+// ==================== IMAGES ====================
+export { IMAGES }
