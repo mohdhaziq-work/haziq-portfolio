@@ -75,9 +75,9 @@ export const IMAGES = {
    * - Upload karo ImgBB.com par aur link daalo
    */
   projectThumbnails: {
-    spiceGarden: '/projects/spice-garden.jpg',
-    successAcademy: '/projects/success-academy.jpg',
-    powerFitness: '/projects/power-fitness.jpg',
+    spiceGarden: '/projects/spice-garden.png',
+    successAcademy: '/projects/success-academy.png',
+    powerFitness: '/projects/power-fitness.png',
   },
 } as const
 
