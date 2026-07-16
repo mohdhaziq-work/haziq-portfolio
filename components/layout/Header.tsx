@@ -81,9 +81,11 @@ export default function Header() {
 
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center text-white font-bold text-sm group-hover:scale-105 transition-transform duration-200">
-                H
-              </div>
+              <img
+                src="/logo-haziq.svg"
+                alt="Haziq Logo"
+                className="w-8 h-8 rounded-lg group-hover:scale-105 transition-transform duration-200"
+              />
               <span className="font-bold text-lg text-text-primary tracking-tight">
                 {SITE.name}
               </span>
@@ -207,9 +209,11 @@ export default function Header() {
         {/* Sidebar Header */}
         <div className="flex items-center justify-between px-6 h-16 border-b border-border-light">
           <Link href="/" onClick={closeSidebar} className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-accent rounded-md flex items-center justify-center text-white font-bold text-xs">
-              H
-            </div>
+            <img
+              src="/logo-haziq.svg"
+              alt="Haziq Logo"
+              className="w-7 h-7 rounded-md"
+            />
             <span className="font-bold text-base text-text-primary tracking-tight">
               {SITE.name}
             </span>

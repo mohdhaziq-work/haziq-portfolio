@@ -15,9 +15,11 @@ export default function Footer() {
           {/* Brand */}
           <div className="md:col-span-2">
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center text-white font-bold text-sm">
-                H
-              </div>
+              <img
+                src="/logo-haziq.svg"
+                alt="Haziq Logo"
+                className="w-8 h-8 rounded-lg"
+              />
               <span className="font-bold text-lg text-text-primary tracking-tight">{SITE.name}</span>
             </Link>
             <p className="text-text-secondary text-body-sm leading-relaxed max-w-sm mb-6">
