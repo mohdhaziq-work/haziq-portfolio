@@ -33,10 +33,10 @@ export default function AboutPage() {
             <AnimatedText as="p" delay={200} className="text-body-lg text-text-secondary leading-relaxed mb-6">
               Hi, I&apos;m <strong className="text-text-primary">{SITE.name}</strong>, a {SITE.age}-year-old developer from{' '}
               <strong className="text-text-primary">{SITE.city}, {SITE.state}</strong>. While others were scrolling reels, 
-              I started mastering AI tools to build professional websites for local businesses.
+              I started mastering web development to build professional websites for local businesses.
             </AnimatedText>
             <AnimatedText as="p" delay={300} className="text-body-lg text-text-secondary leading-relaxed mb-8">
-              I combine the speed of AI with a deep understanding of what local businesses need to grow. 
+              I combine modern tech skills with a deep understanding of what local businesses need to grow. 
               My goal isn&apos;t just to make websites — it&apos;s to create digital tools that bring you more customers.
             </AnimatedText>
 

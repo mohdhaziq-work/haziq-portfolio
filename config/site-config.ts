@@ -25,12 +25,12 @@ export const PERSONAL = {
   pincode: '', // e.g., '228001'
 
   // Professional
-  title: 'AI-Powered Web Developer',
+  title: 'Web Developer',
   tagline: 'Code. Create. Convert.',
-  bio: 'I combine the speed of AI with real business understanding to create modern, fast, and high-converting websites for businesses.',
+  bio: 'I build modern, fast, and high-converting websites that help businesses grow digitally. Clean code, sharp design, real results.',
 
   // Full Story (About Page ke liye)
-  story: `While others were scrolling reels, I started mastering AI tools to build professional websites for local businesses. I combine the speed of AI with a deep understanding of what businesses need to grow. My goal isn't just to make websites — it's to create digital tools that bring you more customers.`,
+  story: `While others were scrolling reels, I started mastering web development to build professional websites for local businesses. I combine modern tech skills with a deep understanding of what businesses need to grow. My goal isn't just to make websites — it's to create digital tools that bring you more customers.`,
 
   // Philosophy (About Page ke liye)
   philosophy: `Every line of code I write has one purpose: to help your business grow. Whether it's a restaurant that needs more reservations, a coaching center that wants more admissions, or a gym that needs more members — I design with conversion in mind.`,
@@ -232,13 +232,13 @@ export const WEBSITE = {
    * SEO TITLE:
    * Browser tab mein ye dikhega
    */
-  title: 'Mohd Haziq — AI-Powered Web Developer',
+  title: 'Mohd Haziq — Web Developer',
 
   /**
    * SEO DESCRIPTION:
    * Google search mein ye dikhega
    */
-  description: 'Building high-converting, AI-powered websites for local businesses in Sultanpur and beyond. Modern, fast, and designed to grow your business digitally.',
+  description: 'Building high-converting, professional websites for local businesses in Sultanpur and beyond. Modern, fast, and designed to grow your business digitally.',
 
   /**
    * SEO KEYWORDS:
@@ -246,14 +246,14 @@ export const WEBSITE = {
    */
   keywords: [
     'Web Developer',
-    'AI Websites',
+    'Website Design',
     'Local Business Growth',
     'Portfolio',
     'Sultanpur',
     'Uttar Pradesh',
     'Next.js Developer',
     'Freelancer',
-    'Website Design',
+    'Frontend Developer',
     'Mobile Friendly',
   ],
 

@@ -23,7 +23,7 @@ export default function Footer() {
               <span className="font-bold text-lg text-text-primary tracking-tight">{SITE.name}</span>
             </Link>
             <p className="text-text-secondary text-body-sm leading-relaxed max-w-sm mb-6">
-              {SITE.age}-year-old AI-Powered Web Developer from {SITE.city}, {SITE.state}. 
+              {SITE.age}-year-old Web Developer from {SITE.city}, {SITE.state}. 
               Building high-converting websites that help local businesses grow digitally.
             </p>
             <div className="flex gap-3">
@@ -103,7 +103,7 @@ export default function Footer() {
 
         <div className="pt-8 border-t border-border flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-text-tertiary text-caption">
-            © {currentYear} {SITE.name}. Built with AI & Next.js.
+            © {currentYear} {SITE.name}. Built with Next.js.
           </p>
           <p className="text-text-tertiary text-caption">
             Designed in {SITE.city}, India

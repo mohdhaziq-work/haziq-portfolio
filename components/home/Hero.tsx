@@ -21,8 +21,8 @@ export default function Hero() {
               <span className="text-accent">bring customers</span> to your door.
             </AnimatedText>
             <AnimatedText as="p" delay={200} className="text-body-lg text-text-secondary max-w-xl mb-10 leading-relaxed">
-              {SITE.age}-year-old AI-Powered Developer. I combine the speed of AI with real business understanding 
-              to create modern, fast, and high-converting websites for local businesses.
+              {SITE.age}-year-old Web Developer. I build modern, fast, and high-converting websites 
+              that help local businesses grow digitally and bring in more customers.
             </AnimatedText>
             <AnimatedText as="div" delay={300} className="flex flex-col sm:flex-row gap-4">
               <a href="/projects" className="btn-primary px-8 py-4 text-body-md">
@@ -60,10 +60,10 @@ export default function Hero() {
                 </div>
               </div>
               <div className="absolute -top-6 -right-6 surface-card p-4 flex items-center gap-3 animate-float" style={{ animationDelay: '2s' }}>
-                <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center text-accent font-bold text-sm">AI</div>
+                <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center text-accent font-bold text-sm">⚡</div>
                 <div>
-                  <p className="font-semibold text-text-primary text-body-sm">AI-Powered</p>
-                  <p className="text-caption text-text-tertiary">Development</p>
+                  <p className="font-semibold text-text-primary text-body-sm">Fast Delivery</p>
+                  <p className="text-caption text-text-tertiary">3-14 Days</p>
                 </div>
               </div>
             </div>

@@ -136,7 +136,7 @@ export const SERVICES = [
 // ==================== STATS ====================
 export const STATS = [
   { value: '3+', label: 'Live Projects' },
-  { value: '100%', label: 'AI-Powered' },
+  { value: '100%', label: 'Modern Tech' },
   { value: '3+', label: 'Niches Covered' },
   { value: `${PRICING.currency}${PRICING.plans[0].price.split(',')[0]}`, label: 'Starting At' },
 ] as const
