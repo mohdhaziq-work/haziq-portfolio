@@ -5,7 +5,24 @@ import Section from '@/components/ui/Section'
 import AnimatedText from '@/components/ui/AnimatedText'
 import Link from 'next/link'
 
+type ProjectItem = {
+  id: string
+  title: string
+  category: string
+  description: string
+  longDescription: string
+  techStack: readonly string[]
+  features: readonly string[]
+  liveUrl: string
+  githubUrl: string
+  thumbnail: string
+  accent: string
+  bgColor: string
+}
+
 export default function ProjectShowcase() {
+  const projects: ProjectItem[] = PROJECTS.map(p => ({ ...p }))
+
   return (
     <Section id="work" background="white">
       {/* Header */}
@@ -21,7 +38,7 @@ export default function ProjectShowcase() {
 
       {/* Project Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {PROJECTS.map((project, index) => (
+        {projects.map((project, index) => (
           <AnimatedText as="div" key={project.id} delay={index * 150}>
             <div className="elevated-card p-0 overflow-hidden group h-full flex flex-col">
               {/* Thumbnail */}
@@ -29,15 +46,22 @@ export default function ProjectShowcase() {
                 className="h-56 relative overflow-hidden"
                 style={{ backgroundColor: project.bgColor }}
               >
-                {/* Placeholder or actual thumbnail */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span
-                    className="font-bold text-2xl tracking-tight"
-                    style={{ color: project.accent }}
-                  >
-                    {project.title}
-                  </span>
-                </div>
+                {project.thumbnail ? (
+                  <img
+                    src={project.thumbnail}
+                    alt={`${project.title} screenshot`}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span
+                      className="font-bold text-2xl tracking-tight"
+                      style={{ color: project.accent }}
+                    >
+                      {project.title}
+                    </span>
+                  </div>
+                )}
 
                 {/* Hover overlay */}
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">

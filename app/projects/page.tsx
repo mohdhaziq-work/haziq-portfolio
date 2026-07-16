@@ -5,7 +5,24 @@ import Section from '@/components/ui/Section'
 import AnimatedText from '@/components/ui/AnimatedText'
 import { openInstagramDM } from '@/lib/instagram'
 
+type ProjectItem = {
+  id: string
+  title: string
+  category: string
+  description: string
+  longDescription: string
+  techStack: readonly string[]
+  features: readonly string[]
+  liveUrl: string
+  githubUrl: string
+  thumbnail: string
+  accent: string
+  bgColor: string
+}
+
 export default function ProjectsPage() {
+  const projects: ProjectItem[] = PROJECTS.map(p => ({ ...p }))
+
   return (
     <div className="pt-24">
       {/* Header */}
@@ -22,25 +39,41 @@ export default function ProjectsPage() {
       </Section>
 
       {/* Projects Detail */}
-      {PROJECTS.map((project, index) => (
+      {projects.map((project, index) => (
         <Section key={project.id} id={project.id} background={index % 2 === 0 ? 'surface' : 'white'}>
           <div className={`grid grid-cols-1 lg:grid-cols-2 gap-12 items-center ${index % 2 !== 0 ? 'lg:flex-row-reverse' : ''}`}>
-            {/* Visual */}
+            {/* Visual - Screenshot */}
             <AnimatedText as="div" delay={0} className={index % 2 !== 0 ? 'lg:order-2' : ''}>
               <div
-                className="elevated-card p-0 overflow-hidden aspect-video"
+                className="elevated-card p-0 overflow-hidden aspect-video group cursor-pointer"
                 style={{ backgroundColor: project.bgColor }}
               >
-                <div className="w-full h-full flex items-center justify-center min-h-[300px]">
-                  <div className="text-center">
-                    <span className="font-bold text-4xl tracking-tight" style={{ color: project.accent }}>
-                      {project.title}
-                    </span>
-                    <p className="text-body-sm mt-2 opacity-50" style={{ color: project.accent }}>
-                      Screenshot placeholder
-                    </p>
+                {project.thumbnail ? (
+                  <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" className="block w-full h-full relative">
+                    <img
+                      src={project.thumbnail}
+                      alt={`${project.title} screenshot`}
+                      className="w-full h-full object-cover min-h-[300px] transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-6">
+                      <span className="bg-white text-text-primary px-5 py-2 rounded-full text-body-sm font-semibold flex items-center gap-2">
+                        Visit Live Site
+                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="m10 14 11-11"/></svg>
+                      </span>
+                    </div>
+                  </a>
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center min-h-[300px]">
+                    <div className="text-center">
+                      <span className="font-bold text-4xl tracking-tight" style={{ color: project.accent }}>
+                        {project.title}
+                      </span>
+                      <p className="text-body-sm mt-2 opacity-50" style={{ color: project.accent }}>
+                        Screenshot placeholder
+                      </p>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </AnimatedText>
 
