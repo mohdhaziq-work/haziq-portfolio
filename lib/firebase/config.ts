@@ -1,14 +1,13 @@
 /**
  * Firebase Configuration
  * 
- * ⚠️ IS FILE MEIN SIRF FIREBASE CONFIG HAI
- * ⚠️ API KEYS SAFE HAIN KYUNKI YE CLIENT-SIDE HAI
- * ⚠️ SECURITY RULES FIRESTORE CONSOLE SE SET HOTE HAIN
+ * Firestore + Authentication (Google Sign-In)
+ * Gracefully handles missing config during SSR/build
  */
 
 import { initializeApp, getApps, getApp } from 'firebase/app'
 import { getFirestore } from 'firebase/firestore'
-import { getAnalytics, isSupported } from 'firebase/analytics'
+import { getAuth, GoogleAuthProvider } from 'firebase/auth'
 import { DATABASE } from '@/config/site-config'
 
 const firebaseConfig = {
@@ -27,7 +26,15 @@ const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp()
 // Initialize Firestore
 export const db = getFirestore(app)
 
-// Initialize Analytics (only in browser)
-export const analytics = typeof window !== 'undefined' ? isSupported().then(yes => yes ? getAnalytics(app) : null) : null
+// Initialize Auth
+export const auth = getAuth(app)
+export const googleProvider = new GoogleAuthProvider()
+
+// Initialize Analytics (only in browser, optional)
+export const analytics = typeof window !== 'undefined'
+  ? import('firebase/analytics').then(({ isSupported, getAnalytics }) =>
+      isSupported().then(yes => yes ? getAnalytics(app) : null)
+    ).catch(() => null)
+  : null
 
 export default app
