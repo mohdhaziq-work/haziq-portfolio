@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { NAV_LINKS, SITE, SOCIAL } from '@/lib/constants'
+import { NAV_LINKS, SITE } from '@/lib/constants'
 import { cn } from '@/lib/utils'
+import { openInstagramDM } from '@/lib/instagram'
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -64,17 +65,15 @@ export default function Header() {
               })}
             </nav>
 
-            {/* Desktop CTA */}
+            {/* Desktop CTA — Opens Instagram DM directly */}
             <div className="hidden md:flex items-center gap-3">
-              <a
-                href={SOCIAL.instagram}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                onClick={() => openInstagramDM()}
                 className="btn-secondary text-caption py-2 px-4"
               >
                 <InstagramIcon />
                 DM Me
-              </a>
+              </button>
             </div>
 
             {/* Mobile Toggle */}
@@ -113,15 +112,13 @@ export default function Header() {
                 )
               })}
               <div className="pt-4 border-t border-border-light">
-                <a
-                  href={SOCIAL.instagram}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  onClick={() => { setIsMobileOpen(false); openInstagramDM(); }}
                   className="btn-primary w-full justify-center text-body-sm"
                 >
                   <InstagramIcon />
                   DM Me on Instagram
-                </a>
+                </button>
               </div>
             </nav>
           </div>

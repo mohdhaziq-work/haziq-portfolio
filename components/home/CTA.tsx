@@ -1,8 +1,9 @@
 'use client'
 
-import { SITE, SOCIAL } from '@/lib/constants'
+import { SITE } from '@/lib/constants'
 import Section from '@/components/ui/Section'
 import AnimatedText from '@/components/ui/AnimatedText'
+import { openInstagramDM } from '@/lib/instagram'
 
 export default function CTA() {
   return (
@@ -24,15 +25,13 @@ export default function CTA() {
         </AnimatedText>
 
         <AnimatedText as="div" delay={300} className="flex flex-col sm:flex-row gap-4 justify-center">
-          <a
-            href={SOCIAL.instagram}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            onClick={() => openInstagramDM('Hi Haziq! I would like a FREE mockup for my business website.')}
             className="btn-primary px-10 py-4 text-body-md"
           >
-            <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z"/></svg>
             Request Free Mockup
-          </a>
+          </button>
           <a href="/contact" className="btn-outline px-10 py-4 text-body-md">
             View Contact Options
           </a>
