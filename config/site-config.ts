@@ -90,7 +90,7 @@ export const SOCIAL_LINKS = {
    * Format: 'https://instagram.com/YOUR_USERNAME'
    * Example: 'https://instagram.com/mohdhaziq.dev'
    */
-  instagram: 'https://www.instagram.com/haziq_sheikh16?igsh=MW51NzN1dHBhcWg0eA==',
+  instagram: 'https://www.instagram.com/haziq.built',
 
   /**
    * GITHUB:

@@ -1,8 +1,9 @@
 'use client'
 
-import { SITE, SOCIAL } from '@/lib/constants'
+import { SITE } from '@/lib/constants'
 import Section from '@/components/ui/Section'
 import AnimatedText from '@/components/ui/AnimatedText'
+import { openInstagramDM } from '@/lib/instagram'
 
 export default function ContactPage() {
   return (
@@ -46,21 +47,19 @@ export default function ContactPage() {
                   const { submitContactForm } = await import('@/lib/firebase/firestore')
                   const result = await submitContactForm(data)
                   
-                  if (result.success && result.instagramDmUrl) {
-                    // Save success - redirect to Instagram DM
+                  if (result.success) {
                     form.reset()
-                    window.open(result.instagramDmUrl, '_blank')
                     alert('Thank you! Your message has been saved. You will now be redirected to Instagram DM to complete the conversation.')
+                    openInstagramDM()
                   } else {
-                    // Fallback: still open Instagram
-                    const dmText = encodeURIComponent(`Hi Haziq! I'm ${data.fullName} from ${data.businessName || 'my business'}. I'm interested in your ${data.service} plan. ${data.message}`)
-                    window.open(`https://instagram.com/direct/new/?text=${dmText}`, '_blank')
                     form.reset()
+                    openInstagramDM()
                   }
                 } catch {
-                  // Firebase not configured - simple fallback
-                  alert('Thank you for reaching out! Please DM me on Instagram to discuss your project further.')
+                  // Firebase not configured - open Instagram DM directly
+                  alert('Thank you for reaching out! You will now be redirected to Instagram DM.')
                   form.reset()
+                  openInstagramDM()
                 }
               }}>
                 <div>
@@ -134,9 +133,9 @@ export default function ContactPage() {
                 <div>
                   <h3 className="font-semibold text-text-primary mb-1">Instagram DM</h3>
                   <p className="text-body-sm text-text-secondary mb-3">The fastest way to reach me. I reply within 2 hours.</p>
-                  <a href={SOCIAL.instagram} target="_blank" rel="noopener noreferrer" className="text-accent font-semibold text-body-sm hover:underline">
+                  <button onClick={() => openInstagramDM()} className="text-accent font-semibold text-body-sm hover:underline">
                     Send a DM →
-                  </a>
+                  </button>
                 </div>
               </div>
             </AnimatedText>
@@ -173,9 +172,9 @@ export default function ContactPage() {
                 <p className="text-body-sm text-text-secondary mb-4">
                   Not sure yet? I&apos;ll design a free mockup of your website. If you love it, we work together. No risk.
                 </p>
-                <a href={SOCIAL.instagram} target="_blank" rel="noopener noreferrer" className="btn-primary px-6 py-3 text-body-sm">
+                <button onClick={() => openInstagramDM()} className="btn-primary px-6 py-3 text-body-sm">
                   Request Free Mockup
-                </a>
+                </button>
               </div>
             </AnimatedText>
           </div>

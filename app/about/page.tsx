@@ -1,8 +1,9 @@
 'use client'
 
-import { SITE, SKILLS, SOCIAL } from '@/lib/constants'
+import { SITE, SKILLS } from '@/lib/constants'
 import Section from '@/components/ui/Section'
 import AnimatedText from '@/components/ui/AnimatedText'
+import { openInstagramDM } from '@/lib/instagram'
 
 export default function AboutPage() {
   return (
@@ -40,9 +41,9 @@ export default function AboutPage() {
             </AnimatedText>
 
             <AnimatedText as="div" delay={400} className="flex gap-4">
-              <a href={SOCIAL.instagram} target="_blank" rel="noopener noreferrer" className="btn-primary px-6 py-3">
+              <button onClick={() => openInstagramDM()} className="btn-primary px-6 py-3">
                 DM Me on Instagram
-              </a>
+              </button>
               <a href="/projects" className="btn-outline px-6 py-3">
                 View My Work
               </a>

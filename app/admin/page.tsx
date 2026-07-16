@@ -14,7 +14,8 @@ import {
   type ProjectInquiry,
   type ContactStatus,
 } from '@/lib/firebase/firestore'
-import { PERSONAL, SOCIAL_LINKS } from '@/config/site-config'
+import { PERSONAL } from '@/config/site-config'
+import { openInstagramDM } from '@/lib/instagram'
 
 // ==================== ADMIN PASSWORD ====================
 // ⚠️ YE PASSWORD SIRF TU JAANE - KOI AUR NAHI DEKH SAKTA
@@ -390,14 +391,12 @@ export default function AdminDashboard() {
 
                       {/* Actions */}
                       <div className="flex gap-3 mt-4 pt-4 border-t border-border-light">
-                        <a
-                          href={`${SOCIAL_LINKS.instagram}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <button
+                          onClick={() => openInstagramDM()}
                           className="btn-secondary px-4 py-2 text-caption"
                         >
                           Reply on Instagram
-                        </a>
+                        </button>
                         <button
                           onClick={() => {
                             setNewProject(prev => ({

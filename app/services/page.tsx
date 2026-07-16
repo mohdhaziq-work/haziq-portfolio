@@ -1,8 +1,9 @@
 'use client'
 
-import { SERVICES, PROCESS_STEPS, SOCIAL } from '@/lib/constants'
+import { SERVICES, PROCESS_STEPS } from '@/lib/constants'
 import Section from '@/components/ui/Section'
 import AnimatedText from '@/components/ui/AnimatedText'
+import { openInstagramDM } from '@/lib/instagram'
 
 export default function ServicesPage() {
   return (
@@ -55,10 +56,8 @@ export default function ServicesPage() {
                   ))}
                 </ul>
 
-                <a
-                  href={SOCIAL.instagram}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  onClick={() => openInstagramDM()}
                   className={`w-full py-4 rounded-full font-semibold text-body-sm transition-all duration-200 text-center ${
                     plan.popular
                       ? 'bg-accent text-white hover:bg-accent-hover shadow-chip'
@@ -66,7 +65,7 @@ export default function ServicesPage() {
                   }`}
                 >
                   {plan.cta}
-                </a>
+                </button>
               </div>
             </AnimatedText>
           ))}

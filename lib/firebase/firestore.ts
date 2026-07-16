@@ -21,6 +21,7 @@ import {
 } from 'firebase/firestore'
 import { db } from './config'
 import { DATABASE } from '@/config/site-config'
+import { getInstagramDMLink } from '@/lib/instagram'
 
 // ==================== TYPES ====================
 
@@ -80,11 +81,8 @@ export async function submitContactForm(data: {
     })
 
     // Instagram DM URL with pre-filled message
-    const dmText = encodeURIComponent(
-      `Hi Haziq! I'm ${data.fullName} from ${data.businessName || 'my business'}. ` +
-      `I'm interested in your ${data.service} plan. ${data.message}`
-    )
-    const instagramDmUrl = `https://instagram.com/direct/new/?text=${dmText}`
+    const dmMessage = `Hi Haziq! I'm ${data.fullName} from ${data.businessName || 'my business'}. I'm interested in your ${data.service} plan. ${data.message}`
+    const instagramDmUrl = getInstagramDMLink(dmMessage)
 
     return {
       success: true,

@@ -1,8 +1,9 @@
 'use client'
 
-import { PROJECTS, SOCIAL } from '@/lib/constants'
+import { PROJECTS } from '@/lib/constants'
 import Section from '@/components/ui/Section'
 import AnimatedText from '@/components/ui/AnimatedText'
+import { openInstagramDM } from '@/lib/instagram'
 
 export default function ProjectsPage() {
   return (
@@ -111,10 +112,10 @@ export default function ProjectsPage() {
             Let&apos;s build something amazing for your business too.
           </AnimatedText>
           <AnimatedText as="div" delay={200}>
-            <a href={SOCIAL.instagram} target="_blank" rel="noopener noreferrer" className="btn-primary px-10 py-4">
+            <button onClick={() => openInstagramDM()} className="btn-primary px-10 py-4">
               Start a Project
               <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="m9 18 6-6-6-6"/></svg>
-            </a>
+            </button>
           </AnimatedText>
         </div>
       </Section>
