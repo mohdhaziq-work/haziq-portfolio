@@ -39,6 +39,8 @@ if (isFirebaseConfigured) {
     db = getFirestore(app)
     auth = getAuth(app)
     googleProvider = new GoogleAuthProvider()
+    // Force account chooser to always show (even if only 1 account logged in)
+    googleProvider.setCustomParameters({ prompt: 'select_account' })
   } catch (error) {
     console.error('Firebase initialization error:', error)
   }
