@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
 import { useTutorial, Language } from './TutorialContext'
 import { cn } from '@/lib/utils'
 
@@ -9,22 +10,26 @@ const LANG_LABELS: Record<Language, string> = { en: 'English', hi: 'Hindi', hing
 export default function TourOverlay() {
   const {
     isTourActive, currentStep, currentStepIndex, totalSteps,
-    language, nextStep, prevStep, stopTutorial, setLanguage,
+    language, nextStep, prevStep, stopTutorial, setLanguage, isNavigating,
   } = useTutorial()
+
+  const router = useRouter()
+  const pathname = usePathname()
 
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null)
   const [tooltipStyle, setTooltipStyle] = useState<React.CSSProperties>({})
   const [arrowStyle, setArrowStyle] = useState<React.CSSProperties>({})
   const [resolvedPos, setResolvedPos] = useState<'top' | 'bottom' | 'left' | 'right' | 'center'>('bottom')
   const [isAnimating, setIsAnimating] = useState(false)
+  const [waitingForNav, setWaitingForNav] = useState(false)
   const tooltipRef = useRef<HTMLDivElement>(null)
   const spotPadding = 8
+  const navigatedRef = useRef<string>('')
 
   // Find the target element on the page
   const findTarget = useCallback((): Element | null => {
     if (!currentStep || !currentStep.target) return null
-    const el = document.querySelector(`[data-tour="${currentStep.target}"]`)
-    return el
+    return document.querySelector(`[data-tour="${currentStep.target}"]`)
   }, [currentStep])
 
   // Update positions
@@ -34,7 +39,6 @@ export default function TourOverlay() {
     const target = findTarget()
 
     if (!target) {
-      // No target = center position
       setTargetRect(null)
       setResolvedPos('center')
       setTooltipStyle({
@@ -45,10 +49,8 @@ export default function TourOverlay() {
       return
     }
 
-    // Scroll target into view
     target.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' })
 
-    // Wait for scroll to finish, then calculate
     setTimeout(() => {
       const rect = target.getBoundingClientRect()
       setTargetRect(rect)
@@ -58,9 +60,8 @@ export default function TourOverlay() {
       const vw = window.innerWidth
       const vh = window.innerHeight
       const tooltipW = Math.min(380, vw - 32)
-      const tooltipH = 220 // estimated
+      const tooltipH = 220
 
-      // Determine position
       let pos: 'top' | 'bottom' | 'left' | 'right' | 'center' | 'auto' = currentStep.position || 'auto'
       if (pos === 'auto') {
         if (isMobile) {
@@ -77,7 +78,6 @@ export default function TourOverlay() {
       }
       setResolvedPos(pos)
 
-      // Calculate tooltip position
       let top = 0, left = 0
 
       switch (pos) {
@@ -103,13 +103,11 @@ export default function TourOverlay() {
           break
       }
 
-      // Clamp to viewport
       left = Math.max(16, Math.min(left, vw - tooltipW - 16))
       top = Math.max(16, Math.min(top, vh - tooltipH - 16))
 
       setTooltipStyle({ top, left, width: tooltipW })
 
-      // Arrow position (points from tooltip toward the target)
       const arrowSize = 8
       let aStyle: React.CSSProperties = {}
       switch (pos) {
@@ -143,10 +141,41 @@ export default function TourOverlay() {
           break
       }
       setArrowStyle(aStyle)
-    }, 350) // wait for scrollIntoView
+    }, 350)
   }, [isTourActive, currentStep, findTarget, spotPadding])
 
-  // Run position updates
+  // Handle page navigation using Next.js router (no full reload!)
+  useEffect(() => {
+    if (!isTourActive || !currentStep?.page) return
+
+    const targetPage = currentStep.page
+    const currentPage = pathname
+
+    if (currentPage !== targetPage && navigatedRef.current !== targetPage) {
+      navigatedRef.current = targetPage
+      setWaitingForNav(true)
+      setTargetRect(null)
+
+      // Use Next.js router for client-side navigation (preserves React state!)
+      router.push(targetPage)
+    }
+  }, [isTourActive, currentStep, pathname, router])
+
+  // After navigation completes, update positions
+  useEffect(() => {
+    if (!isTourActive || !currentStep) return
+
+    // Small delay after page change to let DOM render
+    const timer = setTimeout(() => {
+      setWaitingForNav(false)
+      navigatedRef.current = ''
+      updatePositions()
+    }, 500)
+
+    return () => clearTimeout(timer)
+  }, [pathname, isTourActive, currentStepIndex, updatePositions])
+
+  // Run position updates on resize/scroll
   useEffect(() => {
     if (!isTourActive) return
     setIsAnimating(true)
@@ -183,18 +212,9 @@ export default function TourOverlay() {
     return () => { document.body.style.overflow = '' }
   }, [isTourActive])
 
-  // Navigate to step's page if needed
-  useEffect(() => {
-    if (!isTourActive || !currentStep?.page) return
-    const currentPath = window.location.pathname
-    if (currentPath !== currentStep.page) {
-      window.location.href = currentStep.page
-    }
-  }, [isTourActive, currentStep])
-
   if (!isTourActive || !currentStep) return null
 
-  const isCenter = resolvedPos === 'center' || !currentStep.target
+  const isCenter = resolvedPos === 'center' || !currentStep.target || waitingForNav
 
   return (
     <>
@@ -202,11 +222,10 @@ export default function TourOverlay() {
       <div
         className="fixed inset-0 z-[9998] transition-opacity duration-300"
         style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(2px)' }}
-        onClick={(e) => { if (e.target === e.currentTarget) {/* don't close on overlay click */} }}
       />
 
       {/* Spotlight around target element */}
-      {targetRect && (
+      {targetRect && !waitingForNav && (
         <div
           className="fixed z-[9999] rounded-lg pointer-events-none"
           style={{
@@ -219,7 +238,6 @@ export default function TourOverlay() {
             transition: 'all 0.35s cubic-bezier(0.4,0,0.2,1)',
           }}
         >
-          {/* Animated pulse ring */}
           <div
             className="absolute inset-0 rounded-lg"
             style={{
@@ -235,8 +253,8 @@ export default function TourOverlay() {
         ref={tooltipRef}
         className={cn(
           'fixed z-[10001] bg-white rounded-xl shadow-2xl overflow-hidden transition-all duration-300',
-          isAnimating && 'opacity-0 scale-95',
-          !isAnimating && 'opacity-100 scale-100',
+          (isAnimating || waitingForNav) && 'opacity-0 scale-95',
+          !isAnimating && !waitingForNav && 'opacity-100 scale-100',
         )}
         style={{
           ...tooltipStyle,
@@ -291,6 +309,14 @@ export default function TourOverlay() {
           <p className="text-[13px] text-text-secondary leading-relaxed">
             {currentStep.description[language] || currentStep.description.en}
           </p>
+          {waitingForNav && (
+            <div className="flex items-center gap-2 mt-3 text-accent">
+              <div className="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+              <span className="text-[11px] font-medium">
+                {language === 'hi' ? 'पेज लोड हो रहा है...' : language === 'hing' ? 'Page load ho raha hai...' : 'Loading page...'}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Progress Bar */}
