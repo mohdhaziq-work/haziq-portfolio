@@ -1,6 +1,6 @@
 import type { Tutorial } from './TutorialPlayer'
 
-const THUM = 'https://image.thum.io/get/width/1280/wait/3/crop/720/https://mohdhaziq-portfolio.onrender.com'
+const THUM = 'https://image.thum.io/get/width/1280/png/wait/3/https://mohdhaziq-portfolio.onrender.com'
 
 export const TUTORIALS: Tutorial[] = [
   {
