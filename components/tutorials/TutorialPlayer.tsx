@@ -171,7 +171,7 @@ export default function TutorialPlayer({ tutorial, onClose }: TutorialPlayerProp
               <div className="w-3 h-3 rounded-full bg-green-400" />
             </div>
             <div className="flex-1 bg-white rounded-md px-3 py-1 text-xs text-text-tertiary border border-border max-w-md">
-              haziq-portfolio.onrender.com
+              mohdhaziq-portfolio.onrender.com
             </div>
           </div>
 

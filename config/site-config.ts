@@ -128,7 +128,7 @@ export const SOCIAL_LINKS = {
    * PORTFOLIO WEBSITE (Optional):
    * Format: 'https://yourdomain.com'
    */
-  website: 'https://haziq-portfolio.onrender.com',
+  website: 'https://mohdhaziq-portfolio.onrender.com',
 } as const
 
 // ============================================================
@@ -226,7 +226,7 @@ export const WEBSITE = {
    * SITE URL:
    * Render ya Vercel par deploy ke baad ye update karo
    */
-  url: 'https://haziq-portfolio.onrender.com',
+  url: 'https://mohdhaziq-portfolio.onrender.com',
 
   /**
    * SEO TITLE:
