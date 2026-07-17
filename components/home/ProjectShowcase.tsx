@@ -24,7 +24,7 @@ export default function ProjectShowcase() {
   const projects: ProjectItem[] = PROJECTS.map(p => ({ ...p }))
 
   return (
-    <Section id="work" background="white">
+    <Section id="work" background="white" data-tour="projects-section">
       {/* Header */}
       <div className="text-center mb-16">
         <AnimatedText as="span" className="section-overline">Portfolio</AnimatedText>

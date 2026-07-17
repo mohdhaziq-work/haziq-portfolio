@@ -6,7 +6,7 @@ import { openInstagramDM } from '@/lib/instagram'
 
 export default function Hero() {
   return (
-    <section className="min-h-screen flex items-center pt-20 pb-16 relative overflow-hidden">
+    <section className="min-h-screen flex items-center pt-20 pb-16 relative overflow-hidden" data-tour="hero-section">
       <div className="absolute top-20 right-0 w-[500px] h-[500px] bg-accent/3 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-lavender/20 rounded-full blur-[100px] pointer-events-none" />
 

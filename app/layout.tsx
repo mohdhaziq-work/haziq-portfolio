@@ -5,6 +5,8 @@ import Footer from '@/components/layout/Footer'
 import UserPanel from '@/components/layout/UserPanel'
 import LoginPopup from '@/components/auth/LoginPopup'
 import { AuthProvider } from '@/lib/auth/AuthContext'
+import { TutorialProvider } from '@/lib/tutorial/TutorialContext'
+import TourOverlay from '@/lib/tutorial/TourOverlay'
 
 export const metadata: Metadata = {
   title: {
@@ -35,11 +37,14 @@ export default function RootLayout({
       </head>
       <body className="bg-background text-text-primary antialiased">
         <AuthProvider>
-          <Header />
-          <main>{children}</main>
-          <Footer />
-          <UserPanel />
-          <LoginPopup />
+          <TutorialProvider>
+            <Header />
+            <main>{children}</main>
+            <Footer />
+            <UserPanel />
+            <LoginPopup />
+            <TourOverlay />
+          </TutorialProvider>
         </AuthProvider>
       </body>
     </html>

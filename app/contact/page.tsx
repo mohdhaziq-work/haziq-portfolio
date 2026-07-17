@@ -35,7 +35,7 @@ export default function ContactPage() {
               <h2 className="text-headline text-text-primary mb-2">Send a Message</h2>
               <p className="text-body-sm text-text-secondary mb-8">Fill out the form and I&apos;ll respond via Instagram DM.</p>
 
-              <form className="space-y-6" onSubmit={async (e) => {
+              <form className="space-y-6" data-tour="contact-form" onSubmit={async (e) => {
                 e.preventDefault()
                 if (submitting) return
 
@@ -144,7 +144,7 @@ export default function ContactPage() {
 
                 {/* Login hint */}
                 {!user && (
-                  <div className="flex items-start gap-3 p-3 bg-accent-light/50 rounded-lg border border-accent/10">
+                  <div className="flex items-start gap-3 p-3 bg-accent-light/50 rounded-lg border border-accent/10" data-tour="sign-in-notice">
                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" className="text-accent flex-shrink-0 mt-0.5">
                       <path d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
                     </svg>
@@ -177,7 +177,7 @@ export default function ContactPage() {
           {/* Contact Info */}
           <div>
             <AnimatedText as="div" delay={100} className="mb-6">
-              <div className="elevated-card p-8 flex items-start gap-5">
+              <div className="elevated-card p-8 flex items-start gap-5" data-tour="instagram-card">
                 <div className="w-12 h-12 bg-accent-light rounded-xl flex items-center justify-center flex-shrink-0">
                   <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24" className="text-accent"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z"/></svg>
                 </div>
@@ -218,7 +218,7 @@ export default function ContactPage() {
             </AnimatedText>
 
             <AnimatedText as="div" delay={400}>
-              <div className="elevated-card p-8 border-2 border-accent/20 bg-accent-light/30">
+              <div className="elevated-card p-8 border-2 border-accent/20 bg-accent-light/30" data-tour="free-mockup">
                 <h3 className="font-semibold text-text-primary mb-2">Free Mockup Offer</h3>
                 <p className="text-body-sm text-text-secondary mb-4">
                   Not sure yet? I&apos;ll design a free mockup of your website. If you love it, we work together. No risk.

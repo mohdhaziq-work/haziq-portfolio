@@ -164,14 +164,10 @@ body {
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* ===== TUTORIAL PLAYER ===== */
-@keyframes highlightPulse {
-  0%, 100% { box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.15), 0 0 20px rgba(26, 115, 232, 0.1); }
-  50% { box-shadow: 0 0 0 8px rgba(26, 115, 232, 0.1), 0 0 30px rgba(26, 115, 232, 0.15); }
-}
-
-.tutorial-highlight {
-  animation: highlightPulse 2s ease-in-out infinite;
+/* ===== TUTORIAL TOUR ===== */
+@keyframes tourPulse {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(26,115,232,0.3), 0 0 20px rgba(26,115,232,0.1); }
+  50% { box-shadow: 0 0 0 6px rgba(26,115,232,0.15), 0 0 30px rgba(26,115,232,0.2); }
 }
 
 /* ===== MOBILE SIDEBAR ===== */

@@ -7,7 +7,7 @@ import { openInstagramDM } from '@/lib/instagram'
 
 export default function CTA() {
   return (
-    <Section background="surface" padding="large">
+    <Section background="surface" padding="large" data-tour="cta-section">
       <div className="max-w-3xl mx-auto text-center">
         <AnimatedText as="div" delay={0} className="mb-8">
           <div className="w-16 h-16 bg-accent-light rounded-2xl flex items-center justify-center mx-auto mb-6">

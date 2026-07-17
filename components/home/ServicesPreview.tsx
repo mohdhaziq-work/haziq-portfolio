@@ -8,7 +8,7 @@ import { openInstagramDM } from '@/lib/instagram'
 
 export default function ServicesPreview() {
   return (
-    <Section id="services" background="surface">
+    <Section id="services" background="surface" data-tour="services-section">
       <div className="text-center mb-16">
         <AnimatedText as="span" className="section-overline">Services</AnimatedText>
         <AnimatedText as="h2" delay={100} className="text-display-md text-text-primary mb-4">

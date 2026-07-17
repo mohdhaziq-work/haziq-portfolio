@@ -105,7 +105,7 @@ export default function Header() {
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-1">
+            <nav className="hidden md:flex items-center gap-1" data-tour="nav-links">
               {NAV_LINKS.map((link) => {
                 const isActive = pathname === link.href
                 return (
@@ -130,6 +130,7 @@ export default function Header() {
               {/* User Button */}
               <button
                 onClick={handleUserClick}
+                data-tour="user-btn"
                 className={cn(
                   'flex items-center gap-2 px-3 py-2 rounded-full transition-all duration-200',
                   user
@@ -157,6 +158,7 @@ export default function Header() {
               {/* DM Button */}
               <button
                 onClick={() => openInstagramDM()}
+                data-tour="dm-btn"
                 className="btn-secondary text-caption py-2 px-4"
               >
                 <InstagramIcon />

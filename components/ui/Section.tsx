@@ -9,9 +9,10 @@ interface SectionProps {
   id?: string
   background?: 'white' | 'surface' | 'gradient'
   padding?: 'default' | 'small' | 'large'
+  'data-tour'?: string
 }
 
-export default function Section({ children, className, id, background = 'white', padding = 'default' }: SectionProps) {
+export default function Section({ children, className, id, background = 'white', padding = 'default', 'data-tour': dataTour }: SectionProps) {
   const ref = useRef<HTMLDivElement>(null)
   const [isVisible, setIsVisible] = useState(false)
 
@@ -45,6 +46,7 @@ export default function Section({ children, className, id, background = 'white',
     <section
       ref={ref}
       id={id}
+      data-tour={dataTour}
       className={cn(bgClass, paddingClass, className)}
     >
       <div className={cn(
