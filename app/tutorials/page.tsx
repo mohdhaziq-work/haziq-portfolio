@@ -10,6 +10,11 @@ import type { Tutorial } from '@/components/tutorials/TutorialPlayer'
 export default function TutorialsPage() {
   const [activeTutorial, setActiveTutorial] = useState<Tutorial | null>(null)
 
+  const tutorialsMeta = {
+    title: 'Video Guides | Mohd Haziq',
+    description: 'Watch step-by-step video guides showing how to contact, request a website, choose a plan, and track your project progress.',
+  }
+
   return (
     <div className="pt-24">
       {/* Header */}
