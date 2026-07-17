@@ -190,8 +190,17 @@ function AdminDashboard() {
     }
   }
 
-  const handleProjectStatusChange = async (projectId: string, status: ProjectStatus) => {
-    await updateProjectStatus(projectId, status)
+  const handleProjectStatusChange = async (projectId: string, newStatus: ProjectStatus) => {
+    // If marking as delivered, also set progress to 100
+    if (newStatus === 'delivered') {
+      await updateProjectDetails(projectId, { status: newStatus, progress: 100 })
+    } else {
+      await updateProjectStatus(projectId, newStatus)
+    }
+    // Close edit form if open for this project
+    if (editingProject === projectId) {
+      setEditingProject(null)
+    }
     fetchData()
   }
 
@@ -533,28 +542,44 @@ function AdminDashboard() {
                       </div>
                     )}
 
-                    {/* Edit Details Button */}
-                    <button
-                      onClick={() => {
-                        if (editingProject === project.id) {
-                          setEditingProject(null)
-                        } else {
-                          setEditingProject(project.id!)
-                          setEditData({
-                            status: project.status,
-                            progress: project.progress || 0,
-                            deliveryDate: project.deliveryDate || '',
-                            adminNotes: project.adminNotes || '',
-                          })
-                        }
-                      }}
-                      className="text-[10px] font-semibold text-accent hover:underline"
-                    >
-                      {editingProject === project.id ? 'Close Edit' : 'Edit Progress'}
-                    </button>
+                    {/* Edit Details Button - ONLY for active projects */}
+                    {!['delivered', 'cancelled'].includes(project.status) && (
+                      <button
+                        onClick={() => {
+                          if (editingProject === project.id) {
+                            setEditingProject(null)
+                          } else {
+                            setEditingProject(project.id!)
+                            setEditData({
+                              status: project.status,
+                              progress: project.progress || 0,
+                              deliveryDate: project.deliveryDate || '',
+                              adminNotes: project.adminNotes || '',
+                            })
+                          }
+                        }}
+                        className="text-[10px] font-semibold text-accent hover:underline"
+                      >
+                        {editingProject === project.id ? 'Close Edit' : 'Edit Progress'}
+                      </button>
+                    )}
 
-                    {/* Edit Form */}
-                    {editingProject === project.id && (
+                    {/* Delivered / Cancelled badge */}
+                    {['delivered', 'cancelled'].includes(project.status) && (
+                      <div className="flex items-center gap-1.5 mt-1">
+                        {project.status === 'delivered' ? (
+                          <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" className="text-emerald-500"><path d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+                        ) : (
+                          <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" className="text-red-500"><path d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+                        )}
+                        <span className="text-[10px] font-medium text-text-tertiary">
+                          {project.status === 'delivered' ? 'Project completed and delivered' : 'Project cancelled'}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Edit Form - ONLY for active projects */}
+                    {editingProject === project.id && !['delivered', 'cancelled'].includes(project.status) && (
                       <div className="mt-2 bg-white rounded-md p-3 border border-accent/20">
                         <div className="space-y-2">
                           <div>

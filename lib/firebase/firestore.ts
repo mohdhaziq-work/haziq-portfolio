@@ -178,6 +178,8 @@ export async function getAllProjects(): Promise<ProjectInquiry[]> {
 
 /**
  * Get Projects by Client Email (Client Portal)
+ * NOTE: We do NOT use orderBy here because that requires a composite index.
+ * Instead, we sort client-side after fetching.
  */
 export async function getProjectsByClientEmail(email: string): Promise<ProjectInquiry[]> {
   if (!isFirebaseConfigured || !db) return []
@@ -185,14 +187,19 @@ export async function getProjectsByClientEmail(email: string): Promise<ProjectIn
     const projectsCollection = getProjectsCollection()
     const q = query(
       projectsCollection,
-      where('clientEmail', '==', email),
-      orderBy('updatedAt', 'desc')
+      where('clientEmail', '==', email)
     )
     const snapshot = await getDocs(q)
-    return snapshot.docs.map((doc) => ({
+    const projects = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     })) as ProjectInquiry[]
+    // Sort client-side by updatedAt descending
+    return projects.sort((a, b) => {
+      const aTime = (a.updatedAt as unknown as { seconds: number } | null)?.seconds || 0
+      const bTime = (b.updatedAt as unknown as { seconds: number } | null)?.seconds || 0
+      return bTime - aTime
+    })
   } catch (error) {
     console.error('Fetch client projects error:', error)
     return []

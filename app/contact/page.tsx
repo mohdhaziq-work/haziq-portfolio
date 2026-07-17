@@ -51,12 +51,23 @@ export default function ContactPage() {
 
                 try {
                   // Dynamic import to avoid SSR issues
-                  const { submitContactForm } = await import('@/lib/firebase/firestore')
+                  const { submitContactForm, submitClientProject } = await import('@/lib/firebase/firestore')
                   const result = await submitContactForm(data)
                   
                   if (result.success) {
+                    // Also create a project entry for the client so they can track it
+                    if (user?.email) {
+                      await submitClientProject({
+                        clientName: data.fullName,
+                        clientEmail: user.email,
+                        businessName: data.businessName,
+                        projectType: data.service || 'custom',
+                        budget: '',
+                        notes: data.message,
+                      })
+                    }
                     form.reset()
-                    alert('Thank you! Your message has been saved. You will now be redirected to Instagram DM to complete the conversation.')
+                    alert('Thank you! Your message has been saved. You can track your project progress from the menu. You will now be redirected to Instagram DM.')
                     openInstagramDM()
                   } else {
                     form.reset()
