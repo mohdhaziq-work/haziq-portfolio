@@ -10,3 +10,15 @@ services:
         value: "18"
       - key: PORT
         value: "3000"
+      - key: NEXT_PUBLIC_FIREBASE_API_KEY
+        value: "AIzaSyBWaZ4dFCJJ0CW-3lLlf0EP9Ihk5AOl6wI"
+      - key: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+        value: "my-portfolio-d84d3.firebaseapp.com"
+      - key: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+        value: "my-portfolio-d84d3"
+      - key: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+        value: "my-portfolio-d84d3.firebasestorage.app"
+      - key: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+        value: "497943029240"
+      - key: NEXT_PUBLIC_FIREBASE_APP_ID
+        value: "1:497943029240:web:699bbdf7ce77bcdce6a20d"
