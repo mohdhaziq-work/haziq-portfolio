@@ -1,49 +1,24 @@
-/**
- * ╔══════════════════════════════════════════════════════════════╗
- * ║            FIRESTORE SECURITY RULES — UPDATED               ║
- * ║                                                              ║
- * ║  Ye rules Firebase Console mein paste karo:                  ║
- * ║  Firebase → Firestore Database → Rules tab → Edit → Publish ║
- * ╚══════════════════════════════════════════════════════════════╝
- * 
- * ==================== START COPY ====================
- 
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // CONTACTS: Public can create, anyone with link can read (admin dashboard)
-    match /contacts/{contactId} {
-      allow create: if true;           // Contact form submit (public)
-      allow read: if true;             // Admin dashboard can read
-      allow update: if true;           // Admin can update status
-      allow delete: if true;           // Admin can delete
+    // Contacts: only admin (mohdhaziq1962@gmail.com) can read/update/delete
+    // Anyone authenticated can create (from contact form)
+    match /contacts/{docId} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if request.auth != null 
+        && request.auth.token.email == 'mohdhaziq1962@gmail.com';
     }
     
-    // PROJECTS: Admin dashboard full access
-    match /projects/{projectId} {
-      allow read, write: if true;      // Admin dashboard CRUD
-    }
-    
-    // TESTIMONIALS: Anyone can read, admin can write
-    match /testimonials/{testimonialId} {
-      allow read: if true;
-      allow write: if true;
-    }
-    
-    // ANALYTICS: Admin access
-    match /analytics/{analyticsId} {
-      allow read, write: if true;
+    // Projects: admin can do everything
+    // Clients can only read their own projects (by clientEmail)
+    // Anyone authenticated can create (from contact form / client portal)
+    match /projects/{docId} {
+      allow create: if request.auth != null;
+      allow read: if request.auth != null 
+        && (request.auth.token.email == 'mohdhaziq1962@gmail.com'
+            || resource.data.clientEmail == request.auth.token.email);
+      allow update, delete: if request.auth != null 
+        && request.auth.token.email == 'mohdhaziq1962@gmail.com';
     }
   }
 }
-
- * ==================== END COPY ====================
- * 
- * ⚠️ WHY THESE RULES?
- * - Contact form public hai → koi bhi submit kar sakta hai
- * - Admin dashboard client-side hai → Firebase se data read karna padega
- * - Admin page password-protected hai → sirf tu access kar sakta hai
- * - Real security: Admin page ka password + Firebase rules dono hain
- * - Ye portfolio site hai, not a bank app — ye rules safe hain
- */

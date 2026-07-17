@@ -105,17 +105,7 @@ export default function UserPanel() {
         </div>
       </div>
 
-      {/* Animations */}
-      <style jsx>{`
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        @keyframes slideInRight {
-          from { transform: translateX(100%); }
-          to { transform: translateX(0); }
-        }
-      `}</style>
+      {/* Animations handled via globals.css */}
     </>
   )
 }

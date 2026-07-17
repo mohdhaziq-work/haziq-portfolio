@@ -2,14 +2,14 @@
  * ╔══════════════════════════════════════════════════════════════╗
  * ║                    PORTFOLIO CONFIGURATION                   ║
  * ║                                                              ║
- * ║  📌 IS FILE MEIN SAB KUCH CHANGE HOTA HAI!                  ║
- * ║  📌 YE EK HI FILE HAI — BAAKI SAB YAHAN SE READ KARTA HAI  ║
- * ║  📌 BAS ISME VALUES DALO, PURI SITE UPDATE HO JAYEGI       ║
+ * ║  [!] IS FILE MEIN SAB KUCH CHANGE HOTA HAI!                 ║
+ * ║  [!] YE EK HI FILE HAI -- BAAKI SAB YAHAN SE READ KARTA HAI║
+ * ║  [!] BAS ISME VALUES DALO, PURI SITE UPDATE HO JAYEGI      ║
  * ╚══════════════════════════════════════════════════════════════╝
  */
 
 // ============================================================
-// 👤 PERSONAL INFORMATION (Apni Details Yahan Daalo)
+// PERSONAL INFORMATION (Apni Details Yahan Daalo)
 // ============================================================
 export const PERSONAL = {
   firstName: 'Mohd',
@@ -37,7 +37,7 @@ export const PERSONAL = {
 } as const
 
 // ============================================================
-// 📸 IMAGES (Apni Photos Ke Links Yahan Daalo)
+// IMAGES (Apni Photos Ke Links Yahan Daalo)
 // ============================================================
 export const IMAGES = {
   /**
@@ -82,7 +82,7 @@ export const IMAGES = {
 } as const
 
 // ============================================================
-// 🔗 SOCIAL MEDIA & CONTACT LINKS
+// SOCIAL MEDIA & CONTACT LINKS
 // ============================================================
 export const SOCIAL_LINKS = {
   /**
@@ -102,7 +102,7 @@ export const SOCIAL_LINKS = {
    * LINKEDIN:
    * Format: 'https://linkedin.com/in/YOUR_USERNAME'
    */
-  linkedin: 'https://linkedin.com/in/',
+  linkedin: '',
 
   /**
    * EMAIL:
@@ -132,7 +132,7 @@ export const SOCIAL_LINKS = {
 } as const
 
 // ============================================================
-// 💬 CONTACT & AVAILABILITY
+// CONTACT & AVAILABILITY
 // ============================================================
 export const CONTACT = {
   /**
@@ -169,7 +169,7 @@ export const CONTACT = {
 } as const
 
 // ============================================================
-// 🔥 DATABASE CONFIGURATION (Firebase)
+// DATABASE CONFIGURATION (Firebase)
 // ============================================================
 export const DATABASE = {
   /**
@@ -219,7 +219,7 @@ export const DATABASE = {
 } as const
 
 // ============================================================
-// 🌐 WEBSITE & SEO
+// WEBSITE & SEO
 // ============================================================
 export const WEBSITE = {
   /**
@@ -272,7 +272,7 @@ export const WEBSITE = {
 } as const
 
 // ============================================================
-// 💰 PRICING (Services Page)
+// PRICING (Services Page)
 // ============================================================
 export const PRICING = {
   /**
@@ -337,7 +337,7 @@ export const PRICING = {
 } as const
 
 // ============================================================
-// 🎨 THEME & APPEARANCE (Advanced)
+// THEME & APPEARANCE (Advanced)
 // ============================================================
 export const THEME = {
   /**
@@ -366,7 +366,7 @@ export const THEME = {
 } as const
 
 // ============================================================
-// 📝 FAQ (Contact Page)
+// FAQ (Contact Page)
 // ============================================================
 export const FAQ = [
   {

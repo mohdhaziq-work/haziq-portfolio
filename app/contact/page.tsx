@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { SITE } from '@/lib/constants'
 import Section from '@/components/ui/Section'
 import AnimatedText from '@/components/ui/AnimatedText'
@@ -8,6 +9,7 @@ import { useAuth } from '@/lib/auth/AuthContext'
 
 export default function ContactPage() {
   const { user, requireLogin } = useAuth()
+  const [submitting, setSubmitting] = useState(false)
 
   return (
     <div className="pt-24">
@@ -35,9 +37,12 @@ export default function ContactPage() {
 
               <form className="space-y-6" onSubmit={async (e) => {
                 e.preventDefault()
+                if (submitting) return
 
                 // Require login before submitting project details
                 if (!requireLogin()) return
+
+                setSubmitting(true)
 
                 const form = e.currentTarget
                 const formData = new FormData(form)
@@ -55,7 +60,7 @@ export default function ContactPage() {
                   const result = await submitContactForm(data)
                   
                   if (result.success) {
-                    // Also create a project entry for the client so they can track it
+                    // Create a project entry so client can track progress
                     if (user?.email) {
                       await submitClientProject({
                         clientName: data.fullName,
@@ -78,6 +83,8 @@ export default function ContactPage() {
                   alert('Thank you for reaching out! You will now be redirected to Instagram DM.')
                   form.reset()
                   openInstagramDM()
+                } finally {
+                  setSubmitting(false)
                 }
               }}>
                 <div>
@@ -86,8 +93,9 @@ export default function ContactPage() {
                     name="fullName"
                     type="text"
                     required
+                    disabled={submitting}
                     placeholder="Your full name"
-                    className="w-full px-4 py-3 rounded-lg border border-border bg-background text-text-primary text-body-md placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all"
+                    className="w-full px-4 py-3 rounded-lg border border-border bg-background text-text-primary text-body-md placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all disabled:opacity-50"
                   />
                 </div>
                 <div>
@@ -96,7 +104,8 @@ export default function ContactPage() {
                     name="businessName"
                     type="text"
                     placeholder="Your business name"
-                    className="w-full px-4 py-3 rounded-lg border border-border bg-background text-text-primary text-body-md placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all"
+                    disabled={submitting}
+                    className="w-full px-4 py-3 rounded-lg border border-border bg-background text-text-primary text-body-md placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all disabled:opacity-50"
                   />
                 </div>
                 <div>
@@ -106,12 +115,13 @@ export default function ContactPage() {
                     type="text"
                     required
                     placeholder="@yourusername"
-                    className="w-full px-4 py-3 rounded-lg border border-border bg-background text-text-primary text-body-md placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all"
+                    disabled={submitting}
+                    className="w-full px-4 py-3 rounded-lg border border-border bg-background text-text-primary text-body-md placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all disabled:opacity-50"
                   />
                 </div>
                 <div>
                   <label className="block text-body-sm font-medium text-text-primary mb-2">What do you need?</label>
-                  <select name="service" className="w-full px-4 py-3 rounded-lg border border-border bg-background text-text-primary text-body-md focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all appearance-none">
+                  <select name="service" disabled={submitting} className="w-full px-4 py-3 rounded-lg border border-border bg-background text-text-primary text-body-md focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all appearance-none disabled:opacity-50">
                     <option value="">Select a service</option>
                     <option value="starter">Starter -- 2,500</option>
                     <option value="business">Business -- 6,000</option>
@@ -127,7 +137,8 @@ export default function ContactPage() {
                     rows={4}
                     required
                     placeholder="What does your business do? What kind of website do you need?"
-                    className="w-full px-4 py-3 rounded-lg border border-border bg-background text-text-primary text-body-md placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all resize-none"
+                    disabled={submitting}
+                    className="w-full px-4 py-3 rounded-lg border border-border bg-background text-text-primary text-body-md placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all resize-none disabled:opacity-50"
                   />
                 </div>
 
@@ -143,9 +154,18 @@ export default function ContactPage() {
                   </div>
                 )}
 
-                <button type="submit" className="btn-primary w-full py-4 justify-center text-body-md">
-                  Send Message
-                  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="m9 18 6-6-6-6"/></svg>
+                <button type="submit" disabled={submitting} className="btn-primary w-full py-4 justify-center text-body-md disabled:opacity-50 disabled:cursor-not-allowed">
+                  {submitting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      Send Message
+                      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="m9 18 6-6-6-6"/></svg>
+                    </>
+                  )}
                 </button>
                 <p className="text-center text-caption text-text-tertiary">
                   Your message will be saved and you&apos;ll be redirected to Instagram DM to chat directly.

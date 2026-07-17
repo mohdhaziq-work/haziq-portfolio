@@ -60,7 +60,9 @@ export default function Hero() {
                 </div>
               </div>
               <div className="absolute -top-6 -right-6 surface-card p-4 flex items-center gap-3 animate-float" style={{ animationDelay: '2s' }}>
-                <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center text-accent font-bold text-sm">⚡</div>
+                <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center text-accent">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                </div>
                 <div>
                   <p className="font-semibold text-text-primary text-body-sm">Fast Delivery</p>
                   <p className="text-caption text-text-tertiary">3-14 Days</p>
