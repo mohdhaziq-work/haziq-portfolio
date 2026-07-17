@@ -6,12 +6,12 @@ import { usePathname } from 'next/navigation'
 import { NAV_LINKS, SITE } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { openInstagramDM } from '@/lib/instagram'
+import { useAuth } from '@/lib/auth/AuthContext'
 
 /* ─────────────────────────────────────────────
    Unique "Dual Arc" Hamburger Button
    - Two curved arcs (smile + frown shape)
    - Morphs into X on open
-   - Nobody does curved hamburger lines!
    ───────────────────────────────────────────── */
 
 export default function Header() {
@@ -19,6 +19,7 @@ export default function Header() {
   const [isMobileOpen, setIsMobileOpen] = useState(false)
   const [visibleItems, setVisibleItems] = useState<Set<number>>(new Set())
   const pathname = usePathname()
+  const { user, isAdmin, isClient, toggleUserPanel, setUserPanelOpen, requireLogin, setShowLoginPopup } = useAuth()
 
   // Scroll detection
   useEffect(() => {
@@ -30,7 +31,8 @@ export default function Header() {
   // Close sidebar on route change
   useEffect(() => {
     setIsMobileOpen(false)
-  }, [pathname])
+    setUserPanelOpen(false)
+  }, [pathname, setUserPanelOpen])
 
   // Lock body scroll when sidebar open
   useEffect(() => {
@@ -64,6 +66,13 @@ export default function Header() {
   const toggleSidebar = useCallback(() => {
     setIsMobileOpen(prev => !prev)
   }, [])
+
+  const handleUserClick = useCallback(() => {
+    toggleUserPanel()
+  }, [toggleUserPanel])
+
+  // Get user initials
+  const userInitial = user?.displayName?.charAt(0) || user?.email?.charAt(0).toUpperCase() || 'U'
 
   return (
     <>
@@ -112,8 +121,37 @@ export default function Header() {
               })}
             </nav>
 
-            {/* Desktop CTA */}
-            <div className="hidden md:flex items-center gap-3">
+            {/* Desktop Right Side: User Button + DM */}
+            <div className="hidden md:flex items-center gap-2">
+              {/* User Button */}
+              <button
+                onClick={handleUserClick}
+                className={cn(
+                  'flex items-center gap-2 px-3 py-2 rounded-full transition-all duration-200',
+                  user
+                    ? 'bg-surface-2 hover:bg-accent-light text-text-primary hover:text-accent'
+                    : 'bg-accent-light hover:bg-accent-surface text-accent'
+                )}
+              >
+                {user?.photoURL ? (
+                  <img src={user.photoURL} alt="" className="w-5 h-5 rounded-full" referrerPolicy="no-referrer" />
+                ) : (
+                  <div className={cn(
+                    'w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold',
+                    user ? 'bg-accent text-white' : 'bg-accent text-white'
+                  )}>
+                    {user ? userInitial : 'G'}
+                  </div>
+                )}
+                <span className="text-xs font-medium">
+                  {user
+                    ? (isAdmin ? 'Admin' : (user.displayName?.split(' ')[0] || 'My Portal'))
+                    : 'Sign In'
+                  }
+                </span>
+              </button>
+
+              {/* DM Button */}
               <button
                 onClick={() => openInstagramDM()}
                 className="btn-secondary text-caption py-2 px-4"
@@ -123,66 +161,89 @@ export default function Header() {
               </button>
             </div>
 
-            {/* ─── UNIQUE Mobile Toggle: Dual Arc Button ─── */}
-            <button
-              onClick={toggleSidebar}
-              className={cn(
-                'md:hidden relative w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300',
-                isMobileOpen
-                  ? 'bg-accent-light text-accent'
-                  : 'hover:bg-surface-2 text-text-secondary'
-              )}
-              aria-label={isMobileOpen ? 'Close menu' : 'Open menu'}
-            >
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 22 22"
-                fill="none"
-                className="transition-transform duration-300"
+            {/* Mobile Right Side: User Button + Hamburger */}
+            <div className="flex md:hidden items-center gap-1">
+              {/* Mobile User Button */}
+              <button
+                onClick={handleUserClick}
+                className={cn(
+                  'w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200',
+                  user
+                    ? 'text-accent'
+                    : 'text-text-secondary hover:bg-surface-2'
+                )}
+                aria-label={user ? 'Open portal' : 'Sign in'}
               >
-                {/* Top Arc — curves UP when closed, straightens+rotates on open */}
-                <path
-                  d="M4 8 Q11 4 18 8"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  className="transition-all duration-400 origin-center"
-                  style={{
-                    transform: isMobileOpen
-                      ? 'rotate(45deg) translate(2px, 2px) scaleX(1.05)'
-                      : 'rotate(0deg) translate(0, 0) scaleX(1)',
-                    transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s',
-                  }}
-                />
-                {/* Bottom Arc — curves DOWN when closed, straightens+rotates on open */}
-                <path
-                  d="M4 14 Q11 18 18 14"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  className="transition-all duration-400 origin-center"
-                  style={{
-                    transform: isMobileOpen
-                      ? 'rotate(-45deg) translate(2px, -2px) scaleX(1.05)'
-                      : 'rotate(0deg) translate(0, 0) scaleX(1)',
-                    transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s',
-                  }}
-                />
-                {/* Center Dot — visible only when closed, fades out on open */}
-                <circle
-                  cx="11"
-                  cy="11"
-                  r="1.5"
-                  fill="currentColor"
-                  style={{
-                    opacity: isMobileOpen ? 0 : 1,
-                    transform: isMobileOpen ? 'scale(0)' : 'scale(1)',
-                    transition: 'opacity 0.25s ease, transform 0.25s ease',
-                  }}
-                />
-              </svg>
-            </button>
+                {user?.photoURL ? (
+                  <img src={user.photoURL} alt="" className="w-6 h-6 rounded-full" referrerPolicy="no-referrer" />
+                ) : (
+                  <div className={cn(
+                    'w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold',
+                    user ? 'bg-accent text-white' : 'bg-surface-2 text-text-secondary'
+                  )}>
+                    {user ? userInitial : 'G'}
+                  </div>
+                )}
+              </button>
+
+              {/* ─── UNIQUE Mobile Toggle: Dual Arc Button ─── */}
+              <button
+                onClick={toggleSidebar}
+                className={cn(
+                  'relative w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300',
+                  isMobileOpen
+                    ? 'bg-accent-light text-accent'
+                    : 'hover:bg-surface-2 text-text-secondary'
+                )}
+                aria-label={isMobileOpen ? 'Close menu' : 'Open menu'}
+              >
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 22 22"
+                  fill="none"
+                  className="transition-transform duration-300"
+                >
+                  <path
+                    d="M4 8 Q11 4 18 8"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    className="transition-all duration-400 origin-center"
+                    style={{
+                      transform: isMobileOpen
+                        ? 'rotate(45deg) translate(2px, 2px) scaleX(1.05)'
+                        : 'rotate(0deg) translate(0, 0) scaleX(1)',
+                      transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s',
+                    }}
+                  />
+                  <path
+                    d="M4 14 Q11 18 18 14"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    className="transition-all duration-400 origin-center"
+                    style={{
+                      transform: isMobileOpen
+                        ? 'rotate(-45deg) translate(2px, -2px) scaleX(1.05)'
+                        : 'rotate(0deg) translate(0, 0) scaleX(1)',
+                      transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s',
+                    }}
+                  />
+                  <circle
+                    cx="11"
+                    cy="11"
+                    r="1.5"
+                    fill="currentColor"
+                    style={{
+                      opacity: isMobileOpen ? 0 : 1,
+                      transform: isMobileOpen ? 'scale(0)' : 'scale(1)',
+                      transition: 'opacity 0.25s ease, transform 0.25s ease',
+                    }}
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -261,10 +322,75 @@ export default function Header() {
               </Link>
             )
           })}
+
+          {/* ─── User Section in Sidebar ─── */}
+          {user && (
+            <>
+              <div className="mx-5 my-3 border-t border-border-light" />
+
+              {/* Admin Section */}
+              {isAdmin && (
+                <button
+                  onClick={() => { closeSidebar(); toggleUserPanel(); }}
+                  className="sidebar-nav-item sidebar-nav-item--visible w-full text-left"
+                >
+                  <span className="sidebar-nav-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                  </span>
+                  <span>Admin Dashboard</span>
+                </button>
+              )}
+
+              {/* Client Section */}
+              {isClient && (
+                <button
+                  onClick={() => { closeSidebar(); toggleUserPanel(); }}
+                  className="sidebar-nav-item sidebar-nav-item--visible w-full text-left"
+                >
+                  <span className="sidebar-nav-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect width="20" height="14" x="2" y="7" rx="2" ry="2" />
+                      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                    </svg>
+                  </span>
+                  <span>My Projects</span>
+                </button>
+              )}
+            </>
+          )}
         </nav>
 
         {/* Sidebar Footer — CTA */}
         <div className="p-5 border-t border-border-light">
+          {/* User Status */}
+          {user ? (
+            <div className="flex items-center gap-3 mb-4 px-1">
+              {user.photoURL ? (
+                <img src={user.photoURL} alt="" className="w-8 h-8 rounded-full" referrerPolicy="no-referrer" />
+              ) : (
+                <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center text-white text-xs font-bold">
+                  {userInitial}
+                </div>
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold text-text-primary truncate">{user.displayName || user.email?.split('@')[0]}</p>
+                <p className="text-[10px] text-text-tertiary">{isAdmin ? 'Admin Access' : 'Client'}</p>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={() => { closeSidebar(); setShowLoginPopup(true); }}
+              className="flex items-center gap-2 w-full px-4 py-2.5 mb-3 rounded-lg border border-accent/30 text-accent text-xs font-medium hover:bg-accent-light transition-colors"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+              </svg>
+              Sign In with Google
+            </button>
+          )}
+
           {/* Availability Badge */}
           <div className="flex items-center gap-2 mb-4">
             <span className="relative flex h-2.5 w-2.5">

@@ -20,20 +20,36 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || DATABASE.firebase.measurementId,
 }
 
+// Check if Firebase config is valid (not empty strings)
+const isFirebaseConfigured = Boolean(
+  firebaseConfig.apiKey &&
+  firebaseConfig.projectId &&
+  firebaseConfig.appId
+)
+
 // Initialize Firebase (prevent re-initialization)
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp()
+let app = null as ReturnType<typeof initializeApp> | null
+let db = null as ReturnType<typeof getFirestore> | null
+let auth = null as ReturnType<typeof getAuth> | null
+let googleProvider = null as GoogleAuthProvider | null
 
-// Initialize Firestore
-export const db = getFirestore(app)
+if (isFirebaseConfigured) {
+  try {
+    app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp()
+    db = getFirestore(app)
+    auth = getAuth(app)
+    googleProvider = new GoogleAuthProvider()
+  } catch (error) {
+    console.error('Firebase initialization error:', error)
+  }
+}
 
-// Initialize Auth
-export const auth = getAuth(app)
-export const googleProvider = new GoogleAuthProvider()
+export { app, db, auth, googleProvider, isFirebaseConfigured }
 
 // Initialize Analytics (only in browser, optional)
-export const analytics = typeof window !== 'undefined'
+export const analytics = typeof window !== 'undefined' && isFirebaseConfigured
   ? import('firebase/analytics').then(({ isSupported, getAnalytics }) =>
-      isSupported().then(yes => yes ? getAnalytics(app) : null)
+      isSupported().then(yes => yes && app ? getAnalytics(app) : null)
     ).catch(() => null)
   : null
 

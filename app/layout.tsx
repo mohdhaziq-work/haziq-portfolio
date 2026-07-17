@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
+import UserPanel from '@/components/layout/UserPanel'
+import LoginPopup from '@/components/auth/LoginPopup'
 import { AuthProvider } from '@/lib/auth/AuthContext'
 
 export const metadata: Metadata = {
@@ -35,6 +37,8 @@ export default function RootLayout({
           <Header />
           <main>{children}</main>
           <Footer />
+          <UserPanel />
+          <LoginPopup />
         </AuthProvider>
       </body>
     </html>

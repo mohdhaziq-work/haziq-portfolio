@@ -4,8 +4,11 @@ import { SITE } from '@/lib/constants'
 import Section from '@/components/ui/Section'
 import AnimatedText from '@/components/ui/AnimatedText'
 import { openInstagramDM } from '@/lib/instagram'
+import { useAuth } from '@/lib/auth/AuthContext'
 
 export default function ContactPage() {
+  const { user, requireLogin } = useAuth()
+
   return (
     <div className="pt-24">
       {/* Header */}
@@ -32,6 +35,10 @@ export default function ContactPage() {
 
               <form className="space-y-6" onSubmit={async (e) => {
                 e.preventDefault()
+
+                // Require login before submitting project details
+                if (!requireLogin()) return
+
                 const form = e.currentTarget
                 const formData = new FormData(form)
                 const data = {
@@ -95,9 +102,9 @@ export default function ContactPage() {
                   <label className="block text-body-sm font-medium text-text-primary mb-2">What do you need?</label>
                   <select name="service" className="w-full px-4 py-3 rounded-lg border border-border bg-background text-text-primary text-body-md focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all appearance-none">
                     <option value="">Select a service</option>
-                    <option value="starter">Starter — ₹2,500</option>
-                    <option value="business">Business — ₹6,000</option>
-                    <option value="premium">Premium — ₹12,000</option>
+                    <option value="starter">Starter -- 2,500</option>
+                    <option value="business">Business -- 6,000</option>
+                    <option value="premium">Premium -- 12,000</option>
                     <option value="custom">Custom Project</option>
                     <option value="free-mockup">Free Mockup First</option>
                   </select>
@@ -112,6 +119,19 @@ export default function ContactPage() {
                     className="w-full px-4 py-3 rounded-lg border border-border bg-background text-text-primary text-body-md placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all resize-none"
                   />
                 </div>
+
+                {/* Login hint */}
+                {!user && (
+                  <div className="flex items-start gap-3 p-3 bg-accent-light/50 rounded-lg border border-accent/10">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" className="text-accent flex-shrink-0 mt-0.5">
+                      <path d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                    </svg>
+                    <p className="text-xs text-text-secondary">
+                      You&apos;ll need to <span className="text-accent font-semibold">sign in with Google</span> before submitting. This helps you track your project progress!
+                    </p>
+                  </div>
+                )}
+
                 <button type="submit" className="btn-primary w-full py-4 justify-center text-body-md">
                   Send Message
                   <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="m9 18 6-6-6-6"/></svg>
@@ -134,7 +154,7 @@ export default function ContactPage() {
                   <h3 className="font-semibold text-text-primary mb-1">Instagram DM</h3>
                   <p className="text-body-sm text-text-secondary mb-3">The fastest way to reach me. I reply within 2 hours.</p>
                   <button onClick={() => openInstagramDM()} className="text-accent font-semibold text-body-sm hover:underline">
-                    Send a DM →
+                    Send a DM
                   </button>
                 </div>
               </div>
@@ -168,7 +188,7 @@ export default function ContactPage() {
 
             <AnimatedText as="div" delay={400}>
               <div className="elevated-card p-8 border-2 border-accent/20 bg-accent-light/30">
-                <h3 className="font-semibold text-text-primary mb-2">🎁 Free Mockup Offer</h3>
+                <h3 className="font-semibold text-text-primary mb-2">Free Mockup Offer</h3>
                 <p className="text-body-sm text-text-secondary mb-4">
                   Not sure yet? I&apos;ll design a free mockup of your website. If you love it, we work together. No risk.
                 </p>

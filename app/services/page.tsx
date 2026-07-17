@@ -4,8 +4,19 @@ import { SERVICES, PROCESS_STEPS } from '@/lib/constants'
 import Section from '@/components/ui/Section'
 import AnimatedText from '@/components/ui/AnimatedText'
 import { openInstagramDM } from '@/lib/instagram'
+import { useAuth } from '@/lib/auth/AuthContext'
+import { useRouter } from 'next/navigation'
 
 export default function ServicesPage() {
+  const { user, requireLogin } = useAuth()
+  const router = useRouter()
+
+  const handleCTAClick = () => {
+    // Require login first, then redirect to contact page
+    if (!requireLogin(() => router.push('/contact'))) return
+    router.push('/contact')
+  }
+
   return (
     <div className="pt-24">
       {/* Header */}
@@ -57,7 +68,7 @@ export default function ServicesPage() {
                 </ul>
 
                 <button
-                  onClick={() => openInstagramDM()}
+                  onClick={handleCTAClick}
                   className={`w-full py-4 rounded-full font-semibold text-body-sm transition-all duration-200 text-center ${
                     plan.popular
                       ? 'bg-accent text-white hover:bg-accent-hover shadow-chip'
@@ -108,7 +119,7 @@ export default function ServicesPage() {
             { q: 'How long does it take to build a website?', a: 'Starter: 3 days. Business: 7 days. Premium: 14 days. Timelines are clear and guaranteed.' },
             { q: 'What if I need changes after delivery?', a: 'Each plan includes revision rounds. Starter: 1 round, Business: 2 rounds, Premium: 3 rounds.' },
             { q: 'Will my website work on mobile?', a: 'Absolutely. Every website I build is mobile-first and responsive on all devices.' },
-            { q: 'How do I get started?', a: 'Simply DM me on Instagram. Tell me about your business, and I\'ll take it from there!' },
+            { q: 'How do I get started?', a: "Simply sign in and submit your project details, or DM me on Instagram. I'll take it from there!" },
           ].map((faq, index) => (
             <AnimatedText as="div" key={index} delay={index * 100}>
               <div className="surface-card mb-4">
