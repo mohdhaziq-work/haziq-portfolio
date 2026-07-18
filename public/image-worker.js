@@ -1,6 +1,6 @@
 // Image Enhancement Web Worker
-// Runs ALL heavy processing off the main UI thread to prevent freezing
-// Communicates via postMessage: receives pixel data + settings, sends back processed pixels
+// Focus: CLARITY & SUPER-RESOLUTION only - colors stay exactly the same
+// All color-modifying steps are SKIPPED when values are 0
 
 let cancelled = false;
 
@@ -24,8 +24,8 @@ function sendProgress(step, percent) {
 // ===== MAIN PROCESSING PIPELINE =====
 function processImage(src, srcWidth, srcHeight, settings) {
   try {
-    // Step 1: Upscale with Lanczos3
-    sendProgress('Upscaling...', 5);
+    // Step 1: Upscale with Lanczos3 (super-resolution)
+    sendProgress('Upscaling with Lanczos3...', 5);
     let data, width, height;
 
     if (settings.upscale > 1) {
@@ -40,43 +40,52 @@ function processImage(src, srcWidth, srcHeight, settings) {
       height = srcHeight;
     }
 
-    // Step 2: Bilateral denoise (edge-preserving)
+    // Step 2: Bilateral denoise (edge-preserving) - only if denoise > 0
     if (settings.denoise > 0) {
       if (cancelled) return;
-      sendProgress('Denoising...', 25);
+      sendProgress('Denoising...', 30);
       data = applyBilateralDenoise(data, width, height, settings.denoise);
     }
 
-    // Step 3: Tone mapping (shadows, highlights, brightness)
-    if (settings.shadows !== 0 || settings.highlights !== 0 || settings.brightness !== 0) {
+    // Step 3: Clarity (local contrast) - makes text and edges pop
+    if (settings.clarity > 0) {
       if (cancelled) return;
-      sendProgress('Tone mapping...', 45);
-      data = applyToneMapping(data, width, height, settings.shadows, settings.highlights, settings.brightness);
+      sendProgress('Enhancing clarity...', 45);
+      data = applyClarity(data, width, height, settings.clarity);
     }
 
-    // Step 4: Contrast + Clarity (CLAHE)
-    if (settings.contrast !== 0 || settings.clarity !== 0) {
-      if (cancelled) return;
-      sendProgress('Enhancing contrast...', 60);
-      data = applyCLAHE(data, width, height, settings.contrast, settings.clarity);
-    }
-
-    // Step 5: Vibrance/Saturation
-    if (settings.saturation !== 0) {
-      if (cancelled) return;
-      sendProgress('Enhancing colors...', 75);
-      data = applyVibrance(data, width, height, settings.saturation);
-    }
-
-    // Step 6: Multi-pass Unsharp Mask
+    // Step 4: Sharpen (multi-pass unsharp mask) - makes text crisp
     if (settings.sharpen > 0) {
       if (cancelled) return;
-      sendProgress('Sharpening...', 90);
+      sendProgress('Sharpening...', 70);
       data = applySharpen(data, width, height, settings.sharpen);
     }
 
+    // ===== COLOR MODIFICATIONS (only if user explicitly changes them) =====
+
+    // Step 5: Tone mapping - ONLY if non-zero
+    if (settings.shadows !== 0 || settings.highlights !== 0 || settings.brightness !== 0) {
+      if (cancelled) return;
+      sendProgress('Adjusting tones...', 85);
+      data = applyToneMapping(data, width, height, settings.shadows, settings.highlights, settings.brightness);
+    }
+
+    // Step 6: Contrast - ONLY if non-zero
+    if (settings.contrast !== 0) {
+      if (cancelled) return;
+      sendProgress('Adjusting contrast...', 90);
+      data = applyContrast(data, width, height, settings.contrast);
+    }
+
+    // Step 7: Vibrance - ONLY if non-zero
+    if (settings.saturation !== 0) {
+      if (cancelled) return;
+      sendProgress('Adjusting vibrance...', 95);
+      data = applyVibrance(data, width, height, settings.saturation);
+    }
+
     if (cancelled) return;
-    sendProgress('Finalizing...', 98);
+    sendProgress('Done!', 100);
 
     // Send result back - transfer buffer for zero-copy
     const resultBuffer = data.buffer.slice(0);
@@ -86,7 +95,7 @@ function processImage(src, srcWidth, srcHeight, settings) {
   }
 }
 
-// ===== LANCZOS3 UPSCALING =====
+// ===== LANCZOS3 UPSCALING (Super-Resolution) =====
 function lanczos3(x) {
   if (x === 0) return 1;
   if (x >= 3 || x <= -3) return 0;
@@ -99,15 +108,10 @@ function lanczos3Upscale(src, sw, sh, scale) {
   var dh = Math.round(sh * scale);
   var dst = new Uint8ClampedArray(dw * dh * 4);
 
-  // Pre-compute Lanczos weights for each source position (row and column separately)
-  // Two-pass separable filter is faster: horizontal then vertical
-  // But for simplicity and correctness, we use direct 2D sampling with optimization
-
   for (var y = 0; y < dh; y++) {
     if (cancelled) return { data: dst, width: dw, height: dh };
-    // Progress every 50 rows
-    if (y % 50 === 0) {
-      sendProgress('Upscaling...', 5 + Math.round((y / dh) * 20));
+    if (y % 30 === 0) {
+      sendProgress('Upscaling with Lanczos3...', 5 + Math.round((y / dh) * 25));
     }
     for (var x = 0; x < dw; x++) {
       var srcX = x / scale;
@@ -149,7 +153,6 @@ function lanczos3Upscale(src, sw, sh, scale) {
 // ===== BILATERAL DENOISE (Edge-Preserving) =====
 function applyBilateralDenoise(src, w, h, strength) {
   var radius = Math.max(1, Math.round(strength / 25));
-  // For large images, limit radius to prevent extreme slowness
   if (w * h > 2000000) radius = Math.min(radius, 3);
   if (w * h > 4000000) radius = Math.min(radius, 2);
 
@@ -159,23 +162,18 @@ function applyBilateralDenoise(src, w, h, strength) {
   var twoSigmaRange2 = 2 * sigmaRange * sigmaRange;
 
   var dst = new Uint8ClampedArray(src.length);
-
-  // Process in chunks for progress
   var totalRows = h - 2 * radius;
+
   for (var y = radius; y < h - radius; y++) {
     if (cancelled) return src;
     if (y % 20 === 0) {
-      var pct = 25 + Math.round(((y - radius) / totalRows) * 15);
-      sendProgress('Denoising...', pct);
+      sendProgress('Denoising...', 30 + Math.round(((y - radius) / totalRows) * 10));
     }
     for (var x = radius; x < w - radius; x++) {
       var i = (y * w + x) * 4;
-
       for (var c = 0; c < 3; c++) {
-        var sum = 0;
-        var weightSum = 0;
+        var sum = 0, weightSum = 0;
         var centerVal = src[i + c];
-
         for (var dy = -radius; dy <= radius; dy++) {
           for (var dx = -radius; dx <= radius; dx++) {
             var ni = ((y + dy) * w + (x + dx)) * 4 + c;
@@ -188,107 +186,49 @@ function applyBilateralDenoise(src, w, h, strength) {
         }
         dst[i + c] = Math.round(sum / weightSum);
       }
-      dst[i + 3] = src[i + 3]; // Alpha unchanged
+      dst[i + 3] = src[i + 3];
     }
   }
 
-  // Copy border pixels
   copyBorders(dst, src, w, h, radius);
   return dst;
 }
 
-// ===== TONE MAPPING (Shadows, Highlights, Brightness) =====
-function applyToneMapping(src, w, h, shadows, highlights, brightness) {
-  var dst = new Uint8ClampedArray(src.length);
-  var brightnessAdj = brightness * 2.55;
+// ===== CLARITY (Local Contrast Enhancement) =====
+// This is the KEY algorithm for making text readable
+// It enhances local contrast without changing colors
+function applyClarity(src, w, h, amount) {
+  var dst = new Uint8ClampedArray(src);
+  var clarityStrength = amount / 100;
+  var radius = 10; // Smaller radius for text clarity
 
-  for (var i = 0; i < src.length; i += 4) {
-    var r = src[i], g = src[i + 1], b = src[i + 2];
-    var lum = 0.299 * r + 0.587 * g + 0.114 * b;
-
-    // Shadows: boost dark areas
-    if (shadows !== 0) {
-      var shadowMask = Math.max(0, 1 - lum / 128);
-      var shadowAdj = shadows * shadowMask * 0.01 * 255;
-      r = Math.max(0, Math.min(255, r + shadowAdj));
-      g = Math.max(0, Math.min(255, g + shadowAdj));
-      b = Math.max(0, Math.min(255, b + shadowAdj));
+  // Process every 2nd pixel for speed, apply to 2x2 block
+  for (var y = radius; y < h - radius; y += 2) {
+    if (cancelled) return dst;
+    if (y % 40 === 0) {
+      var pct = 45 + Math.round(((y - radius) / (h - 2 * radius)) * 20);
+      sendProgress('Enhancing clarity...', pct);
     }
-
-    // Highlights: control bright areas
-    if (highlights !== 0) {
-      var hlMask = Math.max(0, (lum - 128) / 127);
-      var hlAdj = highlights * hlMask * 0.01 * 255;
-      r = Math.max(0, Math.min(255, r + hlAdj));
-      g = Math.max(0, Math.min(255, g + hlAdj));
-      b = Math.max(0, Math.min(255, b + hlAdj));
-    }
-
-    // Brightness
-    if (brightnessAdj !== 0) {
-      r = Math.max(0, Math.min(255, r + brightnessAdj));
-      g = Math.max(0, Math.min(255, g + brightnessAdj));
-      b = Math.max(0, Math.min(255, b + brightnessAdj));
-    }
-
-    dst[i] = r;
-    dst[i + 1] = g;
-    dst[i + 2] = b;
-    dst[i + 3] = src[i + 3];
-  }
-
-  return dst;
-}
-
-// ===== CLAHE - Contrast Limited Adaptive Histogram Equalization =====
-function applyCLAHE(src, w, h, contrast, clarity) {
-  var dst = new Uint8ClampedArray(src.length);
-
-  // Global contrast
-  if (contrast !== 0) {
-    var factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
-    for (var i = 0; i < src.length; i += 4) {
-      dst[i] = Math.max(0, Math.min(255, factor * (src[i] - 128) + 128));
-      dst[i + 1] = Math.max(0, Math.min(255, factor * (src[i + 1] - 128) + 128));
-      dst[i + 2] = Math.max(0, Math.min(255, factor * (src[i + 2] - 128) + 128));
-      dst[i + 3] = src[i + 3];
-    }
-  } else {
-    dst.set(src);
-  }
-
-  // Local contrast (clarity) - local mean subtraction with skin protection
-  if (clarity !== 0) {
-    var copy = new Uint8ClampedArray(dst);
-    var radius = 15;
-    var clarityStrength = clarity / 100;
-    // Process every 2nd pixel for speed, apply to 2x2 block
-    for (var y = radius; y < h - radius; y += 2) {
-      if (cancelled) return dst;
-      if (y % 40 === 0) {
-        var pct = 60 + Math.round(((y - radius) / (h - 2 * radius)) * 10);
-        sendProgress('Enhancing contrast...', pct);
-      }
-      for (var x = radius; x < w - radius; x += 2) {
-        var rSum = 0, gSum = 0, bSum = 0, count = 0;
-        for (var dy = -radius; dy <= radius; dy += 2) {
-          for (var dx = -radius; dx <= radius; dx += 2) {
-            var ni = ((y + dy) * w + (x + dx)) * 4;
-            rSum += copy[ni];
-            gSum += copy[ni + 1];
-            bSum += copy[ni + 2];
-            count++;
-          }
+    for (var x = radius; x < w - radius; x += 2) {
+      // Calculate local mean (average of surrounding area)
+      var rSum = 0, gSum = 0, bSum = 0, count = 0;
+      for (var dy = -radius; dy <= radius; dy += 2) {
+        for (var dx = -radius; dx <= radius; dx += 2) {
+          var ni = ((y + dy) * w + (x + dx)) * 4;
+          rSum += src[ni]; gSum += src[ni + 1]; bSum += src[ni + 2];
+          count++;
         }
-        var rMean = rSum / count, gMean = gSum / count, bMean = bSum / count;
-        // Apply to 2x2 block
-        for (var bdy = 0; bdy < 2 && y + bdy < h; bdy++) {
-          for (var bdx = 0; bdx < 2 && x + bdx < w; bdx++) {
-            var bi = ((y + bdy) * w + (x + bdx)) * 4;
-            dst[bi] = Math.max(0, Math.min(255, copy[bi] + (copy[bi] - rMean) * clarityStrength));
-            dst[bi + 1] = Math.max(0, Math.min(255, copy[bi + 1] + (copy[bi + 1] - gMean) * clarityStrength));
-            dst[bi + 2] = Math.max(0, Math.min(255, copy[bi + 2] + (copy[bi + 2] - bMean) * clarityStrength));
-          }
+      }
+      var rMean = rSum / count, gMean = gSum / count, bMean = bSum / count;
+
+      // Apply local contrast: pixel = pixel + (pixel - localMean) * strength
+      // This makes edges sharper without changing overall colors
+      for (var bdy = 0; bdy < 2 && y + bdy < h; bdy++) {
+        for (var bdx = 0; bdx < 2 && x + bdx < w; bdx++) {
+          var bi = ((y + bdy) * w + (x + bdx)) * 4;
+          dst[bi] = Math.max(0, Math.min(255, src[bi] + (src[bi] - rMean) * clarityStrength));
+          dst[bi + 1] = Math.max(0, Math.min(255, src[bi + 1] + (src[bi + 1] - gMean) * clarityStrength));
+          dst[bi + 2] = Math.max(0, Math.min(255, src[bi + 2] + (src[bi + 2] - bMean) * clarityStrength));
         }
       }
     }
@@ -297,41 +237,18 @@ function applyCLAHE(src, w, h, contrast, clarity) {
   return dst;
 }
 
-// ===== VIBRANCE / SATURATION =====
-function applyVibrance(src, w, h, saturation) {
-  if (saturation === 0) return src;
-  var dst = new Uint8ClampedArray(src.length);
-  var strength = saturation / 100;
-
-  for (var i = 0; i < src.length; i += 4) {
-    var r = src[i], g = src[i + 1], b = src[i + 2];
-    var max = Math.max(r, g, b);
-    var min = Math.min(r, g, b);
-    var currentSat = max === 0 ? 0 : (max - min) / max;
-    // Vibrance: less saturated pixels get more boost
-    var boost = strength * (1 - currentSat * 0.5);
-    var avg = (r + g + b) / 3;
-    dst[i] = Math.max(0, Math.min(255, r + (r - avg) * boost));
-    dst[i + 1] = Math.max(0, Math.min(255, g + (g - avg) * boost));
-    dst[i + 2] = Math.max(0, Math.min(255, b + (b - avg) * boost));
-    dst[i + 3] = src[i + 3];
-  }
-
-  return dst;
-}
-
-// ===== MULTI-PASS UNSHARP MASK =====
+// ===== MULTI-PASS UNSHARP MASK (for text crispness) =====
 function applySharpen(src, w, h, amount) {
   if (amount === 0) return src;
   var strength = amount / 100;
   var dst = new Uint8ClampedArray(src);
 
-  // Pass 1: Fine detail sharpen (3x3 kernel)
+  // Pass 1: Fine detail sharpen (3x3 kernel) - great for text edges
   var copy1 = new Uint8ClampedArray(dst);
   for (var y = 1; y < h - 1; y++) {
     if (cancelled) return dst;
     if (y % 40 === 0) {
-      var pct = 90 + Math.round(((y - 1) / (h - 2)) * 5);
+      var pct = 70 + Math.round(((y - 1) / (h - 2)) * 15);
       sendProgress('Sharpening...', pct);
     }
     for (var x = 1; x < w - 1; x++) {
@@ -343,7 +260,7 @@ function applySharpen(src, w, h, amount) {
     }
   }
 
-  // Pass 2: Medium detail (5x5 kernel) - only for stronger sharpening
+  // Pass 2: Medium detail (5x5 kernel) - for thicker text strokes
   if (amount > 30) {
     var copy2 = new Uint8ClampedArray(dst);
     for (var y2 = 2; y2 < h - 2; y2++) {
@@ -367,30 +284,95 @@ function applySharpen(src, w, h, amount) {
   return dst;
 }
 
-// ===== HELPER: Copy border pixels for denoise =====
+// ===== TONE MAPPING (Advanced only - hidden by default) =====
+function applyToneMapping(src, w, h, shadows, highlights, brightness) {
+  var dst = new Uint8ClampedArray(src.length);
+  var brightnessAdj = brightness * 2.55;
+
+  for (var i = 0; i < src.length; i += 4) {
+    var r = src[i], g = src[i + 1], b = src[i + 2];
+    var lum = 0.299 * r + 0.587 * g + 0.114 * b;
+
+    if (shadows !== 0) {
+      var shadowMask = Math.max(0, 1 - lum / 128);
+      var shadowAdj = shadows * shadowMask * 0.01 * 255;
+      r = Math.max(0, Math.min(255, r + shadowAdj));
+      g = Math.max(0, Math.min(255, g + shadowAdj));
+      b = Math.max(0, Math.min(255, b + shadowAdj));
+    }
+
+    if (highlights !== 0) {
+      var hlMask = Math.max(0, (lum - 128) / 127);
+      var hlAdj = highlights * hlMask * 0.01 * 255;
+      r = Math.max(0, Math.min(255, r + hlAdj));
+      g = Math.max(0, Math.min(255, g + hlAdj));
+      b = Math.max(0, Math.min(255, b + hlAdj));
+    }
+
+    if (brightnessAdj !== 0) {
+      r = Math.max(0, Math.min(255, r + brightnessAdj));
+      g = Math.max(0, Math.min(255, g + brightnessAdj));
+      b = Math.max(0, Math.min(255, b + brightnessAdj));
+    }
+
+    dst[i] = r; dst[i + 1] = g; dst[i + 2] = b; dst[i + 3] = src[i + 3];
+  }
+
+  return dst;
+}
+
+// ===== CONTRAST (Advanced only - hidden by default) =====
+function applyContrast(src, w, h, contrast) {
+  var dst = new Uint8ClampedArray(src.length);
+  var factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+  for (var i = 0; i < src.length; i += 4) {
+    dst[i] = Math.max(0, Math.min(255, factor * (src[i] - 128) + 128));
+    dst[i + 1] = Math.max(0, Math.min(255, factor * (src[i + 1] - 128) + 128));
+    dst[i + 2] = Math.max(0, Math.min(255, factor * (src[i + 2] - 128) + 128));
+    dst[i + 3] = src[i + 3];
+  }
+  return dst;
+}
+
+// ===== VIBRANCE (Advanced only - hidden by default) =====
+function applyVibrance(src, w, h, saturation) {
+  var dst = new Uint8ClampedArray(src.length);
+  var strength = saturation / 100;
+  for (var i = 0; i < src.length; i += 4) {
+    var r = src[i], g = src[i + 1], b = src[i + 2];
+    var max = Math.max(r, g, b);
+    var min = Math.min(r, g, b);
+    var currentSat = max === 0 ? 0 : (max - min) / max;
+    var boost = strength * (1 - currentSat * 0.5);
+    var avg = (r + g + b) / 3;
+    dst[i] = Math.max(0, Math.min(255, r + (r - avg) * boost));
+    dst[i + 1] = Math.max(0, Math.min(255, g + (g - avg) * boost));
+    dst[i + 2] = Math.max(0, Math.min(255, b + (b - avg) * boost));
+    dst[i + 3] = src[i + 3];
+  }
+  return dst;
+}
+
+// ===== HELPER: Copy border pixels =====
 function copyBorders(dst, src, w, h, radius) {
-  // Top rows
   for (var y = 0; y < radius; y++) {
     for (var x = 0; x < w; x++) {
       var i = (y * w + x) * 4;
       dst[i] = src[i]; dst[i + 1] = src[i + 1]; dst[i + 2] = src[i + 2]; dst[i + 3] = src[i + 3];
     }
   }
-  // Bottom rows
   for (var y2 = h - radius; y2 < h; y2++) {
     for (var x2 = 0; x2 < w; x2++) {
       var i2 = (y2 * w + x2) * 4;
       dst[i2] = src[i2]; dst[i2 + 1] = src[i2 + 1]; dst[i2 + 2] = src[i2 + 2]; dst[i2 + 3] = src[i2 + 3];
     }
   }
-  // Left columns
   for (var y3 = radius; y3 < h - radius; y3++) {
     for (var x3 = 0; x3 < radius; x3++) {
       var i3 = (y3 * w + x3) * 4;
       dst[i3] = src[i3]; dst[i3 + 1] = src[i3 + 1]; dst[i3 + 2] = src[i3 + 2]; dst[i3 + 3] = src[i3 + 3];
     }
   }
-  // Right columns
   for (var y4 = radius; y4 < h - radius; y4++) {
     for (var x4 = w - radius; x4 < w; x4++) {
       var i4 = (y4 * w + x4) * 4;

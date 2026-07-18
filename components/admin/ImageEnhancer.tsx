@@ -14,30 +14,52 @@ interface EnhanceSettings {
   highlights: number
 }
 
+// DEFAULT: Clarity only - NO color changes
 const DEFAULT_SETTINGS: EnhanceSettings = {
   upscale: 2,
-  sharpen: 35,
-  contrast: 12,
-  brightness: 3,
-  saturation: 20,
-  denoise: 10,
-  clarity: 25,
-  shadows: 10,
-  highlights: -5,
+  sharpen: 50,
+  contrast: 0,
+  brightness: 0,
+  saturation: 0,
+  denoise: 0,
+  clarity: 40,
+  shadows: 0,
+  highlights: 0,
 }
 
-type Preset = 'social' | 'photo' | 'sharp' | 'clear' | 'portrait' | 'reset'
-
-const PRESETS: Record<string, { label: string; settings: EnhanceSettings }> = {
-  social: { label: 'Social', settings: { upscale: 2, sharpen: 40, contrast: 15, brightness: 5, saturation: 30, denoise: 0, clarity: 30, shadows: 15, highlights: -5 } },
-  photo: { label: 'Photo', settings: { upscale: 2, sharpen: 25, contrast: 8, brightness: 0, saturation: 15, denoise: 20, clarity: 20, shadows: 10, highlights: -3 } },
-  sharp: { label: 'Sharp', settings: { upscale: 1, sharpen: 70, contrast: 20, brightness: 0, saturation: 0, denoise: 0, clarity: 50, shadows: 0, highlights: 0 } },
-  clear: { label: 'Clear', settings: { upscale: 2, sharpen: 20, contrast: 10, brightness: 10, saturation: 15, denoise: 30, clarity: 15, shadows: 15, highlights: -5 } },
-  portrait: { label: 'Portrait', settings: { upscale: 2, sharpen: 15, contrast: 5, brightness: 5, saturation: 10, denoise: 25, clarity: 10, shadows: 20, highlights: -10 } },
-  reset: { label: 'Reset', settings: { upscale: 1, sharpen: 0, contrast: 0, brightness: 0, saturation: 0, denoise: 0, clarity: 0, shadows: 0, highlights: 0 } },
+const PRESETS: Record<string, { label: string; desc: string; settings: EnhanceSettings }> = {
+  text: {
+    label: 'Text',
+    desc: 'Clear text, no color change',
+    settings: { upscale: 4, sharpen: 60, contrast: 0, brightness: 0, saturation: 0, denoise: 0, clarity: 50, shadows: 0, highlights: 0 }
+  },
+  clarity: {
+    label: 'Clarity',
+    desc: 'Balanced sharpness + clarity',
+    settings: { upscale: 2, sharpen: 50, contrast: 0, brightness: 0, saturation: 0, denoise: 0, clarity: 40, shadows: 0, highlights: 0 }
+  },
+  super: {
+    label: '4x Super',
+    desc: '4x upscale, max clarity',
+    settings: { upscale: 4, sharpen: 70, contrast: 0, brightness: 0, saturation: 0, denoise: 0, clarity: 60, shadows: 0, highlights: 0 }
+  },
+  social: {
+    label: 'Social',
+    desc: 'Upscale + slight color boost',
+    settings: { upscale: 2, sharpen: 40, contrast: 15, brightness: 5, saturation: 30, denoise: 0, clarity: 30, shadows: 15, highlights: -5 }
+  },
+  photo: {
+    label: 'Photo',
+    desc: 'Denoise + enhance',
+    settings: { upscale: 2, sharpen: 25, contrast: 8, brightness: 0, saturation: 15, denoise: 20, clarity: 20, shadows: 10, highlights: -3 }
+  },
+  reset: {
+    label: 'None',
+    desc: 'No enhancement',
+    settings: { upscale: 1, sharpen: 0, contrast: 0, brightness: 0, saturation: 0, denoise: 0, clarity: 0, shadows: 0, highlights: 0 }
+  },
 }
 
-// Max output dimension - prevents extreme slowness on mobile
 const MAX_DIMENSION = 2048
 
 export default function ImageEnhancer() {
@@ -54,6 +76,7 @@ export default function ImageEnhancer() {
   const [sliderPos, setSliderPos] = useState(50)
   const [isDragging, setIsDragging] = useState(false)
   const [imageInfo, setImageInfo] = useState({ w: 0, h: 0, downscaled: false })
+  const [showAdvanced, setShowAdvanced] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const compareContainerRef = useRef<HTMLDivElement>(null)
@@ -70,7 +93,6 @@ export default function ImageEnhancer() {
           setProgressPercent(e.data.percent)
         } else if (type === 'result') {
           const { buffer, width, height } = e.data
-          // Put result on canvas and generate URL
           const canvas = canvasRef.current
           if (canvas) {
             canvas.width = width
@@ -119,7 +141,6 @@ export default function ImageEnhancer() {
   // Load image from file
   const loadImage = useCallback((file: File) => {
     if (!file.type.startsWith('image/')) return
-    // Cancel any in-progress work
     cancelProcessing()
     setFileName(file.name)
     setEnhancedUrl('')
@@ -131,7 +152,7 @@ export default function ImageEnhancer() {
       img.onload = () => {
         setOriginalImage(img)
         setOriginalUrl(e.target?.result as string)
-        setSettings({ ...PRESETS.social.settings })
+        setSettings({ ...PRESETS.text.settings })
       }
       img.src = e.target?.result as string
     }
@@ -154,7 +175,6 @@ export default function ImageEnhancer() {
   const enhanceImage = useCallback(() => {
     if (!originalImage || !workerRef.current) return
 
-    // Cancel any previous processing
     workerRef.current.postMessage({ type: 'cancel' })
 
     setProcessing(true)
@@ -162,10 +182,8 @@ export default function ImageEnhancer() {
     setProgressPercent(2)
     setEnhancedUrl('')
 
-    // Use requestAnimationFrame to let UI update before heavy work starts
     requestAnimationFrame(() => {
       try {
-        // Draw original image onto canvas to get pixel data
         const canvas = canvasRef.current
         if (!canvas) return
 
@@ -173,7 +191,6 @@ export default function ImageEnhancer() {
         let drawH = originalImage.height
         let downscaled = false
 
-        // Auto-downscale if too large for mobile processing
         if (drawW > MAX_DIMENSION || drawH > MAX_DIMENSION) {
           const ratio = Math.min(MAX_DIMENSION / drawW, MAX_DIMENSION / drawH)
           drawW = Math.round(drawW * ratio)
@@ -192,11 +209,9 @@ export default function ImageEnhancer() {
 
         setImageInfo({ w: drawW, h: drawH, downscaled })
 
-        // Get pixel data
         const imageData = ctx.getImageData(0, 0, drawW, drawH)
         const buffer = imageData.data.buffer.slice(0)
 
-        // Send to Web Worker
         if (!workerRef.current) return
         workerRef.current.postMessage(
           {
@@ -206,7 +221,7 @@ export default function ImageEnhancer() {
             height: drawH,
             settings: { ...settings },
           },
-          [buffer] // Transfer buffer (zero-copy)
+          [buffer]
         )
       } catch (err) {
         console.error('Enhancement error:', err)
@@ -217,7 +232,7 @@ export default function ImageEnhancer() {
     })
   }, [originalImage, settings])
 
-  // Download enhanced image
+  // Download
   const downloadEnhanced = () => {
     if (!enhancedUrl) return
     const a = document.createElement('a')
@@ -227,7 +242,7 @@ export default function ImageEnhancer() {
     a.click()
   }
 
-  // Fullscreen compare controls
+  // Fullscreen compare
   const handleCompareMove = useCallback((clientX: number) => {
     if (!compareContainerRef.current) return
     const rect = compareContainerRef.current.getBoundingClientRect()
@@ -254,7 +269,6 @@ export default function ImageEnhancer() {
     }
   }, [isDragging, handleCompareMove])
 
-  // Close fullscreen on Escape
   useEffect(() => {
     if (!fullscreenCompare) return
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setFullscreenCompare(false) }
@@ -267,14 +281,17 @@ export default function ImageEnhancer() {
     setOriginalImage(null)
     setOriginalUrl('')
     setEnhancedUrl('')
-    setSettings({ ...PRESETS.social.settings })
+    setSettings({ ...DEFAULT_SETTINGS })
     setFileName('')
     setFullscreenCompare(false)
     setImageInfo({ w: 0, h: 0, downscaled: false })
+    setShowAdvanced(false)
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
-  // Calculate output dimensions for display
+  // Check if any color settings are active
+  const hasColorChanges = settings.contrast !== 0 || settings.brightness !== 0 || settings.saturation !== 0 || settings.shadows !== 0 || settings.highlights !== 0
+
   const getOutputDims = () => {
     if (!originalImage) return ''
     const baseW = imageInfo.downscaled ? imageInfo.w : originalImage.width
@@ -298,7 +315,7 @@ export default function ImageEnhancer() {
             </div>
             <div>
               <p className="text-xs font-bold text-text-primary">Image Enhancer</p>
-              <p className="text-[9px] text-text-tertiary">Lanczos3, CLAHE, bilateral denoise</p>
+              <p className="text-[9px] text-text-tertiary">Clarity & Super-Resolution only</p>
             </div>
           </div>
         </div>
@@ -354,13 +371,9 @@ export default function ImageEnhancer() {
                   </div>
                 ) : null}
 
-                {/* Processing overlay with progress bar */}
                 {processing && !fullscreenCompare && (
                   <div className="absolute bottom-0 left-0 right-0 h-1 bg-border">
-                    <div
-                      className="h-full bg-accent transition-all duration-300"
-                      style={{ width: `${progressPercent}%` }}
-                    />
+                    <div className="h-full bg-accent transition-all duration-300" style={{ width: `${progressPercent}%` }} />
                   </div>
                 )}
               </div>
@@ -368,36 +381,36 @@ export default function ImageEnhancer() {
               {/* Info bar */}
               <div className="flex items-center justify-between text-[9px] text-text-tertiary">
                 <span className="truncate max-w-[60%]">{fileName}</span>
-                <span>{getOutputDims()}{settings.upscale > 1 ? ` (${settings.upscale}x)` : ''}{imageInfo.downscaled ? ' auto-scaled' : ''}</span>
+                <span>{getOutputDims()}{settings.upscale > 1 ? ` (${settings.upscale}x)` : ''}{imageInfo.downscaled ? ' scaled' : ''}</span>
               </div>
 
-              {/* Big warning if image was auto-downscaled */}
               {imageInfo.downscaled && (
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2 text-[10px] text-yellow-700">
-                  Large image auto-scaled to {MAX_DIMENSION}px max for mobile processing. Output quality remains high.
+                  Large image auto-scaled to {MAX_DIMENSION}px for mobile. Output quality stays high.
                 </div>
               )}
 
-              {/* Presets */}
+              {/* ===== PRESETS ===== */}
               <div>
                 <p className="text-[9px] text-text-tertiary uppercase font-semibold mb-1.5">Quick Presets</p>
-                <div className="grid grid-cols-6 gap-1">
+                <div className="grid grid-cols-3 gap-1.5">
                   {Object.entries(PRESETS).map(([key, preset]) => (
                     <button
                       key={key}
                       onClick={() => setSettings({ ...preset.settings })}
                       disabled={processing}
-                      className={`px-1 py-2 rounded-lg text-center transition-all disabled:opacity-40 ${key === 'reset' ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'bg-surface hover:bg-accent-light hover:text-accent'}`}
+                      className={`px-2 py-2 rounded-lg text-left transition-all disabled:opacity-40 ${key === 'reset' ? 'bg-red-50 hover:bg-red-100' : 'bg-surface hover:bg-accent-light hover:text-accent'}`}
                     >
-                      <p className="text-[10px] font-bold">{preset.label}</p>
+                      <p className={`text-[10px] font-bold ${key === 'reset' ? 'text-red-600' : ''}`}>{preset.label}</p>
+                      <p className="text-[8px] text-text-tertiary leading-tight">{preset.desc}</p>
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Controls */}
-              <div className="space-y-2">
-                <p className="text-[9px] text-text-tertiary uppercase font-semibold">Controls</p>
+              {/* ===== CLARITY CONTROLS (main, always visible) ===== */}
+              <div className="space-y-2.5">
+                <p className="text-[9px] text-text-tertiary uppercase font-semibold">Clarity Controls</p>
 
                 {/* Upscale */}
                 <div>
@@ -406,40 +419,111 @@ export default function ImageEnhancer() {
                     <span className="text-[10px] font-bold text-accent">{settings.upscale}x</span>
                   </div>
                   <div className="flex gap-1">
-                    {[1, 1.5, 2, 3, 4].map(v => (
+                    {[1, 2, 3, 4].map(v => (
                       <button key={v} onClick={() => setSettings(s => ({ ...s, upscale: v }))}
                         disabled={processing}
                         className={`flex-1 py-1.5 rounded-md text-[10px] font-semibold transition-all disabled:opacity-40 ${settings.upscale === v ? 'bg-accent text-white' : 'bg-surface text-text-secondary hover:bg-accent-light'}`}
                       >{v}x</button>
                     ))}
                   </div>
+                  <p className="text-[8px] text-text-tertiary mt-0.5">Higher = no pixels when zoomed, but slower</p>
                 </div>
 
-                {/* Sliders */}
-                {[
-                  { key: 'sharpen' as const, label: 'Sharpen', min: 0, max: 100 },
-                  { key: 'contrast' as const, label: 'Contrast', min: -50, max: 50 },
-                  { key: 'brightness' as const, label: 'Brightness', min: -50, max: 50 },
-                  { key: 'saturation' as const, label: 'Vibrance', min: 0, max: 100 },
-                  { key: 'clarity' as const, label: 'Clarity', min: 0, max: 100 },
-                  { key: 'denoise' as const, label: 'Denoise', min: 0, max: 100 },
-                  { key: 'shadows' as const, label: 'Shadows', min: -50, max: 50 },
-                  { key: 'highlights' as const, label: 'Highlights', min: -50, max: 50 },
-                ].map(ctrl => (
-                  <div key={ctrl.key}>
-                    <div className="flex items-center justify-between mb-0.5">
-                      <label className="text-[10px] font-medium text-text-primary">{ctrl.label}</label>
-                      <span className="text-[10px] font-bold text-text-secondary">{settings[ctrl.key] > 0 ? '+' : ''}{settings[ctrl.key]}</span>
-                    </div>
-                    <input type="range" min={ctrl.min} max={ctrl.max} value={settings[ctrl.key]}
-                      disabled={processing}
-                      onChange={e => setSettings(s => ({ ...s, [ctrl.key]: parseInt(e.target.value) }))}
-                      className="w-full h-1 accent-accent disabled:opacity-40" />
+                {/* Sharpen */}
+                <div>
+                  <div className="flex items-center justify-between mb-0.5">
+                    <label className="text-[10px] font-medium text-text-primary">Sharpen</label>
+                    <span className="text-[10px] font-bold text-text-secondary">{settings.sharpen}</span>
                   </div>
-                ))}
+                  <input type="range" min={0} max={100} value={settings.sharpen}
+                    disabled={processing}
+                    onChange={e => setSettings(s => ({ ...s, sharpen: parseInt(e.target.value) }))}
+                    className="w-full h-1 accent-accent disabled:opacity-40" />
+                  <p className="text-[8px] text-text-tertiary mt-0.5">Makes text edges crisp and sharp</p>
+                </div>
+
+                {/* Clarity */}
+                <div>
+                  <div className="flex items-center justify-between mb-0.5">
+                    <label className="text-[10px] font-medium text-text-primary">Clarity</label>
+                    <span className="text-[10px] font-bold text-text-secondary">{settings.clarity}</span>
+                  </div>
+                  <input type="range" min={0} max={100} value={settings.clarity}
+                    disabled={processing}
+                    onChange={e => setSettings(s => ({ ...s, clarity: parseInt(e.target.value) }))}
+                    className="w-full h-1 accent-accent disabled:opacity-40" />
+                  <p className="text-[8px] text-text-tertiary mt-0.5">Enhances local contrast - text becomes readable</p>
+                </div>
+
+                {/* Denoise */}
+                <div>
+                  <div className="flex items-center justify-between mb-0.5">
+                    <label className="text-[10px] font-medium text-text-primary">Denoise</label>
+                    <span className="text-[10px] font-bold text-text-secondary">{settings.denoise}</span>
+                  </div>
+                  <input type="range" min={0} max={100} value={settings.denoise}
+                    disabled={processing}
+                    onChange={e => setSettings(s => ({ ...s, denoise: parseInt(e.target.value) }))}
+                    className="w-full h-1 accent-accent disabled:opacity-40" />
+                  <p className="text-[8px] text-text-tertiary mt-0.5">Removes grain/noise (may blur text slightly)</p>
+                </div>
               </div>
 
-              {/* ENHANCE / CANCEL Button */}
+              {/* ===== ADVANCED COLOR CONTROLS (hidden by default) ===== */}
+              <div className="border border-border rounded-lg overflow-hidden">
+                <button
+                  onClick={() => setShowAdvanced(!showAdvanced)}
+                  className="w-full flex items-center justify-between px-3 py-2 bg-surface hover:bg-surface-2 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-semibold text-text-secondary">Color Controls</span>
+                    {hasColorChanges && (
+                      <span className="w-1.5 h-1.5 bg-accent rounded-full" />
+                    )}
+                  </div>
+                  <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"
+                    className={`text-text-tertiary transition-transform ${showAdvanced ? 'rotate-180' : ''}`}>
+                    <path d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {showAdvanced && (
+                  <div className="px-3 py-2 space-y-2 border-t border-border bg-surface-2/30">
+                    <p className="text-[8px] text-yellow-600 font-semibold">These change colors - use only if needed</p>
+
+                    {[
+                      { key: 'contrast' as const, label: 'Contrast', min: -50, max: 50 },
+                      { key: 'brightness' as const, label: 'Brightness', min: -50, max: 50 },
+                      { key: 'saturation' as const, label: 'Vibrance', min: -50, max: 50 },
+                      { key: 'shadows' as const, label: 'Shadows', min: -50, max: 50 },
+                      { key: 'highlights' as const, label: 'Highlights', min: -50, max: 50 },
+                    ].map(ctrl => (
+                      <div key={ctrl.key}>
+                        <div className="flex items-center justify-between mb-0.5">
+                          <label className="text-[10px] font-medium text-text-primary">{ctrl.label}</label>
+                          <span className="text-[10px] font-bold text-text-secondary">{settings[ctrl.key] > 0 ? '+' : ''}{settings[ctrl.key]}</span>
+                        </div>
+                        <input type="range" min={ctrl.min} max={ctrl.max} value={settings[ctrl.key]}
+                          disabled={processing}
+                          onChange={e => setSettings(s => ({ ...s, [ctrl.key]: parseInt(e.target.value) }))}
+                          className="w-full h-1 accent-accent disabled:opacity-40" />
+                      </div>
+                    ))}
+
+                    {/* Reset color values only */}
+                    {hasColorChanges && (
+                      <button
+                        onClick={() => setSettings(s => ({ ...s, contrast: 0, brightness: 0, saturation: 0, shadows: 0, highlights: 0 }))}
+                        className="w-full py-1.5 rounded-md text-[9px] font-semibold bg-red-50 text-red-500 hover:bg-red-100"
+                      >
+                        Reset color changes
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* ===== ENHANCE / CANCEL BUTTON ===== */}
               {processing ? (
                 <button
                   onClick={cancelProcessing}
@@ -463,7 +547,7 @@ export default function ImageEnhancer() {
                 </button>
               )}
 
-              {/* Processing progress detail */}
+              {/* Processing progress */}
               {processing && (
                 <div className="bg-accent-light/30 rounded-lg px-3 py-2">
                   <div className="flex items-center gap-2 mb-1.5">
@@ -471,10 +555,7 @@ export default function ImageEnhancer() {
                     <span className="text-[10px] font-semibold text-accent">{progressStep}</span>
                   </div>
                   <div className="w-full h-1.5 bg-border rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-accent rounded-full transition-all duration-300"
-                      style={{ width: `${progressPercent}%` }}
-                    />
+                    <div className="h-full bg-accent rounded-full transition-all duration-300" style={{ width: `${progressPercent}%` }} />
                   </div>
                   <p className="text-[9px] text-text-tertiary mt-1">{progressPercent}% complete</p>
                 </div>
@@ -516,11 +597,10 @@ export default function ImageEnhancer() {
       {/* ===== FULLSCREEN COMPARE MODE ===== */}
       {fullscreenCompare && enhancedUrl && (
         <div className="fixed inset-0 z-[200] bg-black flex flex-col">
-          {/* Top bar */}
           <div className="flex items-center justify-between px-4 py-3 bg-black/80 z-10">
             <div className="flex items-center gap-3">
               <span className="text-white text-xs font-bold">Before / After</span>
-              <span className="text-white/50 text-[10px]">Slide left-right to compare</span>
+              <span className="text-white/50 text-[10px]">Slide to compare</span>
             </div>
             <button
               onClick={() => setFullscreenCompare(false)}
@@ -532,7 +612,6 @@ export default function ImageEnhancer() {
             </button>
           </div>
 
-          {/* Compare area */}
           <div
             ref={compareContainerRef}
             className="flex-1 relative select-none overflow-hidden"
@@ -540,15 +619,10 @@ export default function ImageEnhancer() {
             onMouseDown={(e) => { setIsDragging(true); handleCompareMove(e.clientX) }}
             onTouchStart={(e) => { setIsDragging(true); handleCompareMove(e.touches[0].clientX) }}
           >
-            {/* Enhanced (full background) */}
             <img src={enhancedUrl} alt="Enhanced" className="absolute inset-0 w-full h-full object-contain" />
-
-            {/* Original (clipped) */}
             <div className="absolute inset-0 overflow-hidden" style={{ width: `${sliderPos}%` }}>
               <img src={originalUrl} alt="Original" className="w-full h-full object-contain" style={{ width: compareContainerRef.current ? `${compareContainerRef.current.offsetWidth}px` : '100%' }} />
             </div>
-
-            {/* Slider line */}
             <div className="absolute top-0 bottom-0 w-0.5 bg-white shadow-lg z-10" style={{ left: `${sliderPos}%` }}>
               <div className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-xl flex items-center justify-center cursor-grab">
                 <svg width="16" height="16" fill="none" stroke="#1a73e8" viewBox="0 0 24 24" strokeWidth="3">
@@ -556,13 +630,10 @@ export default function ImageEnhancer() {
                 </svg>
               </div>
             </div>
-
-            {/* Labels */}
             <div className="absolute top-4 left-4 px-3 py-1.5 bg-black/70 text-white text-xs rounded-lg font-semibold z-20">ORIGINAL</div>
             <div className="absolute top-4 right-4 px-3 py-1.5 bg-accent text-white text-xs rounded-lg font-semibold z-20">ENHANCED</div>
           </div>
 
-          {/* Bottom info */}
           <div className="flex items-center justify-between px-4 py-2 bg-black/80">
             <span className="text-white/50 text-[10px]">{originalImage?.width}x{originalImage?.height} original</span>
             <span className="text-white/50 text-[10px]">{getOutputDims()} enhanced ({settings.upscale}x)</span>
