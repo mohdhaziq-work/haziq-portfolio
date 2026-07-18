@@ -198,7 +198,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-text-primary mb-1">Location</h3>
-                  <p className="text-body-sm text-text-secondary">{SITE.city}, {SITE.state}, {SITE.country}</p>
+                  <p className="text-body-sm text-text-secondary">India</p>
                   <p className="text-caption text-text-tertiary mt-1">Available for remote work worldwide</p>
                 </div>
               </div>

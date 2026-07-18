@@ -31,8 +31,7 @@ export default function AboutPage() {
               <span className="text-accent">Behind the Code</span>
             </AnimatedText>
             <AnimatedText as="p" delay={200} className="text-body-lg text-text-secondary leading-relaxed mb-6">
-              Hi, I&apos;m <strong className="text-text-primary">{SITE.name}</strong>, a {SITE.age}-year-old developer from{' '}
-              <strong className="text-text-primary">{SITE.city}, {SITE.state}</strong>. While others were scrolling reels, 
+              Hi, I&apos;m <strong className="text-text-primary">{SITE.name}</strong>, a {SITE.age}-year-old developer. While others were scrolling reels,
               I started mastering web development to build professional websites for local businesses.
             </AnimatedText>
             <AnimatedText as="p" delay={300} className="text-body-lg text-text-secondary leading-relaxed mb-8">
