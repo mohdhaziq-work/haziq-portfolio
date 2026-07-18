@@ -14,7 +14,6 @@ interface EnhanceSettings {
   highlights: number
 }
 
-// DEFAULT: Clarity only - NO color changes
 const DEFAULT_SETTINGS: EnhanceSettings = {
   upscale: 2,
   sharpen: 50,
@@ -29,23 +28,23 @@ const DEFAULT_SETTINGS: EnhanceSettings = {
 
 const PRESETS: Record<string, { label: string; desc: string; settings: EnhanceSettings }> = {
   text: {
-    label: 'Text',
-    desc: 'Clear text, no color change',
+    label: 'Text Clear',
+    desc: '4x upscale, text becomes readable',
     settings: { upscale: 4, sharpen: 60, contrast: 0, brightness: 0, saturation: 0, denoise: 0, clarity: 50, shadows: 0, highlights: 0 }
   },
   clarity: {
     label: 'Clarity',
-    desc: 'Balanced sharpness + clarity',
+    desc: '2x upscale + sharp + clarity',
     settings: { upscale: 2, sharpen: 50, contrast: 0, brightness: 0, saturation: 0, denoise: 0, clarity: 40, shadows: 0, highlights: 0 }
   },
   super: {
     label: '4x Super',
-    desc: '4x upscale, max clarity',
+    desc: 'Maximum clarity and sharpness',
     settings: { upscale: 4, sharpen: 70, contrast: 0, brightness: 0, saturation: 0, denoise: 0, clarity: 60, shadows: 0, highlights: 0 }
   },
   social: {
     label: 'Social',
-    desc: 'Upscale + slight color boost',
+    desc: 'Upscale + color boost',
     settings: { upscale: 2, sharpen: 40, contrast: 15, brightness: 5, saturation: 30, denoise: 0, clarity: 30, shadows: 15, highlights: -5 }
   },
   photo: {
@@ -60,7 +59,31 @@ const PRESETS: Record<string, { label: string; desc: string; settings: EnhanceSe
   },
 }
 
-const MAX_DIMENSION = 2048
+const MAX_OUTPUT_DIM = 4096
+
+// Estimate processing time based on output size and enabled steps
+function estimateSeconds(w: number, h: number, s: EnhanceSettings): number {
+  const pixels = (w * h) / 1000000 // in millions
+  let sec = 0
+  // Denoise: 3x3 bilateral, ~2s per 4M pixels on mobile
+  if (s.denoise > 0) sec += pixels * 0.5
+  // Clarity: integral image O(n), ~0.3s per 4M pixels
+  if (s.clarity > 0) sec += pixels * 0.08
+  // Sharpen: 3x3 + optional 5x5, ~0.4s per 4M pixels
+  if (s.sharpen > 0) sec += pixels * 0.1
+  // Color adjustments: simple per-pixel, very fast
+  if (s.shadows !== 0 || s.highlights !== 0 || s.brightness !== 0) sec += pixels * 0.03
+  if (s.contrast !== 0) sec += pixels * 0.02
+  if (s.saturation !== 0) sec += pixels * 0.02
+  return Math.max(1, Math.ceil(sec))
+}
+
+function formatTime(seconds: number): string {
+  if (seconds < 60) return `~${seconds} sec`
+  const min = Math.floor(seconds / 60)
+  const sec = seconds % 60
+  return `~${min} min ${sec > 0 ? sec + ' sec' : ''}`
+}
 
 export default function ImageEnhancer() {
   const [originalImage, setOriginalImage] = useState<HTMLImageElement | null>(null)
@@ -75,8 +98,10 @@ export default function ImageEnhancer() {
   const [fullscreenCompare, setFullscreenCompare] = useState(false)
   const [sliderPos, setSliderPos] = useState(50)
   const [isDragging, setIsDragging] = useState(false)
-  const [imageInfo, setImageInfo] = useState({ w: 0, h: 0, downscaled: false })
+  const [imageInfo, setImageInfo] = useState({ w: 0, h: 0, upscaledW: 0, upscaledH: 0 })
   const [showAdvanced, setShowAdvanced] = useState(false)
+  const [estimatedTime, setEstimatedTime] = useState('')
+  const [startTime, setStartTime] = useState(0)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const compareContainerRef = useRef<HTMLDivElement>(null)
@@ -89,8 +114,8 @@ export default function ImageEnhancer() {
       worker.onmessage = (e) => {
         const { type } = e.data
         if (type === 'progress') {
-          setProgressStep(e.data.step)
-          setProgressPercent(e.data.percent)
+          if (e.data.step) setProgressStep(e.data.step)
+          if (e.data.percent != null) setProgressPercent(e.data.percent)
         } else if (type === 'result') {
           const { buffer, width, height } = e.data
           const canvas = canvasRef.current
@@ -108,18 +133,18 @@ export default function ImageEnhancer() {
           setProcessing(false)
           setProgressStep('')
           setProgressPercent(0)
+          setEstimatedTime('')
         } else if (type === 'error') {
           console.error('Worker error:', e.data.message)
           setProcessing(false)
           setProgressStep('')
           setProgressPercent(0)
+          setEstimatedTime('')
         }
       }
       worker.onerror = (err) => {
         console.error('Worker error:', err)
         setProcessing(false)
-        setProgressStep('')
-        setProgressPercent(0)
       }
       workerRef.current = worker
       return () => worker.terminate()
@@ -128,23 +153,19 @@ export default function ImageEnhancer() {
     }
   }, [])
 
-  // Cancel processing
   const cancelProcessing = useCallback(() => {
-    if (workerRef.current) {
-      workerRef.current.postMessage({ type: 'cancel' })
-    }
+    if (workerRef.current) workerRef.current.postMessage({ type: 'cancel' })
     setProcessing(false)
     setProgressStep('')
     setProgressPercent(0)
+    setEstimatedTime('')
   }, [])
 
-  // Load image from file
   const loadImage = useCallback((file: File) => {
     if (!file.type.startsWith('image/')) return
     cancelProcessing()
     setFileName(file.name)
     setEnhancedUrl('')
-
     const reader = new FileReader()
     reader.onload = (e) => {
       const img = new Image()
@@ -171,15 +192,15 @@ export default function ImageEnhancer() {
     if (file) loadImage(file)
   }, [loadImage])
 
-  // ===== MAIN ENHANCE - Runs in Web Worker =====
+  // ===== MAIN ENHANCE - Canvas GPU upscale + Web Worker post-processing =====
   const enhanceImage = useCallback(() => {
     if (!originalImage || !workerRef.current) return
 
     workerRef.current.postMessage({ type: 'cancel' })
 
     setProcessing(true)
-    setProgressStep('Preparing...')
-    setProgressPercent(2)
+    setProgressStep('Upscaling (GPU)...')
+    setProgressPercent(5)
     setEnhancedUrl('')
 
     requestAnimationFrame(() => {
@@ -187,40 +208,47 @@ export default function ImageEnhancer() {
         const canvas = canvasRef.current
         if (!canvas) return
 
-        let drawW = originalImage.width
-        let drawH = originalImage.height
-        let downscaled = false
+        let ow = originalImage.width
+        let oh = originalImage.height
 
-        if (drawW > MAX_DIMENSION || drawH > MAX_DIMENSION) {
-          const ratio = Math.min(MAX_DIMENSION / drawW, MAX_DIMENSION / drawH)
-          drawW = Math.round(drawW * ratio)
-          drawH = Math.round(drawH * ratio)
-          downscaled = true
+        // Calculate output size with upscale
+        let finalW = Math.round(ow * settings.upscale)
+        let finalH = Math.round(oh * settings.upscale)
+
+        // Cap at max output dimension
+        if (finalW > MAX_OUTPUT_DIM || finalH > MAX_OUTPUT_DIM) {
+          const ratio = Math.min(MAX_OUTPUT_DIM / finalW, MAX_OUTPUT_DIM / finalH)
+          finalW = Math.round(finalW * ratio)
+          finalH = Math.round(finalH * ratio)
         }
 
-        canvas.width = drawW
-        canvas.height = drawH
+        // ===== GPU UPSCALE: Use Canvas drawImage (instant, hardware accelerated) =====
+        canvas.width = finalW
+        canvas.height = finalH
         const ctx = canvas.getContext('2d', { willReadFrequently: true })
         if (!ctx) return
 
         ctx.imageSmoothingEnabled = true
         ctx.imageSmoothingQuality = 'high'
-        ctx.drawImage(originalImage, 0, 0, drawW, drawH)
+        ctx.drawImage(originalImage, 0, 0, finalW, finalH)
 
-        setImageInfo({ w: drawW, h: drawH, downscaled })
+        setImageInfo({ w: ow, h: oh, upscaledW: finalW, upscaledH: finalH })
 
-        const imageData = ctx.getImageData(0, 0, drawW, drawH)
+        // Estimate time
+        const est = estimateSeconds(finalW, finalH, settings)
+        setEstimatedTime(formatTime(est))
+        setStartTime(Date.now())
+
+        // Get pixel data and send to worker for post-processing
+        const imageData = ctx.getImageData(0, 0, finalW, finalH)
         const buffer = imageData.data.buffer.slice(0)
+
+        setProgressStep('Processing...')
+        setProgressPercent(8)
 
         if (!workerRef.current) return
         workerRef.current.postMessage(
-          {
-            type: 'enhance',
-            buffer,
-            width: drawW,
-            height: drawH,
-            settings: { ...settings },
-          },
+          { type: 'enhance', buffer, width: finalW, height: finalH, settings: { ...settings } },
           [buffer]
         )
       } catch (err) {
@@ -228,11 +256,20 @@ export default function ImageEnhancer() {
         setProcessing(false)
         setProgressStep('')
         setProgressPercent(0)
+        setEstimatedTime('')
       }
     })
   }, [originalImage, settings])
 
-  // Download
+  // Calculate remaining time during processing
+  const getRemainingTime = (): string => {
+    if (!processing || !startTime || progressPercent < 10) return estimatedTime
+    const elapsed = (Date.now() - startTime) / 1000
+    const remaining = (elapsed / progressPercent) * (100 - progressPercent)
+    if (remaining < 1) return 'Almost done...'
+    return formatTime(Math.ceil(remaining))
+  }
+
   const downloadEnhanced = () => {
     if (!enhancedUrl) return
     const a = document.createElement('a')
@@ -242,12 +279,12 @@ export default function ImageEnhancer() {
     a.click()
   }
 
-  // Fullscreen compare
+  // Compare slider
   const handleCompareMove = useCallback((clientX: number) => {
     if (!compareContainerRef.current) return
     const rect = compareContainerRef.current.getBoundingClientRect()
     const x = clientX - rect.left
-    setSliderPos(Math.max(0, Math.min(100, (x / rect.width) * 100)))
+    setSliderPos(Math.max(2, Math.min(98, (x / rect.width) * 100)))
   }, [])
 
   useEffect(() => {
@@ -284,23 +321,13 @@ export default function ImageEnhancer() {
     setSettings({ ...DEFAULT_SETTINGS })
     setFileName('')
     setFullscreenCompare(false)
-    setImageInfo({ w: 0, h: 0, downscaled: false })
+    setImageInfo({ w: 0, h: 0, upscaledW: 0, upscaledH: 0 })
     setShowAdvanced(false)
+    setEstimatedTime('')
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
-  // Check if any color settings are active
   const hasColorChanges = settings.contrast !== 0 || settings.brightness !== 0 || settings.saturation !== 0 || settings.shadows !== 0 || settings.highlights !== 0
-
-  const getOutputDims = () => {
-    if (!originalImage) return ''
-    const baseW = imageInfo.downscaled ? imageInfo.w : originalImage.width
-    const baseH = imageInfo.downscaled ? imageInfo.h : originalImage.height
-    if (settings.upscale > 1) {
-      return `${Math.round(baseW * settings.upscale)}x${Math.round(baseH * settings.upscale)}`
-    }
-    return `${baseW}x${baseH}`
-  }
 
   return (
     <>
@@ -315,14 +342,13 @@ export default function ImageEnhancer() {
             </div>
             <div>
               <p className="text-xs font-bold text-text-primary">Image Enhancer</p>
-              <p className="text-[9px] text-text-tertiary">Clarity & Super-Resolution only</p>
+              <p className="text-[9px] text-text-tertiary">Clarity & Super-Resolution</p>
             </div>
           </div>
         </div>
 
         <div className="p-4 space-y-3">
           {!originalImage ? (
-            /* Upload Area */
             <div
               className={`relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${dragOver ? 'border-accent bg-accent-light/30' : 'border-border hover:border-accent/50 hover:bg-surface'}`}
               onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
@@ -346,51 +372,34 @@ export default function ImageEnhancer() {
                 {enhancedUrl && !fullscreenCompare ? (
                   <div className="relative">
                     <img src={enhancedUrl} alt="Enhanced" className="w-full" style={{ maxHeight: 250, objectFit: 'contain' }} />
-                    {processing && (
-                      <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
-                        <div className="text-center">
-                          <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-                          <p className="text-[10px] text-accent font-semibold">{progressStep}</p>
-                          <p className="text-[10px] text-accent font-bold">{progressPercent}%</p>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 ) : !fullscreenCompare ? (
                   <div className="relative">
                     <img src={originalUrl} alt="Original" className="w-full" style={{ maxHeight: 250, objectFit: 'contain' }} />
-                    {processing && (
-                      <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
-                        <div className="text-center">
-                          <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-                          <p className="text-[10px] text-accent font-semibold">{progressStep}</p>
-                          <p className="text-[10px] text-accent font-bold">{progressPercent}%</p>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 ) : null}
 
                 {processing && !fullscreenCompare && (
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-border">
-                    <div className="h-full bg-accent transition-all duration-300" style={{ width: `${progressPercent}%` }} />
+                  <div className="absolute inset-0 bg-white/85 flex items-center justify-center">
+                    <div className="text-center max-w-[80%]">
+                      <div className="w-8 h-8 border-3 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                      <p className="text-[11px] text-accent font-semibold mb-1">{progressStep}</p>
+                      <div className="w-32 h-1.5 bg-border rounded-full overflow-hidden mx-auto mb-1.5">
+                        <div className="h-full bg-accent rounded-full transition-all duration-300" style={{ width: `${progressPercent}%` }} />
+                      </div>
+                      <p className="text-[10px] text-text-tertiary">{progressPercent}% - {getRemainingTime()}</p>
+                    </div>
                   </div>
                 )}
               </div>
 
               {/* Info bar */}
               <div className="flex items-center justify-between text-[9px] text-text-tertiary">
-                <span className="truncate max-w-[60%]">{fileName}</span>
-                <span>{getOutputDims()}{settings.upscale > 1 ? ` (${settings.upscale}x)` : ''}{imageInfo.downscaled ? ' scaled' : ''}</span>
+                <span className="truncate max-w-[55%]">{fileName}</span>
+                <span>{imageInfo.w}x{imageInfo.h} {settings.upscale > 1 ? `-> ${imageInfo.upscaledW || Math.round(imageInfo.w * settings.upscale)}x${imageInfo.upscaledH || Math.round(imageInfo.h * settings.upscale)}` : ''}</span>
               </div>
 
-              {imageInfo.downscaled && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2 text-[10px] text-yellow-700">
-                  Large image auto-scaled to {MAX_DIMENSION}px for mobile. Output quality stays high.
-                </div>
-              )}
-
-              {/* ===== PRESETS ===== */}
+              {/* Presets */}
               <div>
                 <p className="text-[9px] text-text-tertiary uppercase font-semibold mb-1.5">Quick Presets</p>
                 <div className="grid grid-cols-3 gap-1.5">
@@ -408,14 +417,14 @@ export default function ImageEnhancer() {
                 </div>
               </div>
 
-              {/* ===== CLARITY CONTROLS (main, always visible) ===== */}
+              {/* Clarity Controls */}
               <div className="space-y-2.5">
                 <p className="text-[9px] text-text-tertiary uppercase font-semibold">Clarity Controls</p>
 
                 {/* Upscale */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="text-[10px] font-medium text-text-primary">Upscale (Lanczos3)</label>
+                    <label className="text-[10px] font-medium text-text-primary">Upscale</label>
                     <span className="text-[10px] font-bold text-accent">{settings.upscale}x</span>
                   </div>
                   <div className="flex gap-1">
@@ -426,50 +435,31 @@ export default function ImageEnhancer() {
                       >{v}x</button>
                     ))}
                   </div>
-                  <p className="text-[8px] text-text-tertiary mt-0.5">Higher = no pixels when zoomed, but slower</p>
+                  <p className="text-[8px] text-text-tertiary mt-0.5">Higher = no pixels when zoomed (4x recommended for text)</p>
                 </div>
 
-                {/* Sharpen */}
-                <div>
-                  <div className="flex items-center justify-between mb-0.5">
-                    <label className="text-[10px] font-medium text-text-primary">Sharpen</label>
-                    <span className="text-[10px] font-bold text-text-secondary">{settings.sharpen}</span>
+                {[
+                  { key: 'sharpen' as const, label: 'Sharpen', desc: 'Crisp text edges', min: 0, max: 100 },
+                  { key: 'clarity' as const, label: 'Clarity', desc: 'Makes text readable', min: 0, max: 100 },
+                  { key: 'denoise' as const, label: 'Denoise', desc: 'Remove grain (may soften text)', min: 0, max: 100 },
+                ].map(ctrl => (
+                  <div key={ctrl.key}>
+                    <div className="flex items-center justify-between mb-0.5">
+                      <div>
+                        <label className="text-[10px] font-medium text-text-primary">{ctrl.label}</label>
+                        <span className="text-[8px] text-text-tertiary ml-1">{ctrl.desc}</span>
+                      </div>
+                      <span className="text-[10px] font-bold text-text-secondary">{settings[ctrl.key]}</span>
+                    </div>
+                    <input type="range" min={ctrl.min} max={ctrl.max} value={settings[ctrl.key]}
+                      disabled={processing}
+                      onChange={e => setSettings(s => ({ ...s, [ctrl.key]: parseInt(e.target.value) }))}
+                      className="w-full h-1 accent-accent disabled:opacity-40" />
                   </div>
-                  <input type="range" min={0} max={100} value={settings.sharpen}
-                    disabled={processing}
-                    onChange={e => setSettings(s => ({ ...s, sharpen: parseInt(e.target.value) }))}
-                    className="w-full h-1 accent-accent disabled:opacity-40" />
-                  <p className="text-[8px] text-text-tertiary mt-0.5">Makes text edges crisp and sharp</p>
-                </div>
-
-                {/* Clarity */}
-                <div>
-                  <div className="flex items-center justify-between mb-0.5">
-                    <label className="text-[10px] font-medium text-text-primary">Clarity</label>
-                    <span className="text-[10px] font-bold text-text-secondary">{settings.clarity}</span>
-                  </div>
-                  <input type="range" min={0} max={100} value={settings.clarity}
-                    disabled={processing}
-                    onChange={e => setSettings(s => ({ ...s, clarity: parseInt(e.target.value) }))}
-                    className="w-full h-1 accent-accent disabled:opacity-40" />
-                  <p className="text-[8px] text-text-tertiary mt-0.5">Enhances local contrast - text becomes readable</p>
-                </div>
-
-                {/* Denoise */}
-                <div>
-                  <div className="flex items-center justify-between mb-0.5">
-                    <label className="text-[10px] font-medium text-text-primary">Denoise</label>
-                    <span className="text-[10px] font-bold text-text-secondary">{settings.denoise}</span>
-                  </div>
-                  <input type="range" min={0} max={100} value={settings.denoise}
-                    disabled={processing}
-                    onChange={e => setSettings(s => ({ ...s, denoise: parseInt(e.target.value) }))}
-                    className="w-full h-1 accent-accent disabled:opacity-40" />
-                  <p className="text-[8px] text-text-tertiary mt-0.5">Removes grain/noise (may blur text slightly)</p>
-                </div>
+                ))}
               </div>
 
-              {/* ===== ADVANCED COLOR CONTROLS (hidden by default) ===== */}
+              {/* Advanced Color Controls */}
               <div className="border border-border rounded-lg overflow-hidden">
                 <button
                   onClick={() => setShowAdvanced(!showAdvanced)}
@@ -477,9 +467,7 @@ export default function ImageEnhancer() {
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-[10px] font-semibold text-text-secondary">Color Controls</span>
-                    {hasColorChanges && (
-                      <span className="w-1.5 h-1.5 bg-accent rounded-full" />
-                    )}
+                    {hasColorChanges && <span className="w-1.5 h-1.5 bg-accent rounded-full" />}
                   </div>
                   <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"
                     className={`text-text-tertiary transition-transform ${showAdvanced ? 'rotate-180' : ''}`}>
@@ -490,7 +478,6 @@ export default function ImageEnhancer() {
                 {showAdvanced && (
                   <div className="px-3 py-2 space-y-2 border-t border-border bg-surface-2/30">
                     <p className="text-[8px] text-yellow-600 font-semibold">These change colors - use only if needed</p>
-
                     {[
                       { key: 'contrast' as const, label: 'Contrast', min: -50, max: 50 },
                       { key: 'brightness' as const, label: 'Brightness', min: -50, max: 50 },
@@ -509,13 +496,9 @@ export default function ImageEnhancer() {
                           className="w-full h-1 accent-accent disabled:opacity-40" />
                       </div>
                     ))}
-
-                    {/* Reset color values only */}
                     {hasColorChanges && (
-                      <button
-                        onClick={() => setSettings(s => ({ ...s, contrast: 0, brightness: 0, saturation: 0, shadows: 0, highlights: 0 }))}
-                        className="w-full py-1.5 rounded-md text-[9px] font-semibold bg-red-50 text-red-500 hover:bg-red-100"
-                      >
+                      <button onClick={() => setSettings(s => ({ ...s, contrast: 0, brightness: 0, saturation: 0, shadows: 0, highlights: 0 }))}
+                        className="w-full py-1.5 rounded-md text-[9px] font-semibold bg-red-50 text-red-500 hover:bg-red-100">
                         Reset color changes
                       </button>
                     )}
@@ -523,7 +506,21 @@ export default function ImageEnhancer() {
                 )}
               </div>
 
-              {/* ===== ENHANCE / CANCEL BUTTON ===== */}
+              {/* Estimated time preview (before processing) */}
+              {!processing && originalImage && (
+                <div className="bg-surface rounded-lg px-3 py-2 flex items-center justify-between">
+                  <span className="text-[10px] text-text-tertiary">Estimated processing time:</span>
+                  <span className="text-[10px] font-bold text-accent">
+                    {formatTime(estimateSeconds(
+                      Math.min(Math.round(originalImage.width * settings.upscale), MAX_OUTPUT_DIM),
+                      Math.min(Math.round(originalImage.height * settings.upscale), MAX_OUTPUT_DIM),
+                      settings
+                    ))}
+                  </span>
+                </div>
+              )}
+
+              {/* Enhance / Cancel Button */}
               {processing ? (
                 <button
                   onClick={cancelProcessing}
@@ -532,7 +529,7 @@ export default function ImageEnhancer() {
                   <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
                     <rect x="6" y="6" width="12" height="12" rx="1" />
                   </svg>
-                  Cancel Processing
+                  Cancel ({progressPercent}%)
                 </button>
               ) : (
                 <button
@@ -547,17 +544,23 @@ export default function ImageEnhancer() {
                 </button>
               )}
 
-              {/* Processing progress */}
+              {/* Processing detail */}
               {processing && (
-                <div className="bg-accent-light/30 rounded-lg px-3 py-2">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <div className="w-3 h-3 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-                    <span className="text-[10px] font-semibold text-accent">{progressStep}</span>
+                <div className="bg-accent-light/30 rounded-lg px-3 py-2.5">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+                      <span className="text-[10px] font-semibold text-accent">{progressStep}</span>
+                    </div>
+                    <span className="text-[10px] font-bold text-accent">{progressPercent}%</span>
                   </div>
-                  <div className="w-full h-1.5 bg-border rounded-full overflow-hidden">
-                    <div className="h-full bg-accent rounded-full transition-all duration-300" style={{ width: `${progressPercent}%` }} />
+                  <div className="w-full h-2 bg-border rounded-full overflow-hidden mb-1.5">
+                    <div className="h-full bg-gradient-to-r from-accent to-blue-500 rounded-full transition-all duration-300" style={{ width: `${progressPercent}%` }} />
                   </div>
-                  <p className="text-[9px] text-text-tertiary mt-1">{progressPercent}% complete</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[9px] text-text-tertiary">Remaining: {getRemainingTime()}</span>
+                    <span className="text-[9px] text-text-tertiary">{imageInfo.upscaledW}x{imageInfo.upscaledH} pixels</span>
+                  </div>
                 </div>
               )}
 
@@ -594,13 +597,14 @@ export default function ImageEnhancer() {
         </div>
       </div>
 
-      {/* ===== FULLSCREEN COMPARE MODE ===== */}
+      {/* ===== FULLSCREEN COMPARE - Fixed: Left=Before, Right=After, Center slider ===== */}
       {fullscreenCompare && enhancedUrl && (
         <div className="fixed inset-0 z-[200] bg-black flex flex-col">
+          {/* Top bar */}
           <div className="flex items-center justify-between px-4 py-3 bg-black/80 z-10">
             <div className="flex items-center gap-3">
               <span className="text-white text-xs font-bold">Before / After</span>
-              <span className="text-white/50 text-[10px]">Slide to compare</span>
+              <span className="text-white/50 text-[10px]">Drag the center line</span>
             </div>
             <button
               onClick={() => setFullscreenCompare(false)}
@@ -612,6 +616,7 @@ export default function ImageEnhancer() {
             </button>
           </div>
 
+          {/* Compare area */}
           <div
             ref={compareContainerRef}
             className="flex-1 relative select-none overflow-hidden"
@@ -619,24 +624,43 @@ export default function ImageEnhancer() {
             onMouseDown={(e) => { setIsDragging(true); handleCompareMove(e.clientX) }}
             onTouchStart={(e) => { setIsDragging(true); handleCompareMove(e.touches[0].clientX) }}
           >
+            {/* Enhanced image (full, behind) */}
             <img src={enhancedUrl} alt="Enhanced" className="absolute inset-0 w-full h-full object-contain" />
-            <div className="absolute inset-0 overflow-hidden" style={{ width: `${sliderPos}%` }}>
-              <img src={originalUrl} alt="Original" className="w-full h-full object-contain" style={{ width: compareContainerRef.current ? `${compareContainerRef.current.offsetWidth}px` : '100%' }} />
-            </div>
-            <div className="absolute top-0 bottom-0 w-0.5 bg-white shadow-lg z-10" style={{ left: `${sliderPos}%` }}>
-              <div className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-xl flex items-center justify-center cursor-grab">
-                <svg width="16" height="16" fill="none" stroke="#1a73e8" viewBox="0 0 24 24" strokeWidth="3">
+
+            {/* Original image (clipped from right using clip-path) */}
+            <img src={originalUrl} alt="Original"
+              className="absolute inset-0 w-full h-full object-contain"
+              style={{ clipPath: `inset(0 ${100 - sliderPos}% 0 0)` }}
+            />
+
+            {/* Vertical divider line */}
+            <div className="absolute top-0 bottom-0 z-10" style={{ left: `${sliderPos}%`, transform: 'translateX(-50%)' }}>
+              {/* Line */}
+              <div className="w-0.5 h-full bg-white/90 mx-auto shadow-lg" />
+
+              {/* Drag handle */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-11 h-11 bg-white rounded-full shadow-xl flex items-center justify-center cursor-grab active:cursor-grabbing">
+                <svg width="20" height="20" fill="none" stroke="#1a73e8" viewBox="0 0 24 24" strokeWidth="2.5">
                   <path d="M8 6l-4 6 4 6M16 6l4 6-4 6" />
                 </svg>
               </div>
             </div>
-            <div className="absolute top-4 left-4 px-3 py-1.5 bg-black/70 text-white text-xs rounded-lg font-semibold z-20">ORIGINAL</div>
-            <div className="absolute top-4 right-4 px-3 py-1.5 bg-accent text-white text-xs rounded-lg font-semibold z-20">ENHANCED</div>
+
+            {/* BEFORE label (left side) */}
+            <div className="absolute top-4 left-4 px-3 py-1.5 bg-black/70 text-white text-[10px] rounded-lg font-bold z-20 tracking-wider">
+              BEFORE
+            </div>
+
+            {/* AFTER label (right side) */}
+            <div className="absolute top-4 right-4 px-3 py-1.5 bg-accent text-white text-[10px] rounded-lg font-bold z-20 tracking-wider">
+              AFTER
+            </div>
           </div>
 
+          {/* Bottom info */}
           <div className="flex items-center justify-between px-4 py-2 bg-black/80">
-            <span className="text-white/50 text-[10px]">{originalImage?.width}x{originalImage?.height} original</span>
-            <span className="text-white/50 text-[10px]">{getOutputDims()} enhanced ({settings.upscale}x)</span>
+            <span className="text-white/50 text-[10px]">{imageInfo.w}x{imageInfo.h} original</span>
+            <span className="text-white/50 text-[10px]">{imageInfo.upscaledW}x{imageInfo.upscaledH} enhanced ({settings.upscale}x)</span>
           </div>
         </div>
       )}
