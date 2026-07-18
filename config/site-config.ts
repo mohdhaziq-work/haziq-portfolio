@@ -179,7 +179,7 @@ export const DATABASE = {
    */
   firebase: {
     apiKey: '',  // ⚠️ Add in Render Env: NEXT_PUBLIC_FIREBASE_API_KEY
-    authDomain: '',  // ⚠️ Add in Render Env: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    authDomain: '',  // ⚠️ Set in Render Env: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN = mohdhaziq-portfolio.onrender.com
     projectId: '',  // ⚠️ Add in Render Env: NEXT_PUBLIC_FIREBASE_PROJECT_ID
     storageBucket: '',  // ⚠️ Add in Render Env: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
     messagingSenderId: '',  // ⚠️ Add in Render Env: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID

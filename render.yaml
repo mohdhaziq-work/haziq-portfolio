@@ -13,7 +13,7 @@ services:
       - key: NEXT_PUBLIC_FIREBASE_API_KEY
         value: "AIzaSyBWaZ4dFCJJ0CW-3lLlf0EP9Ihk5AOl6wI"
       - key: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
-        value: "my-portfolio-d84d3.firebaseapp.com"
+        value: "mohdhaziq-portfolio.onrender.com"
       - key: NEXT_PUBLIC_FIREBASE_PROJECT_ID
         value: "my-portfolio-d84d3"
       - key: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET

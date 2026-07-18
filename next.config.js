@@ -4,6 +4,18 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  async rewrites() {
+    return [
+      {
+        source: '/__/auth/handler',
+        destination: '/firebase-auth-handler',
+      },
+      {
+        source: '/__/auth/handler/:path*',
+        destination: '/firebase-auth-handler',
+      },
+    ]
+  },
 }
 
 module.exports = nextConfig
