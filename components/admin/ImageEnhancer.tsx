@@ -37,25 +37,93 @@ const PRESETS: Record<string, { label: string; settings: EnhanceSettings }> = {
   reset: { label: 'Reset', settings: { upscale: 1, sharpen: 0, contrast: 0, brightness: 0, saturation: 0, denoise: 0, clarity: 0, shadows: 0, highlights: 0 } },
 }
 
+// Max output dimension - prevents extreme slowness on mobile
+const MAX_DIMENSION = 2048
+
 export default function ImageEnhancer() {
   const [originalImage, setOriginalImage] = useState<HTMLImageElement | null>(null)
   const [originalUrl, setOriginalUrl] = useState<string>('')
   const [enhancedUrl, setEnhancedUrl] = useState<string>('')
   const [settings, setSettings] = useState<EnhanceSettings>({ ...DEFAULT_SETTINGS })
   const [processing, setProcessing] = useState(false)
-  const [progress, setProgress] = useState('')
+  const [progressStep, setProgressStep] = useState('')
+  const [progressPercent, setProgressPercent] = useState(0)
   const [dragOver, setDragOver] = useState(false)
   const [fileName, setFileName] = useState('')
   const [fullscreenCompare, setFullscreenCompare] = useState(false)
   const [sliderPos, setSliderPos] = useState(50)
   const [isDragging, setIsDragging] = useState(false)
+  const [imageInfo, setImageInfo] = useState({ w: 0, h: 0, downscaled: false })
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const compareContainerRef = useRef<HTMLDivElement>(null)
+  const workerRef = useRef<Worker | null>(null)
 
+  // Initialize Web Worker
+  useEffect(() => {
+    try {
+      const worker = new Worker('/image-worker.js')
+      worker.onmessage = (e) => {
+        const { type } = e.data
+        if (type === 'progress') {
+          setProgressStep(e.data.step)
+          setProgressPercent(e.data.percent)
+        } else if (type === 'result') {
+          const { buffer, width, height } = e.data
+          // Put result on canvas and generate URL
+          const canvas = canvasRef.current
+          if (canvas) {
+            canvas.width = width
+            canvas.height = height
+            const ctx = canvas.getContext('2d', { willReadFrequently: true })
+            if (ctx) {
+              const imageData = new ImageData(new Uint8ClampedArray(buffer), width, height)
+              ctx.putImageData(imageData, 0, 0)
+              const url = canvas.toDataURL('image/png', 1.0)
+              setEnhancedUrl(url)
+            }
+          }
+          setProcessing(false)
+          setProgressStep('')
+          setProgressPercent(0)
+        } else if (type === 'error') {
+          console.error('Worker error:', e.data.message)
+          setProcessing(false)
+          setProgressStep('')
+          setProgressPercent(0)
+        }
+      }
+      worker.onerror = (err) => {
+        console.error('Worker error:', err)
+        setProcessing(false)
+        setProgressStep('')
+        setProgressPercent(0)
+      }
+      workerRef.current = worker
+      return () => worker.terminate()
+    } catch (err) {
+      console.error('Failed to create Web Worker:', err)
+    }
+  }, [])
+
+  // Cancel processing
+  const cancelProcessing = useCallback(() => {
+    if (workerRef.current) {
+      workerRef.current.postMessage({ type: 'cancel' })
+    }
+    setProcessing(false)
+    setProgressStep('')
+    setProgressPercent(0)
+  }, [])
+
+  // Load image from file
   const loadImage = useCallback((file: File) => {
     if (!file.type.startsWith('image/')) return
+    // Cancel any in-progress work
+    cancelProcessing()
     setFileName(file.name)
+    setEnhancedUrl('')
+
     const reader = new FileReader()
     reader.onload = (e) => {
       const img = new Image()
@@ -63,13 +131,12 @@ export default function ImageEnhancer() {
       img.onload = () => {
         setOriginalImage(img)
         setOriginalUrl(e.target?.result as string)
-        setEnhancedUrl('')
         setSettings({ ...PRESETS.social.settings })
       }
       img.src = e.target?.result as string
     }
     reader.readAsDataURL(file)
-  }, [])
+  }, [cancelProcessing])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -83,364 +150,74 @@ export default function ImageEnhancer() {
     if (file) loadImage(file)
   }, [loadImage])
 
-  // ===== ADVANCED ENHANCEMENT ALGORITHMS =====
-
-  // Lanczos3 interpolation for high-quality upscaling
-  const lanczos3 = (x: number): number => {
-    if (x === 0) return 1
-    if (x >= 3 || x <= -3) return 0
-    const px = Math.PI * x
-    return (Math.sin(px) / px) * (Math.sin(px / 3) / (px / 3))
-  }
-
-  // Upscale using Lanczos resampling
-  const upscaleLanczos = (srcCanvas: HTMLCanvasElement, scale: number): HTMLCanvasElement => {
-    if (scale <= 1) return srcCanvas
-    const sw = srcCanvas.width
-    const sh = srcCanvas.height
-    const dw = Math.round(sw * scale)
-    const dh = Math.round(sh * scale)
-    const dstCanvas = document.createElement('canvas')
-    dstCanvas.width = dw
-    dstCanvas.height = dh
-    const srcCtx = srcCanvas.getContext('2d', { willReadFrequently: true })!
-    const dstCtx = dstCanvas.getContext('2d', { willReadFrequently: true })!
-    const srcData = srcCtx.getImageData(0, 0, sw, sh)
-    const dstData = dstCtx.createImageData(dw, dh)
-    const src = srcData.data
-    const dst = dstData.data
-
-    for (let y = 0; y < dh; y++) {
-      for (let x = 0; x < dw; x++) {
-        const srcX = x / scale
-        const srcY = y / scale
-        let r = 0, g = 0, b = 0, a = 0, weightSum = 0
-
-        const x0 = Math.max(0, Math.floor(srcX - 3))
-        const x1 = Math.min(sw - 1, Math.ceil(srcX + 3))
-        const y0 = Math.max(0, Math.floor(srcY - 3))
-        const y1 = Math.min(sh - 1, Math.ceil(srcY + 3))
-
-        for (let iy = y0; iy <= y1; iy++) {
-          for (let ix = x0; ix <= x1; ix++) {
-            const wx = lanczos3(srcX - ix)
-            const wy = lanczos3(srcY - iy)
-            const w = wx * wy
-            const i = (iy * sw + ix) * 4
-            r += src[i] * w
-            g += src[i + 1] * w
-            b += src[i + 2] * w
-            a += src[i + 3] * w
-            weightSum += w
-          }
-        }
-
-        if (weightSum > 0) {
-          const i = (y * dw + x) * 4
-          dst[i] = Math.max(0, Math.min(255, Math.round(r / weightSum)))
-          dst[i + 1] = Math.max(0, Math.min(255, Math.round(g / weightSum)))
-          dst[i + 2] = Math.max(0, Math.min(255, Math.round(b / weightSum)))
-          dst[i + 3] = Math.max(0, Math.min(255, Math.round(a / weightSum)))
-        }
-      }
-    }
-    dstCtx.putImageData(dstData, 0, 0)
-    return dstCanvas
-  }
-
-  // Bilateral filter (edge-preserving denoise)
-  const applyBilateralDenoise = (ctx: CanvasRenderingContext2D, w: number, h: number, strength: number) => {
-    if (strength === 0) return
-    const imageData = ctx.getImageData(0, 0, w, h)
-    const data = imageData.data
-    const copy = new Uint8ClampedArray(data)
-    const radius = Math.max(1, Math.round(strength / 20))
-    const sigmaSpatial = radius
-    const sigmaRange = 20 + (100 - strength) * 0.5
-
-    for (let y = radius; y < h - radius; y++) {
-      for (let x = radius; x < w - radius; x++) {
-        const i = (y * w + x) * 4
-        for (let c = 0; c < 3; c++) {
-          let sum = 0, weightSum = 0
-          const centerVal = copy[i + c]
-          for (let dy = -radius; dy <= radius; dy++) {
-            for (let dx = -radius; dx <= radius; dx++) {
-              const ni = ((y + dy) * w + (x + dx)) * 4 + c
-              const spatialDist = dx * dx + dy * dy
-              const rangeDist = (copy[ni] - centerVal) * (copy[ni] - centerVal)
-              const w2 = Math.exp(-(spatialDist / (2 * sigmaSpatial * sigmaSpatial)) - (rangeDist / (2 * sigmaRange * sigmaRange)))
-              sum += copy[ni] * w2
-              weightSum += w2
-            }
-          }
-          data[i + c] = Math.round(sum / weightSum)
-        }
-      }
-    }
-    ctx.putImageData(imageData, 0, 0)
-  }
-
-  // CLAHE - Contrast Limited Adaptive Histogram Equalization
-  const applyCLAHE = (ctx: CanvasRenderingContext2D, w: number, h: number, contrast: number, clarity: number) => {
-    if (contrast === 0 && clarity === 0) return
-    const imageData = ctx.getImageData(0, 0, w, h)
-    const data = imageData.data
-
-    // Global contrast
-    if (contrast !== 0) {
-      const factor = (259 * (contrast + 255)) / (255 * (259 - contrast))
-      for (let i = 0; i < data.length; i += 4) {
-        data[i] = Math.max(0, Math.min(255, factor * (data[i] - 128) + 128))
-        data[i + 1] = Math.max(0, Math.min(255, factor * (data[i + 1] - 128) + 128))
-        data[i + 2] = Math.max(0, Math.min(255, factor * (data[i + 2] - 128) + 128))
-      }
-    }
-
-    // Local contrast (clarity) - uses local mean subtraction
-    if (clarity !== 0) {
-      const copy = new Uint8ClampedArray(data)
-      const radius = 15
-      const clarityStrength = clarity / 100
-      for (let y = radius; y < h - radius; y += 2) {
-        for (let x = radius; x < w - radius; x += 2) {
-          let rSum = 0, gSum = 0, bSum = 0, count = 0
-          for (let dy = -radius; dy <= radius; dy += 2) {
-            for (let dx = -radius; dx <= radius; dx += 2) {
-              const ni = ((y + dy) * w + (x + dx)) * 4
-              rSum += copy[ni]; gSum += copy[ni + 1]; bSum += copy[ni + 2]
-              count++
-            }
-          }
-          const rMean = rSum / count, gMean = gSum / count, bMean = bSum / count
-          // Apply to 2x2 block
-          for (let dy = 0; dy < 2 && y + dy < h; dy++) {
-            for (let dx = 0; dx < 2 && x + dx < w; dx++) {
-              const i = ((y + dy) * w + (x + dx)) * 4
-              data[i] = Math.max(0, Math.min(255, copy[i] + (copy[i] - rMean) * clarityStrength))
-              data[i + 1] = Math.max(0, Math.min(255, copy[i + 1] + (copy[i + 1] - gMean) * clarityStrength))
-              data[i + 2] = Math.max(0, Math.min(255, copy[i + 2] + (copy[i + 2] - bMean) * clarityStrength))
-            }
-          }
-        }
-      }
-    }
-    ctx.putImageData(imageData, 0, 0)
-  }
-
-  // Shadows & Highlights
-  const applyToneMapping = (ctx: CanvasRenderingContext2D, w: number, h: number, shadows: number, highlights: number, brightness: number) => {
-    if (shadows === 0 && highlights === 0 && brightness === 0) return
-    const imageData = ctx.getImageData(0, 0, w, h)
-    const data = imageData.data
-    const brightnessAdj = brightness * 2.55
-
-    for (let i = 0; i < data.length; i += 4) {
-      const lum = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]
-
-      // Shadows: boost dark areas
-      if (shadows !== 0) {
-        const shadowMask = Math.max(0, 1 - lum / 128) // 1 for dark, 0 for bright
-        const shadowAdj = shadows * shadowMask * 0.01 * 255
-        data[i] = Math.max(0, Math.min(255, data[i] + shadowAdj))
-        data[i + 1] = Math.max(0, Math.min(255, data[i + 1] + shadowAdj))
-        data[i + 2] = Math.max(0, Math.min(255, data[i + 2] + shadowAdj))
-      }
-
-      // Highlights: control bright areas
-      if (highlights !== 0) {
-        const hlMask = Math.max(0, (lum - 128) / 127) // 1 for bright, 0 for dark
-        const hlAdj = highlights * hlMask * 0.01 * 255
-        data[i] = Math.max(0, Math.min(255, data[i] + hlAdj))
-        data[i + 1] = Math.max(0, Math.min(255, data[i + 1] + hlAdj))
-        data[i + 2] = Math.max(0, Math.min(255, data[i + 2] + hlAdj))
-      }
-
-      // Brightness
-      if (brightnessAdj !== 0) {
-        data[i] = Math.max(0, Math.min(255, data[i] + brightnessAdj))
-        data[i + 1] = Math.max(0, Math.min(255, data[i + 1] + brightnessAdj))
-        data[i + 2] = Math.max(0, Math.min(255, data[i + 2] + brightnessAdj))
-      }
-    }
-    ctx.putImageData(imageData, 0, 0)
-  }
-
-  // Vibrance/Saturation
-  const applySaturation = (ctx: CanvasRenderingContext2D, w: number, h: number, saturation: number) => {
-    if (saturation === 0) return
-    const imageData = ctx.getImageData(0, 0, w, h)
-    const data = imageData.data
-    const strength = saturation / 100
-
-    for (let i = 0; i < data.length; i += 4) {
-      const r = data[i], g = data[i + 1], b = data[i + 2]
-      const max = Math.max(r, g, b)
-      const min = Math.min(r, g, b)
-      const currentSat = max === 0 ? 0 : (max - min) / max
-      // Vibrance: less saturated pixels get more boost
-      const boost = strength * (1 - currentSat * 0.5)
-      const avg = (r + g + b) / 3
-      data[i] = Math.max(0, Math.min(255, r + (r - avg) * boost))
-      data[i + 1] = Math.max(0, Math.min(255, g + (g - avg) * boost))
-      data[i + 2] = Math.max(0, Math.min(255, b + (b - avg) * boost))
-    }
-    ctx.putImageData(imageData, 0, 0)
-  }
-
-  // Multi-pass Unsharp Mask
-  const applySharpen = (ctx: CanvasRenderingContext2D, w: number, h: number, amount: number) => {
-    if (amount === 0) return
-    const strength = amount / 100
-
-    // Pass 1: Fine detail sharpen
-    const imageData = ctx.getImageData(0, 0, w, h)
-    const data = imageData.data
-    const copy1 = new Uint8ClampedArray(data)
-    for (let y = 1; y < h - 1; y++) {
-      for (let x = 1; x < w - 1; x++) {
-        const i = (y * w + x) * 4
-        for (let c = 0; c < 3; c++) {
-          const blur = (copy1[((y - 1) * w + x) * 4 + c] + copy1[((y + 1) * w + x) * 4 + c] + copy1[(y * w + (x - 1)) * 4 + c] + copy1[(y * w + (x + 1)) * 4 + c]) / 4
-          data[i + c] = Math.max(0, Math.min(255, copy1[i + c] + (copy1[i + c] - blur) * strength * 1.5))
-        }
-      }
-    }
-    ctx.putImageData(imageData, 0, 0)
-
-    // Pass 2: Medium detail (wider kernel)
-    if (amount > 30) {
-      const imageData2 = ctx.getImageData(0, 0, w, h)
-      const data2 = imageData2.data
-      const copy2 = new Uint8ClampedArray(data2)
-      for (let y = 2; y < h - 2; y++) {
-        for (let x = 2; x < w - 2; x++) {
-          const i = (y * w + x) * 4
-          for (let c = 0; c < 3; c++) {
-            let blur = 0
-            for (let dy = -2; dy <= 2; dy++) {
-              for (let dx = -2; dx <= 2; dx++) {
-                blur += copy2[((y + dy) * w + (x + dx)) * 4 + c]
-              }
-            }
-            blur /= 25
-            data2[i + c] = Math.max(0, Math.min(255, copy2[i + c] + (copy2[i + c] - blur) * strength * 0.4))
-          }
-        }
-      }
-      ctx.putImageData(imageData2, 0, 0)
-    }
-  }
-
-  // ===== MAIN ENHANCE FUNCTION =====
+  // ===== MAIN ENHANCE - Runs in Web Worker =====
   const enhanceImage = useCallback(() => {
-    if (!originalImage || !canvasRef.current) return
+    if (!originalImage || !workerRef.current) return
+
+    // Cancel any previous processing
+    workerRef.current.postMessage({ type: 'cancel' })
+
     setProcessing(true)
-    setProgress('Upscaling...')
+    setProgressStep('Preparing...')
+    setProgressPercent(2)
+    setEnhancedUrl('')
 
-    // Use setTimeout to let UI update
-    setTimeout(() => {
+    // Use requestAnimationFrame to let UI update before heavy work starts
+    requestAnimationFrame(() => {
       try {
-        const scale = settings.upscale
-        const ow = originalImage.width
-        const oh = originalImage.height
+        // Draw original image onto canvas to get pixel data
+        const canvas = canvasRef.current
+        if (!canvas) return
 
-        // Step 1: Draw original
-        const srcCanvas = document.createElement('canvas')
-        srcCanvas.width = ow
-        srcCanvas.height = oh
-        const srcCtx = srcCanvas.getContext('2d', { willReadFrequently: true })!
-        srcCtx.imageSmoothingEnabled = true
-        srcCtx.imageSmoothingQuality = 'high'
-        srcCtx.drawImage(originalImage, 0, 0)
-        setProgress('Upscaling with Lanczos...')
+        let drawW = originalImage.width
+        let drawH = originalImage.height
+        let downscaled = false
 
-        setTimeout(() => {
-          try {
-            // Step 2: Upscale with Lanczos
-            const upscaled = scale > 1 ? upscaleLanczos(srcCanvas, scale) : srcCanvas
-            const w = upscaled.width
-            const h = upscaled.height
-            setProgress(`Processing ${w}x${h}...`)
+        // Auto-downscale if too large for mobile processing
+        if (drawW > MAX_DIMENSION || drawH > MAX_DIMENSION) {
+          const ratio = Math.min(MAX_DIMENSION / drawW, MAX_DIMENSION / drawH)
+          drawW = Math.round(drawW * ratio)
+          drawH = Math.round(drawH * ratio)
+          downscaled = true
+        }
 
-            // Copy to main canvas
-            const canvas = canvasRef.current!
-            canvas.width = w
-            canvas.height = h
-            const ctx = canvas.getContext('2d', { willReadFrequently: true })!
-            ctx.drawImage(upscaled, 0, 0)
+        canvas.width = drawW
+        canvas.height = drawH
+        const ctx = canvas.getContext('2d', { willReadFrequently: true })
+        if (!ctx) return
 
-            // Step 3: Denoise (first, before sharpening)
-            if (settings.denoise > 0) {
-              setProgress('Denoising...')
-              setTimeout(() => {
-                try {
-                  applyBilateralDenoise(ctx, w, h, settings.denoise)
+        ctx.imageSmoothingEnabled = true
+        ctx.imageSmoothingQuality = 'high'
+        ctx.drawImage(originalImage, 0, 0, drawW, drawH)
 
-                  // Step 4: Tone mapping (shadows, highlights, brightness)
-                  setProgress('Tone mapping...')
-                  applyToneMapping(ctx, w, h, settings.shadows, settings.highlights, settings.brightness)
+        setImageInfo({ w: drawW, h: drawH, downscaled })
 
-                  // Step 5: Contrast + Clarity (CLAHE)
-                  setProgress('Enhancing contrast...')
-                  applyCLAHE(ctx, w, h, settings.contrast, settings.clarity)
+        // Get pixel data
+        const imageData = ctx.getImageData(0, 0, drawW, drawH)
+        const buffer = imageData.data.buffer.slice(0)
 
-                  // Step 6: Saturation/Vibrance
-                  setProgress('Enhancing colors...')
-                  applySaturation(ctx, w, h, settings.saturation)
-
-                  // Step 7: Sharpen (last, for maximum detail)
-                  setProgress('Sharpening...')
-                  applySharpen(ctx, w, h, settings.sharpen)
-
-                  const result = canvas.toDataURL('image/png', 1.0)
-                  setEnhancedUrl(result)
-                  setProcessing(false)
-                  setProgress('')
-                } catch (err) {
-                  console.error('Enhancement step error:', err)
-                  setProcessing(false)
-                  setProgress('')
-                }
-              }, 50)
-            } else {
-              // No denoise, continue directly
-              setProgress('Tone mapping...')
-              applyToneMapping(ctx, w, h, settings.shadows, settings.highlights, settings.brightness)
-              setProgress('Enhancing contrast...')
-              applyCLAHE(ctx, w, h, settings.contrast, settings.clarity)
-              setProgress('Enhancing colors...')
-              applySaturation(ctx, w, h, settings.saturation)
-              setProgress('Sharpening...')
-              applySharpen(ctx, w, h, settings.sharpen)
-
-              const result = canvas.toDataURL('image/png', 1.0)
-              setEnhancedUrl(result)
-              setProcessing(false)
-              setProgress('')
-            }
-          } catch (err) {
-            console.error('Upscale error:', err)
-            setProcessing(false)
-            setProgress('')
-          }
-        }, 50)
+        // Send to Web Worker
+        if (!workerRef.current) return
+        workerRef.current.postMessage(
+          {
+            type: 'enhance',
+            buffer,
+            width: drawW,
+            height: drawH,
+            settings: { ...settings },
+          },
+          [buffer] // Transfer buffer (zero-copy)
+        )
       } catch (err) {
         console.error('Enhancement error:', err)
         setProcessing(false)
-        setProgress('')
+        setProgressStep('')
+        setProgressPercent(0)
       }
-    }, 50)
-  }, [originalImage, settings, upscaleLanczos])
+    })
+  }, [originalImage, settings])
 
-  // Auto-enhance with debounce
-  useEffect(() => {
-    if (!originalImage) return
-    const timer = setTimeout(enhanceImage, 300)
-    return () => clearTimeout(timer)
-  }, [originalImage, settings, enhanceImage])
-
-  // Download
+  // Download enhanced image
   const downloadEnhanced = () => {
     if (!enhancedUrl) return
     const a = document.createElement('a')
@@ -486,13 +263,26 @@ export default function ImageEnhancer() {
   }, [fullscreenCompare])
 
   const resetAll = () => {
+    cancelProcessing()
     setOriginalImage(null)
     setOriginalUrl('')
     setEnhancedUrl('')
     setSettings({ ...PRESETS.social.settings })
     setFileName('')
     setFullscreenCompare(false)
+    setImageInfo({ w: 0, h: 0, downscaled: false })
     if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  // Calculate output dimensions for display
+  const getOutputDims = () => {
+    if (!originalImage) return ''
+    const baseW = imageInfo.downscaled ? imageInfo.w : originalImage.width
+    const baseH = imageInfo.downscaled ? imageInfo.h : originalImage.height
+    if (settings.upscale > 1) {
+      return `${Math.round(baseW * settings.upscale)}x${Math.round(baseH * settings.upscale)}`
+    }
+    return `${baseW}x${baseH}`
   }
 
   return (
@@ -508,14 +298,14 @@ export default function ImageEnhancer() {
             </div>
             <div>
               <p className="text-xs font-bold text-text-primary">Image Enhancer</p>
-              <p className="text-[9px] text-text-tertiary">Lanczos upscale, CLAHE, bilateral denoise</p>
+              <p className="text-[9px] text-text-tertiary">Lanczos3, CLAHE, bilateral denoise</p>
             </div>
           </div>
         </div>
 
         <div className="p-4 space-y-3">
           {!originalImage ? (
-            /* Upload */
+            /* Upload Area */
             <div
               className={`relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${dragOver ? 'border-accent bg-accent-light/30' : 'border-border hover:border-accent/50 hover:bg-surface'}`}
               onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
@@ -543,21 +333,50 @@ export default function ImageEnhancer() {
                       <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
                         <div className="text-center">
                           <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-                          <p className="text-[10px] text-accent font-semibold">{progress}</p>
+                          <p className="text-[10px] text-accent font-semibold">{progressStep}</p>
+                          <p className="text-[10px] text-accent font-bold">{progressPercent}%</p>
                         </div>
                       </div>
                     )}
                   </div>
                 ) : !fullscreenCompare ? (
-                  <img src={originalUrl} alt="Original" className="w-full" style={{ maxHeight: 250, objectFit: 'contain' }} />
+                  <div className="relative">
+                    <img src={originalUrl} alt="Original" className="w-full" style={{ maxHeight: 250, objectFit: 'contain' }} />
+                    {processing && (
+                      <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
+                        <div className="text-center">
+                          <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                          <p className="text-[10px] text-accent font-semibold">{progressStep}</p>
+                          <p className="text-[10px] text-accent font-bold">{progressPercent}%</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 ) : null}
+
+                {/* Processing overlay with progress bar */}
+                {processing && !fullscreenCompare && (
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-border">
+                    <div
+                      className="h-full bg-accent transition-all duration-300"
+                      style={{ width: `${progressPercent}%` }}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Info bar */}
               <div className="flex items-center justify-between text-[9px] text-text-tertiary">
                 <span className="truncate max-w-[60%]">{fileName}</span>
-                <span>{originalImage.width}x{originalImage.height} {settings.upscale > 1 ? `→ ${Math.round(originalImage.width * settings.upscale)}x${Math.round(originalImage.height * settings.upscale)}` : ''}</span>
+                <span>{getOutputDims()}{settings.upscale > 1 ? ` (${settings.upscale}x)` : ''}{imageInfo.downscaled ? ' auto-scaled' : ''}</span>
               </div>
+
+              {/* Big warning if image was auto-downscaled */}
+              {imageInfo.downscaled && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2 text-[10px] text-yellow-700">
+                  Large image auto-scaled to {MAX_DIMENSION}px max for mobile processing. Output quality remains high.
+                </div>
+              )}
 
               {/* Presets */}
               <div>
@@ -567,7 +386,8 @@ export default function ImageEnhancer() {
                     <button
                       key={key}
                       onClick={() => setSettings({ ...preset.settings })}
-                      className={`px-1 py-2 rounded-lg text-center transition-all ${key === 'reset' ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'bg-surface hover:bg-accent-light hover:text-accent'}`}
+                      disabled={processing}
+                      className={`px-1 py-2 rounded-lg text-center transition-all disabled:opacity-40 ${key === 'reset' ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'bg-surface hover:bg-accent-light hover:text-accent'}`}
                     >
                       <p className="text-[10px] font-bold">{preset.label}</p>
                     </button>
@@ -588,7 +408,8 @@ export default function ImageEnhancer() {
                   <div className="flex gap-1">
                     {[1, 1.5, 2, 3, 4].map(v => (
                       <button key={v} onClick={() => setSettings(s => ({ ...s, upscale: v }))}
-                        className={`flex-1 py-1.5 rounded-md text-[10px] font-semibold transition-all ${settings.upscale === v ? 'bg-accent text-white' : 'bg-surface text-text-secondary hover:bg-accent-light'}`}
+                        disabled={processing}
+                        className={`flex-1 py-1.5 rounded-md text-[10px] font-semibold transition-all disabled:opacity-40 ${settings.upscale === v ? 'bg-accent text-white' : 'bg-surface text-text-secondary hover:bg-accent-light'}`}
                       >{v}x</button>
                     ))}
                   </div>
@@ -611,17 +432,59 @@ export default function ImageEnhancer() {
                       <span className="text-[10px] font-bold text-text-secondary">{settings[ctrl.key] > 0 ? '+' : ''}{settings[ctrl.key]}</span>
                     </div>
                     <input type="range" min={ctrl.min} max={ctrl.max} value={settings[ctrl.key]}
+                      disabled={processing}
                       onChange={e => setSettings(s => ({ ...s, [ctrl.key]: parseInt(e.target.value) }))}
-                      className="w-full h-1 accent-accent" />
+                      className="w-full h-1 accent-accent disabled:opacity-40" />
                   </div>
                 ))}
               </div>
+
+              {/* ENHANCE / CANCEL Button */}
+              {processing ? (
+                <button
+                  onClick={cancelProcessing}
+                  className="w-full py-3.5 rounded-xl text-xs font-bold bg-red-500 text-white hover:bg-red-600 transition-all flex items-center justify-center gap-2"
+                >
+                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                    <rect x="6" y="6" width="12" height="12" rx="1" />
+                  </svg>
+                  Cancel Processing
+                </button>
+              ) : (
+                <button
+                  onClick={enhanceImage}
+                  disabled={!originalImage}
+                  className="w-full py-3.5 rounded-xl text-xs font-bold bg-gradient-to-r from-accent to-blue-500 text-white hover:from-accent-hover hover:to-blue-600 transition-all disabled:opacity-40 flex items-center justify-center gap-2 shadow-sm"
+                >
+                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                    <path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
+                  </svg>
+                  Enhance Image
+                </button>
+              )}
+
+              {/* Processing progress detail */}
+              {processing && (
+                <div className="bg-accent-light/30 rounded-lg px-3 py-2">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <div className="w-3 h-3 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+                    <span className="text-[10px] font-semibold text-accent">{progressStep}</span>
+                  </div>
+                  <div className="w-full h-1.5 bg-border rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-accent rounded-full transition-all duration-300"
+                      style={{ width: `${progressPercent}%` }}
+                    />
+                  </div>
+                  <p className="text-[9px] text-text-tertiary mt-1">{progressPercent}% complete</p>
+                </div>
+              )}
 
               {/* Action Buttons */}
               <div className="grid grid-cols-3 gap-2">
                 <button
                   onClick={() => enhancedUrl ? setFullscreenCompare(true) : null}
-                  disabled={!enhancedUrl}
+                  disabled={!enhancedUrl || processing}
                   className="py-2.5 rounded-lg text-[10px] font-semibold bg-surface text-text-secondary hover:bg-accent-light hover:text-accent disabled:opacity-40 flex items-center justify-center gap-1"
                 >
                   <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" /></svg>
@@ -637,7 +500,8 @@ export default function ImageEnhancer() {
                 </button>
                 <button
                   onClick={resetAll}
-                  className="py-2.5 rounded-lg text-[10px] font-semibold bg-surface text-red-500 hover:bg-red-50 flex items-center justify-center gap-1"
+                  disabled={processing}
+                  className="py-2.5 rounded-lg text-[10px] font-semibold bg-surface text-red-500 hover:bg-red-50 disabled:opacity-40 flex items-center justify-center gap-1"
                 >
                   <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.992 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182" /></svg>
                   New
@@ -700,8 +564,8 @@ export default function ImageEnhancer() {
 
           {/* Bottom info */}
           <div className="flex items-center justify-between px-4 py-2 bg-black/80">
-              <span className="text-white/50 text-[10px]">{originalImage?.width}x{originalImage?.height} original</span>
-              <span className="text-white/50 text-[10px]">{Math.round((originalImage?.width || 0) * settings.upscale)}x{Math.round((originalImage?.height || 0) * settings.upscale)} enhanced ({settings.upscale}x)</span>
+            <span className="text-white/50 text-[10px]">{originalImage?.width}x{originalImage?.height} original</span>
+            <span className="text-white/50 text-[10px]">{getOutputDims()} enhanced ({settings.upscale}x)</span>
           </div>
         </div>
       )}
