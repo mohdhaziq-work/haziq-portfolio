@@ -29,18 +29,18 @@ const DEFAULT_SETTINGS: EnhanceSettings = {
 const PRESETS: Record<string, { label: string; desc: string; settings: EnhanceSettings }> = {
   text: {
     label: 'Text Clear',
-    desc: '4x upscale, text becomes readable',
-    settings: { upscale: 4, sharpen: 60, contrast: 0, brightness: 0, saturation: 0, denoise: 0, clarity: 50, shadows: 0, highlights: 0 }
+    desc: '4x upscale, no pixels when zoomed',
+    settings: { upscale: 4, sharpen: 80, contrast: 0, brightness: 0, saturation: 0, denoise: 0, clarity: 70, shadows: 0, highlights: 0 }
   },
   clarity: {
     label: 'Clarity',
     desc: '2x upscale + sharp + clarity',
-    settings: { upscale: 2, sharpen: 50, contrast: 0, brightness: 0, saturation: 0, denoise: 0, clarity: 40, shadows: 0, highlights: 0 }
+    settings: { upscale: 2, sharpen: 65, contrast: 0, brightness: 0, saturation: 0, denoise: 0, clarity: 55, shadows: 0, highlights: 0 }
   },
   super: {
     label: '4x Super',
-    desc: 'Maximum clarity and sharpness',
-    settings: { upscale: 4, sharpen: 70, contrast: 0, brightness: 0, saturation: 0, denoise: 0, clarity: 60, shadows: 0, highlights: 0 }
+    desc: 'Maximum detail, zero pixels',
+    settings: { upscale: 4, sharpen: 90, contrast: 0, brightness: 0, saturation: 0, denoise: 0, clarity: 80, shadows: 0, highlights: 0 }
   },
   social: {
     label: 'Social',
@@ -65,13 +65,16 @@ const MAX_OUTPUT_DIM = 4096
 function estimateSeconds(w: number, h: number, s: EnhanceSettings): number {
   const pixels = (w * h) / 1000000 // in millions
   let sec = 0
-  // Denoise: 3x3 bilateral, ~2s per 4M pixels on mobile
+  // Detail recovery (runs when upscale > 1): ~0.15s per 4M pixels
+  if (s.upscale > 1) sec += pixels * 0.15
+  if (s.upscale >= 3) sec += pixels * 0.1 // extra pass for 3x+
+  // Denoise: 3x3 bilateral
   if (s.denoise > 0) sec += pixels * 0.5
-  // Clarity: integral image O(n), ~0.3s per 4M pixels
+  // Clarity: integral image O(n)
   if (s.clarity > 0) sec += pixels * 0.08
-  // Sharpen: 3x3 + optional 5x5, ~0.4s per 4M pixels
+  // Sharpen: 3x3 + optional 5x5
   if (s.sharpen > 0) sec += pixels * 0.1
-  // Color adjustments: simple per-pixel, very fast
+  // Color adjustments
   if (s.shadows !== 0 || s.highlights !== 0 || s.brightness !== 0) sec += pixels * 0.03
   if (s.contrast !== 0) sec += pixels * 0.02
   if (s.saturation !== 0) sec += pixels * 0.02

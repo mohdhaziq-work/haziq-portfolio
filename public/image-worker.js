@@ -1,7 +1,6 @@
-// Image Enhancement Web Worker - OPTIMIZED FOR SPEED
-// Upscaling done by Canvas (GPU) in main thread - this worker only does post-processing
-// Clarity uses integral images (O(n) instead of O(n*r^2)) - 60x faster
-// Denoise uses 3x3 bilateral (fast) instead of large radius
+// Image Enhancement Web Worker v3 - FAST + CRISP
+// Canvas GPU upscale is fast but soft. This worker adds detail recovery
+// to make edges hard and crisp like Lanczos3 output, but in seconds not minutes.
 
 let cancelled = false;
 
@@ -21,6 +20,8 @@ function sendProgress(step, percent) {
 
 function countSteps(s) {
   let n = 0;
+  // Detail recovery always runs when upscale > 1
+  if (s.upscale > 1) n++;
   if (s.denoise > 0) n++;
   if (s.clarity > 0) n++;
   if (s.sharpen > 0) n++;
@@ -36,7 +37,16 @@ function processImage(src, w, h, settings) {
     var totalSteps = countSteps(settings);
     var currentStep = 0;
 
-    // Step 1: Fast denoise (3x3 bilateral - preserves edges)
+    // Step 1: Detail Recovery - reverses Canvas bicubic softness
+    // This is the KEY step that makes pixels invisible when zoomed
+    if (settings.upscale > 1) {
+      if (cancelled) return;
+      currentStep++;
+      sendProgress('Recovering detail (' + currentStep + '/' + totalSteps + ')...', Math.round((currentStep / totalSteps) * 95));
+      src = applyDetailRecovery(src, w, h, settings.upscale);
+    }
+
+    // Step 2: Fast denoise (3x3 bilateral)
     if (settings.denoise > 0) {
       if (cancelled) return;
       currentStep++;
@@ -44,7 +54,7 @@ function processImage(src, w, h, settings) {
       src = applyDenoise(src, w, h, settings.denoise);
     }
 
-    // Step 2: Clarity (integral image method - 60x faster than before)
+    // Step 3: Clarity (integral image - O(n) speed)
     if (settings.clarity > 0) {
       if (cancelled) return;
       currentStep++;
@@ -52,15 +62,15 @@ function processImage(src, w, h, settings) {
       src = applyClarity(src, w, h, settings.clarity);
     }
 
-    // Step 3: Sharpen (multi-pass unsharp mask)
+    // Step 4: Sharpen (multi-pass unsharp mask)
     if (settings.sharpen > 0) {
       if (cancelled) return;
       currentStep++;
-      sendProgress('Sharpening text (' + currentStep + '/' + totalSteps + ')...', Math.round((currentStep / totalSteps) * 95));
+      sendProgress('Sharpening (' + currentStep + '/' + totalSteps + ')...', Math.round((currentStep / totalSteps) * 95));
       src = applySharpen(src, w, h, settings.sharpen);
     }
 
-    // Step 4: Tone mapping (advanced - only if enabled)
+    // Advanced color steps (only if user enabled)
     if (settings.shadows !== 0 || settings.highlights !== 0 || settings.brightness !== 0) {
       if (cancelled) return;
       currentStep++;
@@ -68,19 +78,17 @@ function processImage(src, w, h, settings) {
       src = applyToneMapping(src, w, h, settings.shadows, settings.highlights, settings.brightness);
     }
 
-    // Step 5: Contrast (advanced - only if enabled)
     if (settings.contrast !== 0) {
       if (cancelled) return;
       currentStep++;
-      sendProgress('Adjusting contrast (' + currentStep + '/' + totalSteps + ')...', Math.round((currentStep / totalSteps) * 95));
+      sendProgress('Contrast (' + currentStep + '/' + totalSteps + ')...', Math.round((currentStep / totalSteps) * 95));
       src = applyContrast(src, w, h, settings.contrast);
     }
 
-    // Step 6: Vibrance (advanced - only if enabled)
     if (settings.saturation !== 0) {
       if (cancelled) return;
       currentStep++;
-      sendProgress('Adjusting vibrance (' + currentStep + '/' + totalSteps + ')...', Math.round((currentStep / totalSteps) * 95));
+      sendProgress('Vibrance (' + currentStep + '/' + totalSteps + ')...', Math.round((currentStep / totalSteps) * 95));
       src = applyVibrance(src, w, h, settings.saturation);
     }
 
@@ -94,7 +102,73 @@ function processImage(src, w, h, settings) {
   }
 }
 
-// ===== FAST DENOISE (3x3 bilateral filter) =====
+// ===== DETAIL RECOVERY =====
+// Canvas bicubic upscale makes soft/blurry edges. This step finds edges
+// and makes them hard/crisp like the original image, so pixels are invisible when zoomed.
+// Uses adaptive threshold unsharp masking - only sharpens where there are real edges.
+function applyDetailRecovery(src, w, h, scale) {
+  var dst = new Uint8ClampedArray(src);
+
+  // The amount of detail recovery depends on how much we upscaled
+  // More upscale = softer result = more recovery needed
+  var strength = 1.0 + (scale - 1) * 0.6; // 1x=1.0, 2x=1.6, 3x=2.2, 4x=2.8
+
+  // Pass 1: 3x3 edge-aware sharpening
+  // Only sharpen where there's a real edge (threshold-based)
+  var threshold = 3; // Minimum difference to count as an edge
+  var copy1 = new Uint8ClampedArray(src);
+
+  for (var y = 1; y < h - 1; y++) {
+    if (cancelled) return dst;
+    for (var x = 1; x < w - 1; x++) {
+      var i = (y * w + x) * 4;
+      for (var c = 0; c < 3; c++) {
+        var center = copy1[i + c];
+        // 4-connected blur (simple average of neighbors)
+        var blur = (copy1[((y - 1) * w + x) * 4 + c] +
+                    copy1[((y + 1) * w + x) * 4 + c] +
+                    copy1[(y * w + (x - 1)) * 4 + c] +
+                    copy1[(y * w + (x + 1)) * 4 + c]) * 0.25;
+        var diff = center - blur;
+        // Adaptive: only sharpen if edge is strong enough
+        if (Math.abs(diff) > threshold) {
+          dst[i + c] = Math.max(0, Math.min(255, center + diff * strength));
+        }
+      }
+    }
+  }
+
+  // Pass 2: 5x5 medium detail recovery for thicker strokes
+  if (scale >= 3) {
+    var copy2 = new Uint8ClampedArray(dst);
+    var medStrength = strength * 0.3;
+
+    for (var y2 = 2; y2 < h - 2; y2++) {
+      if (cancelled) return dst;
+      for (var x2 = 2; x2 < w - 2; x2++) {
+        var i2 = (y2 * w + x2) * 4;
+        for (var c2 = 0; c2 < 3; c2++) {
+          var center2 = copy2[i2 + c2];
+          var blur2 = 0;
+          for (var dy = -2; dy <= 2; dy++) {
+            for (var dx = -2; dx <= 2; dx++) {
+              blur2 += copy2[((y2 + dy) * w + (x2 + dx)) * 4 + c2];
+            }
+          }
+          blur2 /= 25;
+          var diff2 = center2 - blur2;
+          if (Math.abs(diff2) > 2) {
+            dst[i2 + c2] = Math.max(0, Math.min(255, center2 + diff2 * medStrength));
+          }
+        }
+      }
+    }
+  }
+
+  return dst;
+}
+
+// ===== FAST DENOISE (3x3 bilateral) =====
 function applyDenoise(src, w, h, strength) {
   var dst = new Uint8ClampedArray(src);
   var sigma = 15 + (100 - strength) * 0.8;
@@ -102,7 +176,6 @@ function applyDenoise(src, w, h, strength) {
 
   for (var y = 1; y < h - 1; y++) {
     if (cancelled) return dst;
-    if (y % 200 === 0) sendProgress(null, null); // yield
     for (var x = 1; x < w - 1; x++) {
       var i = (y * w + x) * 4;
       for (var c = 0; c < 3; c++) {
@@ -110,23 +183,16 @@ function applyDenoise(src, w, h, strength) {
         var sum = center;
         var wSum = 1;
         // 8 neighbors with range weighting
-        var offsets = [-w-1, -w, -w+1, -1, 1, w-1, w, w+1];
-        for (var n = 0; n < 8; n++) {
-          var nVal = src[((y + Math.floor(offsets[n]/w)) * w + x + (offsets[n] % w)) * 4 + c];
-          // Simpler: just use 8 direct neighbors
-        }
-        // Direct 8-neighbor loop
-        var neighborIdxs = [
+        var nIdxs = [
           ((y-1)*w+(x-1))*4+c, ((y-1)*w+x)*4+c, ((y-1)*w+(x+1))*4+c,
           (y*w+(x-1))*4+c,                         (y*w+(x+1))*4+c,
           ((y+1)*w+(x-1))*4+c, ((y+1)*w+x)*4+c, ((y+1)*w+(x+1))*4+c
         ];
-        sum = center; wSum = 1;
         for (var n = 0; n < 8; n++) {
-          var nVal2 = src[neighborIdxs[n]];
-          var diff = nVal2 - center;
+          var nVal = src[nIdxs[n]];
+          var diff = nVal - center;
           var wt = Math.exp(-(diff * diff) / twoSigma2);
-          sum += nVal2 * wt;
+          sum += nVal * wt;
           wSum += wt;
         }
         dst[i + c] = Math.round(sum / wSum);
@@ -136,20 +202,18 @@ function applyDenoise(src, w, h, strength) {
   return dst;
 }
 
-// ===== CLARITY (Integral Image Method - O(n) speed) =====
-// Instead of checking every neighbor for every pixel (slow),
-// we build a "sum table" that lets us compute local average in O(1)
+// ===== CLARITY (Integral Image - O(n) speed) =====
 function applyClarity(src, w, h, amount) {
   var dst = new Uint8ClampedArray(src);
   var clarityStrength = amount / 100;
   var radius = 8;
 
-  // Build integral images (summed area tables)
+  // Build integral images
   var integralR = new Float64Array(w * h);
   var integralG = new Float64Array(w * h);
   var integralB = new Float64Array(w * h);
 
-  // Build row 0
+  // Row 0
   integralR[0] = src[0]; integralG[0] = src[1]; integralB[0] = src[2];
   for (var x = 1; x < w; x++) {
     var i4 = x * 4;
@@ -158,7 +222,7 @@ function applyClarity(src, w, h, amount) {
     integralB[x] = integralB[x - 1] + src[i4 + 2];
   }
 
-  // Build remaining rows
+  // Remaining rows
   for (var y = 1; y < h; y++) {
     var rowR = 0, rowG = 0, rowB = 0;
     for (var x2 = 0; x2 < w; x2++) {
@@ -170,12 +234,9 @@ function applyClarity(src, w, h, amount) {
     }
   }
 
-  // Apply clarity using integral images for instant local mean
+  // Apply clarity
   for (var y2 = 0; y2 < h; y2++) {
     if (cancelled) return dst;
-    if (y2 % 200 === 0) {
-      // Send progress update
-    }
     var y1min = Math.max(0, y2 - radius);
     var y1max = Math.min(h - 1, y2 + radius);
     for (var x3 = 0; x3 < w; x3++) {
@@ -183,7 +244,6 @@ function applyClarity(src, w, h, amount) {
       var x1max = Math.min(w - 1, x3 + radius);
       var count = (x1max - x1min + 1) * (y1max - y1min + 1);
 
-      // Get area sum from integral image in O(1)
       var rSum = getArea(integralR, w, x1min, y1min, x1max, y1max);
       var gSum = getArea(integralG, w, x1min, y1min, x1max, y1max);
       var bSum = getArea(integralB, w, x1min, y1min, x1max, y1max);
@@ -193,7 +253,6 @@ function applyClarity(src, w, h, amount) {
       var bMean = bSum / count;
 
       var idx = (y2 * w + x3) * 4;
-      // Clarity: pixel = pixel + (pixel - localMean) * strength
       dst[idx] = Math.max(0, Math.min(255, src[idx] + (src[idx] - rMean) * clarityStrength));
       dst[idx + 1] = Math.max(0, Math.min(255, src[idx + 1] + (src[idx + 1] - gMean) * clarityStrength));
       dst[idx + 2] = Math.max(0, Math.min(255, src[idx + 2] + (src[idx + 2] - bMean) * clarityStrength));
@@ -203,7 +262,6 @@ function applyClarity(src, w, h, amount) {
   return dst;
 }
 
-// Helper: Get area sum from integral image in O(1)
 function getArea(integral, w, x1, y1, x2, y2) {
   var a = integral[y2 * w + x2];
   var b = y1 > 0 ? integral[(y1 - 1) * w + x2] : 0;
@@ -217,7 +275,7 @@ function applySharpen(src, w, h, amount) {
   var strength = amount / 100;
   var dst = new Uint8ClampedArray(src);
 
-  // Pass 1: Fine detail (3x3 kernel) - makes text edges crisp
+  // Pass 1: Fine detail (3x3)
   var copy1 = new Uint8ClampedArray(src);
   for (var y = 1; y < h - 1; y++) {
     if (cancelled) return dst;
@@ -230,7 +288,7 @@ function applySharpen(src, w, h, amount) {
     }
   }
 
-  // Pass 2: Medium detail (5x5 kernel) - for thicker strokes
+  // Pass 2: Medium detail (5x5) for amount > 30
   if (amount > 30) {
     var copy2 = new Uint8ClampedArray(dst);
     for (var y2 = 2; y2 < h - 2; y2++) {
@@ -254,7 +312,7 @@ function applySharpen(src, w, h, amount) {
   return dst;
 }
 
-// ===== TONE MAPPING (Advanced only) =====
+// ===== TONE MAPPING =====
 function applyToneMapping(src, w, h, shadows, highlights, brightness) {
   var dst = new Uint8ClampedArray(src.length);
   var brightnessAdj = brightness * 2.55;
@@ -285,7 +343,7 @@ function applyToneMapping(src, w, h, shadows, highlights, brightness) {
   return dst;
 }
 
-// ===== CONTRAST (Advanced only) =====
+// ===== CONTRAST =====
 function applyContrast(src, w, h, contrast) {
   var dst = new Uint8ClampedArray(src.length);
   var factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
@@ -298,7 +356,7 @@ function applyContrast(src, w, h, contrast) {
   return dst;
 }
 
-// ===== VIBRANCE (Advanced only) =====
+// ===== VIBRANCE =====
 function applyVibrance(src, w, h, saturation) {
   var dst = new Uint8ClampedArray(src.length);
   var strength = saturation / 100;
