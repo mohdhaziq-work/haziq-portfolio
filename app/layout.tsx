@@ -13,8 +13,8 @@ export const metadata: Metadata = {
     default: 'Mohd Haziq — Web Developer',
     template: '%s | Mohd Haziq',
   },
-  description: 'Building high-converting, professional websites for local businesses in Sultanpur and beyond. Modern, fast, and designed to grow your business digitally.',
-  keywords: 'Web Developer, Website Design, Local Business Growth, Portfolio, Sultanpur, Next.js Developer, Freelancer',
+  description: 'Building high-converting, professional websites for businesses. Modern, fast, and designed to grow your business digitally.',
+  keywords: 'Web Developer, Website Design, Local Business Growth, Portfolio, Next.js Developer, Freelancer',
   openGraph: {
     title: 'Mohd Haziq — Web Developer',
     description: 'Building high-converting, professional websites for local businesses. Modern, fast, and designed to grow your business digitally.',

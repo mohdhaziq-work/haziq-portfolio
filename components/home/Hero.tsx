@@ -14,7 +14,7 @@ export default function Hero() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-20 items-center">
           <div>
             <AnimatedText as="span" delay={0} className="section-overline">
-              {SITE.city}, {SITE.state}
+              Available for projects
             </AnimatedText>
             <AnimatedText as="h1" delay={100} className="text-display-xl md:text-display-xl text-text-primary mb-6 text-balance">
               I build websites that{' '}

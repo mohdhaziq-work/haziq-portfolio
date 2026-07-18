@@ -19,10 +19,10 @@ export const PERSONAL = {
   dateOfBirth: '', // Format: YYYY-MM-DD (e.g., '2009-05-15')
 
   // Address
-  city: 'Sultanpur',
-  state: 'Uttar Pradesh',
+  city: '',
+  state: '',
   country: 'India',
-  pincode: '', // e.g., '228001'
+  pincode: '',
 
   // Professional
   title: 'Web Developer',
@@ -238,7 +238,7 @@ export const WEBSITE = {
    * SEO DESCRIPTION:
    * Google search mein ye dikhega
    */
-  description: 'Building high-converting, professional websites for local businesses in Sultanpur and beyond. Modern, fast, and designed to grow your business digitally.',
+  description: 'Building high-converting, professional websites for businesses. Modern, fast, and designed to grow your business digitally.',
 
   /**
    * SEO KEYWORDS:
@@ -249,8 +249,6 @@ export const WEBSITE = {
     'Website Design',
     'Local Business Growth',
     'Portfolio',
-    'Sultanpur',
-    'Uttar Pradesh',
     'Next.js Developer',
     'Freelancer',
     'Frontend Developer',

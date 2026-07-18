@@ -23,8 +23,7 @@ export default function Footer() {
               <span className="font-bold text-lg text-text-primary tracking-tight">{SITE.name}</span>
             </Link>
             <p className="text-text-secondary text-body-sm leading-relaxed max-w-sm mb-6">
-              {SITE.age}-year-old Web Developer from {SITE.city}, {SITE.state}. 
-              Building high-converting websites that help local businesses grow digitally.
+              {SITE.age}-year-old Web Developer building high-converting websites that help local businesses grow digitally.
             </p>
             <div className="flex gap-3">
               {/* Instagram → Opens DM */}
@@ -94,10 +93,10 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <span className="text-text-secondary text-body-sm flex items-center gap-2">
-                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-                  {SITE.city}, {SITE.state}
-                </span>
+                <a href={SOCIAL.email} className="text-text-secondary text-body-sm hover:text-accent transition-colors flex items-center gap-2">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                  Email
+                </a>
               </li>
             </ul>
           </div>
@@ -108,7 +107,7 @@ export default function Footer() {
             © {currentYear} {SITE.name}. Built with Next.js.
           </p>
           <p className="text-text-tertiary text-caption">
-            Designed in {SITE.city}, India
+            Designed in India
           </p>
         </div>
       </div>

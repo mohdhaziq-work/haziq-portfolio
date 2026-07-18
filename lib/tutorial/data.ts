@@ -20,9 +20,9 @@ export const TUTORIALS: TutorialData[] = [
         page: '/',
         title: { en: 'Welcome to the Homepage', hi: 'होमपेज पर स्वागत है', hing: 'Homepage par swagat hai' },
         description: {
-          en: 'This is the hero section. It introduces Mohd Haziq as a Web Developer from Sultanpur, UP. The clean design follows Google Labs style.',
+          en: 'This is the hero section. It introduces Mohd Haziq as a Web Developer. The clean design follows Google Labs style.',
           hi: 'यह हीरो सेक्शन है। यह मोहद हाजिक को सुलतानपुर, उप्र से वेब डेवलपर के रूप में परिचित कराता है।',
-          hing: 'Ye hero section hai. Ye Mohd Haziq ko Sultanpur, UP se Web Developer ke roop mein introduce karta hai. Saaf design hai Google Labs jaisa.',
+          hing: 'Ye hero section hai. Ye Mohd Haziq ko Web Developer ke roop mein introduce karta hai. Saaf design hai Google Labs jaisa.',
         },
         position: 'bottom',
       },
