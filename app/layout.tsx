@@ -90,6 +90,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="canonical" href="https://mohdhaziq-portfolio.onrender.com" />
+        <meta name="google-site-verification" content="Et3XMWbEu-1uWfsnyk2cvSOXHkmBkS2RzG8bjI00D9k" />
         {/* JSON-LD Structured Data */}
         <script
           type="application/ld+json"
