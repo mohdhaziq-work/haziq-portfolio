@@ -20,6 +20,7 @@ import {
 } from '@/lib/firebase/firestore'
 import { PERSONAL } from '@/config/site-config'
 import { openInstagramDM } from '@/lib/instagram'
+import ImageEnhancer from '@/components/admin/ImageEnhancer'
 
 // ==================== MAIN USER PANEL ====================
 
@@ -101,6 +102,7 @@ export default function UserPanel() {
         {/* Panel Body */}
         <div className="flex-1 overflow-y-auto">
           {isAdmin && <AdminDashboard />}
+          {isAdmin && <ImageEnhancer />}
           {isClient && <ClientPortal />}
         </div>
       </div>
