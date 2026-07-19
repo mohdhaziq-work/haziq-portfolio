@@ -1,6 +1,7 @@
-// Image Enhancement Web Worker v3 - FAST + CRISP
-// Canvas GPU upscale is fast but soft. This worker adds detail recovery
-// to make edges hard and crisp like Lanczos3 output, but in seconds not minutes.
+// Image Enhancement Web Worker v5 - PROFESSIONAL HALO-FREE
+// Zero white outlines around text. Professional grade.
+// All sharpening uses brightness-aware halo suppression.
+// Final Halo Clean pass removes any remaining edge artifacts.
 
 let cancelled = false;
 
@@ -20,7 +21,6 @@ function sendProgress(step, percent) {
 
 function countSteps(s) {
   let n = 0;
-  // Detail recovery always runs when upscale > 1
   if (s.upscale > 1) n++;
   if (s.denoise > 0) n++;
   if (s.clarity > 0) n++;
@@ -28,6 +28,8 @@ function countSteps(s) {
   if (s.shadows !== 0 || s.highlights !== 0 || s.brightness !== 0) n++;
   if (s.contrast !== 0) n++;
   if (s.saturation !== 0) n++;
+  // Halo clean always runs when sharpening was applied
+  if (s.upscale > 1 || s.sharpen > 0 || s.clarity > 0) n++;
   return Math.max(n, 1);
 }
 
@@ -36,13 +38,13 @@ function processImage(src, w, h, settings) {
   try {
     var totalSteps = countSteps(settings);
     var currentStep = 0;
+    var hasAnySharpening = settings.upscale > 1 || settings.sharpen > 0 || settings.clarity > 0;
 
-    // Step 1: Detail Recovery - reverses Canvas bicubic softness
-    // This is the KEY step that makes pixels invisible when zoomed
+    // Step 1: Detail Recovery (halo-free) - fixes Canvas bicubic softness
     if (settings.upscale > 1) {
       if (cancelled) return;
       currentStep++;
-      sendProgress('Recovering detail (' + currentStep + '/' + totalSteps + ')...', Math.round((currentStep / totalSteps) * 95));
+      sendProgress('Recovering detail (' + currentStep + '/' + totalSteps + ')...', Math.round((currentStep / totalSteps) * 90));
       src = applyDetailRecovery(src, w, h, settings.upscale);
     }
 
@@ -50,45 +52,53 @@ function processImage(src, w, h, settings) {
     if (settings.denoise > 0) {
       if (cancelled) return;
       currentStep++;
-      sendProgress('Denoising (' + currentStep + '/' + totalSteps + ')...', Math.round((currentStep / totalSteps) * 95));
+      sendProgress('Denoising (' + currentStep + '/' + totalSteps + ')...', Math.round((currentStep / totalSteps) * 90));
       src = applyDenoise(src, w, h, settings.denoise);
     }
 
-    // Step 3: Clarity (integral image - O(n) speed)
+    // Step 3: Clarity (integral image, edge-aware)
     if (settings.clarity > 0) {
       if (cancelled) return;
       currentStep++;
-      sendProgress('Enhancing clarity (' + currentStep + '/' + totalSteps + ')...', Math.round((currentStep / totalSteps) * 95));
+      sendProgress('Enhancing clarity (' + currentStep + '/' + totalSteps + ')...', Math.round((currentStep / totalSteps) * 90));
       src = applyClarity(src, w, h, settings.clarity);
     }
 
-    // Step 4: Sharpen (multi-pass unsharp mask)
+    // Step 4: Smart Sharpen (halo-free)
     if (settings.sharpen > 0) {
       if (cancelled) return;
       currentStep++;
-      sendProgress('Sharpening (' + currentStep + '/' + totalSteps + ')...', Math.round((currentStep / totalSteps) * 95));
-      src = applySharpen(src, w, h, settings.sharpen);
+      sendProgress('Sharpening (' + currentStep + '/' + totalSteps + ')...', Math.round((currentStep / totalSteps) * 90));
+      src = applySmartSharpen(src, w, h, settings.sharpen);
     }
 
-    // Advanced color steps (only if user enabled)
+    // Step 5: Halo Clean - removes any remaining white/dark outlines
+    if (hasAnySharpening) {
+      if (cancelled) return;
+      currentStep++;
+      sendProgress('Cleaning edges (' + currentStep + '/' + totalSteps + ')...', Math.round((currentStep / totalSteps) * 90));
+      src = applyHaloClean(src, w, h);
+    }
+
+    // Step 6-8: Color adjustments (only if user enabled)
     if (settings.shadows !== 0 || settings.highlights !== 0 || settings.brightness !== 0) {
       if (cancelled) return;
       currentStep++;
-      sendProgress('Tone mapping (' + currentStep + '/' + totalSteps + ')...', Math.round((currentStep / totalSteps) * 95));
+      sendProgress('Tone mapping (' + currentStep + '/' + totalSteps + ')...', Math.round((currentStep / totalSteps) * 90));
       src = applyToneMapping(src, w, h, settings.shadows, settings.highlights, settings.brightness);
     }
 
     if (settings.contrast !== 0) {
       if (cancelled) return;
       currentStep++;
-      sendProgress('Contrast (' + currentStep + '/' + totalSteps + ')...', Math.round((currentStep / totalSteps) * 95));
+      sendProgress('Contrast (' + currentStep + '/' + totalSteps + ')...', Math.round((currentStep / totalSteps) * 90));
       src = applyContrast(src, w, h, settings.contrast);
     }
 
     if (settings.saturation !== 0) {
       if (cancelled) return;
       currentStep++;
-      sendProgress('Vibrance (' + currentStep + '/' + totalSteps + ')...', Math.round((currentStep / totalSteps) * 95));
+      sendProgress('Vibrance (' + currentStep + '/' + totalSteps + ')...', Math.round((currentStep / totalSteps) * 90));
       src = applyVibrance(src, w, h, settings.saturation);
     }
 
@@ -102,43 +112,60 @@ function processImage(src, w, h, settings) {
   }
 }
 
-// ===== DETAIL RECOVERY =====
-// Canvas bicubic upscale makes soft/blurry edges. This step finds edges
-// and makes them hard/crisp like the original image, so pixels are invisible when zoomed.
-// Uses adaptive threshold unsharp masking - only sharpens where there are real edges.
+// ===== HALO-FREE DETAIL RECOVERY =====
+// Fixes Canvas bicubic softness WITHOUT creating white outlines
+// Key: brightness-aware boost limiting prevents overshoot at edges
 function applyDetailRecovery(src, w, h, scale) {
   var dst = new Uint8ClampedArray(src);
+  var strength = 0.8 + (scale - 1) * 0.5;
 
-  // The amount of detail recovery depends on how much we upscaled
-  // More upscale = softer result = more recovery needed
-  var strength = 1.0 + (scale - 1) * 0.6; // 1x=1.0, 2x=1.6, 3x=2.2, 4x=2.8
-
-  // Pass 1: 3x3 edge-aware sharpening
-  // Only sharpen where there's a real edge (threshold-based)
-  var threshold = 3; // Minimum difference to count as an edge
+  // Pass 1: Fine detail (3x3 neighborhood)
   var copy1 = new Uint8ClampedArray(src);
-
   for (var y = 1; y < h - 1; y++) {
     if (cancelled) return dst;
     for (var x = 1; x < w - 1; x++) {
-      var i = (y * w + x) * 4;
+      var idx = (y * w + x) * 4;
       for (var c = 0; c < 3; c++) {
-        var center = copy1[i + c];
-        // 4-connected blur (simple average of neighbors)
-        var blur = (copy1[((y - 1) * w + x) * 4 + c] +
-                    copy1[((y + 1) * w + x) * 4 + c] +
-                    copy1[(y * w + (x - 1)) * 4 + c] +
-                    copy1[(y * w + (x + 1)) * 4 + c]) * 0.25;
+        var center = copy1[idx + c];
+        var top = copy1[((y - 1) * w + x) * 4 + c];
+        var bottom = copy1[((y + 1) * w + x) * 4 + c];
+        var left = copy1[(y * w + (x - 1)) * 4 + c];
+        var right = copy1[(y * w + (x + 1)) * 4 + c];
+
+        var blur = (top + bottom + left + right) * 0.25;
         var diff = center - blur;
-        // Adaptive: only sharpen if edge is strong enough
-        if (Math.abs(diff) > threshold) {
-          dst[i + c] = Math.max(0, Math.min(255, center + diff * strength));
+
+        // Skip if no edge
+        if (Math.abs(diff) < 2) continue;
+
+        // ===== HALO PREVENTION =====
+        var boost = diff * strength;
+
+        // Limit boost based on local range and brightness
+        var localMin = Math.min(center, top, bottom, left, right);
+        var localMax = Math.max(center, top, bottom, left, right);
+        var localRange = localMax - localMin;
+
+        // Adaptive max boost: proportional to local range, prevents overshoot
+        var maxBoost = Math.max(4, Math.min(50, localRange * 0.2));
+
+        // Extra suppression for bright pixels getting brighter (white halo cause)
+        if (diff > 0 && center > localMin + localRange * 0.6) {
+          maxBoost *= 0.25; // Heavy suppression on bright side of edge
         }
+        // Extra suppression for dark pixels getting darker
+        if (diff < 0 && center < localMin + localRange * 0.4) {
+          maxBoost *= 0.25;
+        }
+
+        // Apply boost with clamping
+        var clampedBoost = Math.sign(diff) * Math.min(Math.abs(boost), maxBoost);
+        dst[idx + c] = Math.max(0, Math.min(255, center + clampedBoost));
       }
     }
   }
 
-  // Pass 2: 5x5 medium detail recovery for thicker strokes
+  // Pass 2: Medium detail (5x5) for 3x+ upscale
   if (scale >= 3) {
     var copy2 = new Uint8ClampedArray(dst);
     var medStrength = strength * 0.3;
@@ -146,20 +173,38 @@ function applyDetailRecovery(src, w, h, scale) {
     for (var y2 = 2; y2 < h - 2; y2++) {
       if (cancelled) return dst;
       for (var x2 = 2; x2 < w - 2; x2++) {
-        var i2 = (y2 * w + x2) * 4;
+        var idx2 = (y2 * w + x2) * 4;
         for (var c2 = 0; c2 < 3; c2++) {
-          var center2 = copy2[i2 + c2];
+          var center2 = copy2[idx2 + c2];
           var blur2 = 0;
+          var min2 = 255, max2 = 0;
           for (var dy = -2; dy <= 2; dy++) {
             for (var dx = -2; dx <= 2; dx++) {
-              blur2 += copy2[((y2 + dy) * w + (x2 + dx)) * 4 + c2];
+              var val = copy2[((y2 + dy) * w + (x2 + dx)) * 4 + c2];
+              blur2 += val;
+              if (val < min2) min2 = val;
+              if (val > max2) max2 = val;
             }
           }
           blur2 /= 25;
           var diff2 = center2 - blur2;
-          if (Math.abs(diff2) > 2) {
-            dst[i2 + c2] = Math.max(0, Math.min(255, center2 + diff2 * medStrength));
+
+          if (Math.abs(diff2) < 1) continue;
+
+          var localRange2 = max2 - min2;
+          var maxBoost2 = Math.max(3, Math.min(35, localRange2 * 0.15));
+
+          // Halo prevention on bright side
+          if (diff2 > 0 && center2 > min2 + localRange2 * 0.6) {
+            maxBoost2 *= 0.2;
           }
+          if (diff2 < 0 && center2 < min2 + localRange2 * 0.4) {
+            maxBoost2 *= 0.2;
+          }
+
+          var boost2 = diff2 * medStrength;
+          var clampedBoost2 = Math.sign(diff2) * Math.min(Math.abs(boost2), maxBoost2);
+          dst[idx2 + c2] = Math.max(0, Math.min(255, center2 + clampedBoost2));
         }
       }
     }
@@ -182,7 +227,6 @@ function applyDenoise(src, w, h, strength) {
         var center = src[i + c];
         var sum = center;
         var wSum = 1;
-        // 8 neighbors with range weighting
         var nIdxs = [
           ((y-1)*w+(x-1))*4+c, ((y-1)*w+x)*4+c, ((y-1)*w+(x+1))*4+c,
           (y*w+(x-1))*4+c,                         (y*w+(x+1))*4+c,
@@ -202,7 +246,7 @@ function applyDenoise(src, w, h, strength) {
   return dst;
 }
 
-// ===== CLARITY (Integral Image - O(n) speed) =====
+// ===== CLARITY (Integral Image, edge-aware) =====
 function applyClarity(src, w, h, amount) {
   var dst = new Uint8ClampedArray(src);
   var clarityStrength = amount / 100;
@@ -234,7 +278,7 @@ function applyClarity(src, w, h, amount) {
     }
   }
 
-  // Apply clarity
+  // Apply clarity with halo awareness
   for (var y2 = 0; y2 < h; y2++) {
     if (cancelled) return dst;
     var y1min = Math.max(0, y2 - radius);
@@ -244,18 +288,48 @@ function applyClarity(src, w, h, amount) {
       var x1max = Math.min(w - 1, x3 + radius);
       var count = (x1max - x1min + 1) * (y1max - y1min + 1);
 
-      var rSum = getArea(integralR, w, x1min, y1min, x1max, y1max);
-      var gSum = getArea(integralG, w, x1min, y1min, x1max, y1max);
-      var bSum = getArea(integralB, w, x1min, y1min, x1max, y1max);
-
-      var rMean = rSum / count;
-      var gMean = gSum / count;
-      var bMean = bSum / count;
+      var rMean = getArea(integralR, w, x1min, y1min, x1max, y1max) / count;
+      var gMean = getArea(integralG, w, x1min, y1min, x1max, y1max) / count;
+      var bMean = getArea(integralB, w, x1min, y1min, x1max, y1max) / count;
 
       var idx = (y2 * w + x3) * 4;
-      dst[idx] = Math.max(0, Math.min(255, src[idx] + (src[idx] - rMean) * clarityStrength));
-      dst[idx + 1] = Math.max(0, Math.min(255, src[idx + 1] + (src[idx + 1] - gMean) * clarityStrength));
-      dst[idx + 2] = Math.max(0, Math.min(255, src[idx + 2] + (src[idx + 2] - bMean) * clarityStrength));
+
+      // Compute local range for halo prevention
+      // Use fast 3x3 min/max for edge detection
+      if (y2 > 0 && y2 < h - 1 && x3 > 0 && x3 < w - 1) {
+        var rLocal = [src[idx], src[((y2-1)*w+x3)*4], src[((y2+1)*w+x3)*4],
+                      src[(y2*w+(x3-1))*4], src[(y2*w+(x3+1))*4]];
+        var rMin = Math.min.apply(null, rLocal);
+        var rMax = Math.max.apply(null, rLocal);
+        var rRange = rMax - rMin;
+
+        // At strong edges, reduce clarity to prevent halos
+        var edgeSuppress = rRange > 80 ? 0.5 : 1.0;
+
+        dst[idx] = Math.max(0, Math.min(255, src[idx] + (src[idx] - rMean) * clarityStrength * edgeSuppress));
+
+        // Same for G and B channels - use simpler approach for speed
+        var gLocal = [src[idx+1], src[((y2-1)*w+x3)*4+1], src[((y2+1)*w+x3)*4+1],
+                      src[(y2*w+(x3-1))*4+1], src[(y2*w+(x3+1))*4+1]];
+        var gMin = Math.min.apply(null, gLocal);
+        var gMax = Math.max.apply(null, gLocal);
+        var gEdgeSuppress = (gMax - gMin) > 80 ? 0.5 : 1.0;
+
+        dst[idx + 1] = Math.max(0, Math.min(255, src[idx + 1] + (src[idx + 1] - gMean) * clarityStrength * gEdgeSuppress));
+
+        var bLocal = [src[idx+2], src[((y2-1)*w+x3)*4+2], src[((y2+1)*w+x3)*4+2],
+                      src[(y2*w+(x3-1))*4+2], src[(y2*w+(x3+1))*4+2]];
+        var bMin = Math.min.apply(null, bLocal);
+        var bMax = Math.max.apply(null, bLocal);
+        var bEdgeSuppress = (bMax - bMin) > 80 ? 0.5 : 1.0;
+
+        dst[idx + 2] = Math.max(0, Math.min(255, src[idx + 2] + (src[idx + 2] - bMean) * clarityStrength * bEdgeSuppress));
+      } else {
+        // Border pixels - no edge detection needed
+        dst[idx] = Math.max(0, Math.min(255, src[idx] + (src[idx] - rMean) * clarityStrength));
+        dst[idx + 1] = Math.max(0, Math.min(255, src[idx + 1] + (src[idx + 1] - gMean) * clarityStrength));
+        dst[idx + 2] = Math.max(0, Math.min(255, src[idx + 2] + (src[idx + 2] - bMean) * clarityStrength));
+      }
     }
   }
 
@@ -270,8 +344,11 @@ function getArea(integral, w, x1, y1, x2, y2) {
   return a - b - c + d;
 }
 
-// ===== SHARPEN (Multi-pass Unsharp Mask) =====
-function applySharpen(src, w, h, amount) {
+// ===== SMART SHARPEN (Halo-Free) =====
+// Replaces old USM. Uses brightness-aware adaptive clamping.
+// Bright pixels at edges get limited positive boost (no white outlines).
+// Dark pixels at edges get full negative boost (text becomes crisp).
+function applySmartSharpen(src, w, h, amount) {
   var strength = amount / 100;
   var dst = new Uint8ClampedArray(src);
 
@@ -280,30 +357,169 @@ function applySharpen(src, w, h, amount) {
   for (var y = 1; y < h - 1; y++) {
     if (cancelled) return dst;
     for (var x = 1; x < w - 1; x++) {
-      var i = (y * w + x) * 4;
+      var idx = (y * w + x) * 4;
       for (var c = 0; c < 3; c++) {
-        var blur = (copy1[((y - 1) * w + x) * 4 + c] + copy1[((y + 1) * w + x) * 4 + c] + copy1[(y * w + (x - 1)) * 4 + c] + copy1[(y * w + (x + 1)) * 4 + c]) / 4;
-        dst[i + c] = Math.max(0, Math.min(255, copy1[i + c] + (copy1[i + c] - blur) * strength * 1.5));
+        var center = copy1[idx + c];
+        var top = copy1[((y - 1) * w + x) * 4 + c];
+        var bottom = copy1[((y + 1) * w + x) * 4 + c];
+        var left = copy1[(y * w + (x - 1)) * 4 + c];
+        var right = copy1[(y * w + (x + 1)) * 4 + c];
+
+        var blur = (top + bottom + left + right) * 0.25;
+        var diff = center - blur;
+
+        if (Math.abs(diff) < 1) continue;
+
+        // Local range for adaptive clamping
+        var localMin = Math.min(center, top, bottom, left, right);
+        var localMax = Math.max(center, top, bottom, left, right);
+        var localRange = localMax - localMin;
+
+        // Base max boost proportional to local range
+        var maxBoost = Math.max(5, Math.min(55, localRange * 0.22));
+
+        // ===== DIRECTIONAL HALO SUPPRESSION =====
+        // If pixel is on the bright side of edge and boost would make it brighter:
+        // This is the WHITE OUTLINE cause - suppress heavily
+        if (diff > 0) {
+          // How far is this pixel toward the bright end of the local range?
+          var brightRatio = localRange > 0 ? (center - localMin) / localRange : 0.5;
+          if (brightRatio > 0.5) {
+            // Pixel is already on bright side - suppress to prevent halo
+            maxBoost *= (1.0 - brightRatio) * 1.2;
+            maxBoost = Math.max(maxBoost, 2); // Keep minimum for subtle detail
+          }
+        }
+        // If pixel is on the dark side and boost would make it darker:
+        // This is SAFE - makes text darker and crisper
+        // No suppression needed
+
+        var boost = diff * strength * 1.5;
+        var clampedBoost = Math.sign(diff) * Math.min(Math.abs(boost), maxBoost);
+        dst[idx + c] = Math.max(0, Math.min(255, center + clampedBoost));
       }
     }
   }
 
-  // Pass 2: Medium detail (5x5) for amount > 30
-  if (amount > 30) {
+  // Pass 2: Medium detail (5x5) for stronger settings
+  if (amount > 40) {
     var copy2 = new Uint8ClampedArray(dst);
+    var medStr = strength * 0.35;
+
     for (var y2 = 2; y2 < h - 2; y2++) {
       if (cancelled) return dst;
       for (var x2 = 2; x2 < w - 2; x2++) {
-        var i2 = (y2 * w + x2) * 4;
+        var idx2 = (y2 * w + x2) * 4;
         for (var c2 = 0; c2 < 3; c2++) {
-          var blur2 = 0;
+          var center2 = copy2[idx2 + c2];
+          var blur2 = 0, min2 = 255, max2 = 0;
           for (var dy = -2; dy <= 2; dy++) {
             for (var dx = -2; dx <= 2; dx++) {
-              blur2 += copy2[((y2 + dy) * w + (x2 + dx)) * 4 + c2];
+              var val = copy2[((y2 + dy) * w + (x2 + dx)) * 4 + c2];
+              blur2 += val;
+              if (val < min2) min2 = val;
+              if (val > max2) max2 = val;
             }
           }
           blur2 /= 25;
-          dst[i2 + c2] = Math.max(0, Math.min(255, copy2[i2 + c2] + (copy2[i2 + c2] - blur2) * strength * 0.4));
+          var diff2 = center2 - blur2;
+
+          if (Math.abs(diff2) < 1) continue;
+
+          var localRange2 = max2 - min2;
+          var maxBoost2 = Math.max(3, Math.min(40, localRange2 * 0.15));
+
+          // Same directional halo suppression
+          if (diff2 > 0) {
+            var brightRatio2 = localRange2 > 0 ? (center2 - min2) / localRange2 : 0.5;
+            if (brightRatio2 > 0.5) {
+              maxBoost2 *= (1.0 - brightRatio2) * 1.2;
+              maxBoost2 = Math.max(maxBoost2, 1);
+            }
+          }
+
+          var boost2 = diff2 * medStr;
+          var clampedBoost2 = Math.sign(diff2) * Math.min(Math.abs(boost2), maxBoost2);
+          dst[idx2 + c2] = Math.max(0, Math.min(255, center2 + clampedBoost2));
+        }
+      }
+    }
+  }
+
+  return dst;
+}
+
+// ===== HALO CLEAN - Final pass =====
+// Detects and removes remaining white/dark outlines at text edges.
+// A "halo pixel" is one that is significantly brighter than its neighbors
+// while being at an edge boundary (some neighbors are much darker).
+function applyHaloClean(src, w, h) {
+  var dst = new Uint8ClampedArray(src);
+
+  for (var y = 1; y < h - 1; y++) {
+    if (cancelled) return dst;
+    for (var x = 1; x < w - 1; x++) {
+      var idx = (y * w + x) * 4;
+
+      for (var c = 0; c < 3; c++) {
+        var center = src[idx + c];
+
+        // Get 3x3 neighborhood
+        var top = src[((y - 1) * w + x) * 4 + c];
+        var bottom = src[((y + 1) * w + x) * 4 + c];
+        var left = src[(y * w + (x - 1)) * 4 + c];
+        var right = src[(y * w + (x + 1)) * 4 + c];
+        var tl = src[((y - 1) * w + (x - 1)) * 4 + c];
+        var tr = src[((y - 1) * w + (x + 1)) * 4 + c];
+        var bl = src[((y + 1) * w + (x - 1)) * 4 + c];
+        var br = src[((y + 1) * w + (x + 1)) * 4 + c];
+
+        var neighbors = [top, bottom, left, right, tl, tr, bl, br];
+        var nMin = 255, nMax = 0, nSum = 0;
+        for (var n = 0; n < 8; n++) {
+          if (neighbors[n] < nMin) nMin = neighbors[n];
+          if (neighbors[n] > nMax) nMax = neighbors[n];
+          nSum += neighbors[n];
+        }
+        var nMean = nSum / 8;
+        var nRange = nMax - nMin;
+
+        // ===== BRIGHT HALO DETECTION =====
+        // Center is significantly brighter than most neighbors AND
+        // there's a big range (edge present) AND
+        // center is on the bright side
+        if (nRange > 50 && center > nMean + nRange * 0.15) {
+          // Check: is at least one neighbor much darker?
+          var darkCount = 0;
+          for (var d = 0; d < 8; d++) {
+            if (neighbors[d] < center - 40) darkCount++;
+          }
+          if (darkCount >= 1 && darkCount <= 5) {
+            // This is likely a halo pixel (bright fringe at edge)
+            // Pull it back toward the 4-connected mean (not diagonal)
+            var crossMean = (top + bottom + left + right) / 4;
+            // Blend: mostly keep original, but reduce the excess
+            var excess = center - crossMean;
+            if (excess > 0) {
+              dst[idx + c] = Math.max(0, Math.min(255, Math.round(center - excess * 0.55)));
+            }
+          }
+        }
+
+        // ===== DARK HALO DETECTION =====
+        // (Less common but can happen)
+        if (nRange > 50 && center < nMean - nRange * 0.15) {
+          var brightCount = 0;
+          for (var b = 0; b < 8; b++) {
+            if (neighbors[b] > center + 40) brightCount++;
+          }
+          if (brightCount >= 1 && brightCount <= 5) {
+            var crossMean2 = (top + bottom + left + right) / 4;
+            var deficit = crossMean2 - center;
+            if (deficit > 0) {
+              dst[idx + c] = Math.max(0, Math.min(255, Math.round(center + deficit * 0.55)));
+            }
+          }
         }
       }
     }

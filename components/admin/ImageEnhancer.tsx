@@ -29,17 +29,17 @@ const DEFAULT_SETTINGS: EnhanceSettings = {
 const PRESETS: Record<string, { label: string; desc: string; settings: EnhanceSettings }> = {
   text: {
     label: 'Text Clear',
-    desc: '4x upscale, no pixels when zoomed',
+    desc: '4x upscale, text readable, no halos',
     settings: { upscale: 4, sharpen: 80, contrast: 0, brightness: 0, saturation: 0, denoise: 0, clarity: 70, shadows: 0, highlights: 0 }
   },
   clarity: {
     label: 'Clarity',
-    desc: '2x upscale + sharp + clarity',
+    desc: '2x upscale, crisp and clean',
     settings: { upscale: 2, sharpen: 65, contrast: 0, brightness: 0, saturation: 0, denoise: 0, clarity: 55, shadows: 0, highlights: 0 }
   },
   super: {
     label: '4x Super',
-    desc: 'Maximum detail, zero pixels',
+    desc: 'Max detail, zero pixels, zero halos',
     settings: { upscale: 4, sharpen: 90, contrast: 0, brightness: 0, saturation: 0, denoise: 0, clarity: 80, shadows: 0, highlights: 0 }
   },
   social: {
@@ -345,7 +345,7 @@ export default function ImageEnhancer() {
             </div>
             <div>
               <p className="text-xs font-bold text-text-primary">Image Enhancer</p>
-              <p className="text-[9px] text-text-tertiary">Clarity & Super-Resolution</p>
+              <p className="text-[9px] text-text-tertiary">Halo-free clarity & super-resolution</p>
             </div>
           </div>
         </div>
