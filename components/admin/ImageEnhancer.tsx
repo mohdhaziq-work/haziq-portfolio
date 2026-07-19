@@ -10,6 +10,7 @@ interface EnhanceSettings {
   saturation: number
   denoise: number
   clarity: number
+  softness: number
   shadows: number
   highlights: number
 }
@@ -22,6 +23,7 @@ const DEFAULT_SETTINGS: EnhanceSettings = {
   saturation: 0,
   denoise: 0,
   clarity: 40,
+  softness: 15,
   shadows: 0,
   highlights: 0,
 }
@@ -30,32 +32,32 @@ const PRESETS: Record<string, { label: string; desc: string; settings: EnhanceSe
   text: {
     label: 'Text Clear',
     desc: '4x upscale, text readable, no halos',
-    settings: { upscale: 4, sharpen: 80, contrast: 0, brightness: 0, saturation: 0, denoise: 0, clarity: 70, shadows: 0, highlights: 0 }
+    settings: { upscale: 4, sharpen: 80, contrast: 0, brightness: 0, saturation: 0, denoise: 0, clarity: 70, softness: 15, shadows: 0, highlights: 0 }
   },
   clarity: {
     label: 'Clarity',
     desc: '2x upscale, crisp and clean',
-    settings: { upscale: 2, sharpen: 65, contrast: 0, brightness: 0, saturation: 0, denoise: 0, clarity: 55, shadows: 0, highlights: 0 }
+    settings: { upscale: 2, sharpen: 65, contrast: 0, brightness: 0, saturation: 0, denoise: 0, clarity: 55, softness: 15, shadows: 0, highlights: 0 }
   },
   super: {
     label: '4x Super',
     desc: 'Max detail, zero pixels, zero halos',
-    settings: { upscale: 4, sharpen: 90, contrast: 0, brightness: 0, saturation: 0, denoise: 0, clarity: 80, shadows: 0, highlights: 0 }
+    settings: { upscale: 4, sharpen: 90, contrast: 0, brightness: 0, saturation: 0, denoise: 0, clarity: 80, softness: 15, shadows: 0, highlights: 0 }
   },
   social: {
     label: 'Social',
     desc: 'Upscale + color boost',
-    settings: { upscale: 2, sharpen: 40, contrast: 15, brightness: 5, saturation: 30, denoise: 0, clarity: 30, shadows: 15, highlights: -5 }
+    settings: { upscale: 2, sharpen: 40, contrast: 15, brightness: 5, saturation: 30, denoise: 0, clarity: 30, softness: 20, shadows: 15, highlights: -5 }
   },
   photo: {
     label: 'Photo',
     desc: 'Denoise + enhance',
-    settings: { upscale: 2, sharpen: 25, contrast: 8, brightness: 0, saturation: 15, denoise: 20, clarity: 20, shadows: 10, highlights: -3 }
+    settings: { upscale: 2, sharpen: 25, contrast: 8, brightness: 0, saturation: 15, denoise: 20, clarity: 20, softness: 25, shadows: 10, highlights: -3 }
   },
   reset: {
     label: 'None',
     desc: 'No enhancement',
-    settings: { upscale: 1, sharpen: 0, contrast: 0, brightness: 0, saturation: 0, denoise: 0, clarity: 0, shadows: 0, highlights: 0 }
+    settings: { upscale: 1, sharpen: 0, contrast: 0, brightness: 0, saturation: 0, denoise: 0, clarity: 0, softness: 0, shadows: 0, highlights: 0 }
   },
 }
 
@@ -65,16 +67,12 @@ const MAX_OUTPUT_DIM = 4096
 function estimateSeconds(w: number, h: number, s: EnhanceSettings): number {
   const pixels = (w * h) / 1000000 // in millions
   let sec = 0
-  // Detail recovery (runs when upscale > 1): ~0.15s per 4M pixels
   if (s.upscale > 1) sec += pixels * 0.15
-  if (s.upscale >= 3) sec += pixels * 0.1 // extra pass for 3x+
-  // Denoise: 3x3 bilateral
+  if (s.upscale >= 3) sec += pixels * 0.1
   if (s.denoise > 0) sec += pixels * 0.5
-  // Clarity: integral image O(n)
   if (s.clarity > 0) sec += pixels * 0.08
-  // Sharpen: 3x3 + optional 5x5
   if (s.sharpen > 0) sec += pixels * 0.1
-  // Color adjustments
+  if (s.softness > 0) sec += pixels * 0.06
   if (s.shadows !== 0 || s.highlights !== 0 || s.brightness !== 0) sec += pixels * 0.03
   if (s.contrast !== 0) sec += pixels * 0.02
   if (s.saturation !== 0) sec += pixels * 0.02
@@ -321,7 +319,7 @@ export default function ImageEnhancer() {
     setOriginalImage(null)
     setOriginalUrl('')
     setEnhancedUrl('')
-    setSettings({ ...DEFAULT_SETTINGS })
+    setSettings({ ...PRESETS.text.settings })
     setFileName('')
     setFullscreenCompare(false)
     setImageInfo({ w: 0, h: 0, upscaledW: 0, upscaledH: 0 })
@@ -444,7 +442,8 @@ export default function ImageEnhancer() {
                 {[
                   { key: 'sharpen' as const, label: 'Sharpen', desc: 'Crisp text edges', min: 0, max: 100 },
                   { key: 'clarity' as const, label: 'Clarity', desc: 'Makes text readable', min: 0, max: 100 },
-                  { key: 'denoise' as const, label: 'Denoise', desc: 'Remove grain (may soften text)', min: 0, max: 100 },
+                  { key: 'softness' as const, label: 'Softness', desc: 'Smooth polished look', min: 0, max: 50 },
+                  { key: 'denoise' as const, label: 'Denoise', desc: 'Remove grain', min: 0, max: 100 },
                 ].map(ctrl => (
                   <div key={ctrl.key}>
                     <div className="flex items-center justify-between mb-0.5">

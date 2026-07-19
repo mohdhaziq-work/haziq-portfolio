@@ -30,6 +30,7 @@ function countSteps(s) {
   if (s.saturation !== 0) n++;
   // Halo clean always runs when sharpening was applied
   if (s.upscale > 1 || s.sharpen > 0 || s.clarity > 0) n++;
+  if (s.softness > 0) n++;
   return Math.max(n, 1);
 }
 
@@ -72,13 +73,21 @@ function processImage(src, w, h, settings) {
       src = applySmartSharpen(src, w, h, settings.sharpen);
     }
 
-    // Step 5: Halo Clean - removes any remaining white/dark outlines
-    if (hasAnySharpening) {
-      if (cancelled) return;
-      currentStep++;
-      sendProgress('Cleaning edges (' + currentStep + '/' + totalSteps + ')...', Math.round((currentStep / totalSteps) * 90));
-      src = applyHaloClean(src, w, h);
-    }
+  // Step 5: Halo Clean - removes any remaining white/dark outlines
+  if (hasAnySharpening) {
+    if (cancelled) return;
+    currentStep++;
+    sendProgress('Cleaning edges (' + currentStep + '/' + totalSteps + ')...', Math.round((currentStep / totalSteps) * 90));
+    src = applyHaloClean(src, w, h);
+  }
+
+  // Step 5.5: Softness (edge-preserving guided smooth) - polished look
+  if (settings.softness > 0) {
+    if (cancelled) return;
+    currentStep++;
+    sendProgress('Softening (' + currentStep + '/' + totalSteps + ')...', Math.round((currentStep / totalSteps) * 90));
+    src = applySoftness(src, w, h, settings.softness);
+  }
 
     // Step 6-8: Color adjustments (only if user enabled)
     if (settings.shadows !== 0 || settings.highlights !== 0 || settings.brightness !== 0) {
@@ -522,6 +531,91 @@ function applyHaloClean(src, w, h) {
           }
         }
       }
+    }
+  }
+
+  return dst;
+}
+
+// ===== SOFTNESS (Edge-Preserving Guided Smooth) =====
+// Gives a polished, professional softness WITHOUT blurring edges.
+// Flat areas get smoothed (removes micro-noise, pixelation artifacts).
+// Edges stay sharp (text stays readable).
+// Uses bilateral-like blending with edge detection.
+function applySoftness(src, w, h, amount) {
+  var dst = new Uint8ClampedArray(src);
+  var blendStrength = amount / 100; // 0-0.5
+  var edgeThreshold = 30; // Edges above this difference are preserved
+
+  for (var y = 1; y < h - 1; y++) {
+    if (cancelled) return dst;
+    for (var x = 1; x < w - 1; x++) {
+      var idx = (y * w + x) * 4;
+
+      // Compute luminance for edge detection
+      var centerLum = 0.299 * src[idx] + 0.587 * src[idx + 1] + 0.114 * src[idx + 2];
+      var topLum = 0.299 * src[((y - 1) * w + x) * 4] + 0.587 * src[((y - 1) * w + x) * 4 + 1] + 0.114 * src[((y - 1) * w + x) * 4 + 2];
+      var bottomLum = 0.299 * src[((y + 1) * w + x) * 4] + 0.587 * src[((y + 1) * w + x) * 4 + 1] + 0.114 * src[((y + 1) * w + x) * 4 + 2];
+      var leftLum = 0.299 * src[(y * w + (x - 1)) * 4] + 0.587 * src[(y * w + (x - 1)) * 4 + 1] + 0.114 * src[(y * w + (x - 1)) * 4 + 2];
+      var rightLum = 0.299 * src[(y * w + (x + 1)) * 4] + 0.587 * src[(y * w + (x + 1)) * 4 + 1] + 0.114 * src[(y * w + (x + 1)) * 4 + 2];
+
+      // Check if this is an edge pixel
+      var maxDiff = Math.max(
+        Math.abs(centerLum - topLum),
+        Math.abs(centerLum - bottomLum),
+        Math.abs(centerLum - leftLum),
+        Math.abs(centerLum - rightLum)
+      );
+
+      // Edge weight: 0 = full edge (preserve), 1 = flat area (smooth)
+      // Smooth transition from preserve to smooth
+      var edgeWeight;
+      if (maxDiff > edgeThreshold) {
+        edgeWeight = 0; // Strong edge - don't touch
+      } else if (maxDiff > edgeThreshold * 0.5) {
+        edgeWeight = (edgeThreshold - maxDiff) / (edgeThreshold * 0.5); // Gradual transition
+        edgeWeight = edgeWeight * edgeWeight; // Quadratic falloff - more preservation near edges
+      } else {
+        edgeWeight = 1.0; // Flat area - full smoothing
+      }
+
+      // Weighted average of 5x5 neighbors for smooth result
+      var rSum = 0, gSum = 0, bSum = 0, wTotal = 0;
+
+      // 5x5 kernel with distance-based weights
+      for (var dy = -2; dy <= 2; dy++) {
+        var ny = y + dy;
+        if (ny < 0 || ny >= h) continue;
+        for (var dx = -2; dx <= 2; dx++) {
+          var nx = x + dx;
+          if (nx < 0 || nx >= w) continue;
+
+          var nIdx = (ny * w + nx) * 4;
+          var dist = Math.sqrt(dx * dx + dy * dy);
+          var wt = 1.0 / (1.0 + dist * dist); // Gaussian-like weight
+
+          // Also weight by color similarity (bilateral-like)
+          var nLum = 0.299 * src[nIdx] + 0.587 * src[nIdx + 1] + 0.114 * src[nIdx + 2];
+          var lumDiff = Math.abs(centerLum - nLum);
+          var colorWt = lumDiff < edgeThreshold ? 1.0 : Math.exp(-(lumDiff * lumDiff) / (2 * edgeThreshold * edgeThreshold));
+
+          var finalWt = wt * colorWt;
+          rSum += src[nIdx] * finalWt;
+          gSum += src[nIdx + 1] * finalWt;
+          bSum += src[nIdx + 2] * finalWt;
+          wTotal += finalWt;
+        }
+      }
+
+      var smoothR = rSum / wTotal;
+      var smoothG = gSum / wTotal;
+      var smoothB = bSum / wTotal;
+
+      // Blend: original + (smooth - original) * blendStrength * edgeWeight
+      var actualBlend = blendStrength * edgeWeight;
+      dst[idx] = Math.max(0, Math.min(255, Math.round(src[idx] + (smoothR - src[idx]) * actualBlend)));
+      dst[idx + 1] = Math.max(0, Math.min(255, Math.round(src[idx + 1] + (smoothG - src[idx + 1]) * actualBlend)));
+      dst[idx + 2] = Math.max(0, Math.min(255, Math.round(src[idx + 2] + (smoothB - src[idx + 2]) * actualBlend)));
     }
   }
 
