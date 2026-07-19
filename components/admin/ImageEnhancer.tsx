@@ -61,7 +61,7 @@ const PRESETS: Record<string, { label: string; desc: string; settings: EnhanceSe
   },
 }
 
-const MAX_OUTPUT_DIM = 4096
+const MAX_OUTPUT_DIM = 2048
 
 // Estimate processing time based on output size and enabled steps
 function estimateSeconds(w: number, h: number, s: EnhanceSettings): number {
@@ -343,7 +343,7 @@ export default function ImageEnhancer() {
             </div>
             <div>
               <p className="text-xs font-bold text-text-primary">Image Enhancer</p>
-              <p className="text-[9px] text-text-tertiary">Halo-free clarity & super-resolution</p>
+              <p className="text-[9px] text-text-tertiary">Guided Filter Engine - Halo-free</p>
             </div>
           </div>
         </div>
