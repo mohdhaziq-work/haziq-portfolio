@@ -104,12 +104,18 @@ export default function Footer() {
 
         <div className="pt-8 border-t border-border flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-text-tertiary text-caption">
-            © {currentYear} {SITE.name}. Built with Next.js.
+            © {currentYear} {SITE.name}. Web Developer — Portfolio.
           </p>
           <p className="text-text-tertiary text-caption">
             Designed in India
           </p>
         </div>
+        {/* SEO: Footer keywords for search engines */}
+        <p className="sr-only">
+          Mohd Haziq Web Developer Portfolio. Professional website development services.
+          Restaurant website, coaching website, gym website, business website.
+          Hire Mohd Haziq — affordable web developer.
+        </p>
       </div>
     </footer>
   )

@@ -18,7 +18,7 @@ export default function ContactPage() {
         <div className="text-center max-w-3xl mx-auto">
           <AnimatedText as="span" className="section-overline">Contact</AnimatedText>
           <AnimatedText as="h1" delay={100} className="text-display-lg text-text-primary mb-6">
-            Let&apos;s Build <span className="text-accent">Together</span>
+            Hire Mohd Haziq — <span className="text-accent">Web Developer</span>
           </AnimatedText>
           <AnimatedText as="p" delay={200} className="text-body-lg text-text-secondary">
             Ready to take your business digital? Drop me a message and I&apos;ll get back to you within 2 hours.

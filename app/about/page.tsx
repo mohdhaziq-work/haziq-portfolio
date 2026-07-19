@@ -27,8 +27,8 @@ export default function AboutPage() {
           <div>
             <AnimatedText as="span" className="section-overline">About Me</AnimatedText>
             <AnimatedText as="h1" delay={100} className="text-display-lg text-text-primary mb-6">
-              The Young Hustler{' '}
-              <span className="text-accent">Behind the Code</span>
+              Mohd Haziq —{' '}
+              <span className="text-accent">Web Developer</span>
             </AnimatedText>
             <AnimatedText as="p" delay={200} className="text-body-lg text-text-secondary leading-relaxed mb-6">
               Hi, I&apos;m <strong className="text-text-primary">{SITE.name}</strong>, a {SITE.age}-year-old developer. While others were scrolling reels,

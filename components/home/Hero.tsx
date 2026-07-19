@@ -22,8 +22,10 @@ export default function Hero() {
             </AnimatedText>
             {/* SEO: Hidden semantic description for search engines */}
             <p className="sr-only">
-              Mohd Haziq Portfolio — Professional Web Developer building high-converting websites for businesses.
-              Hire Mohd Haziq for your next website project. View portfolio, projects, and services.
+              Mohd Haziq is a professional Web Developer specializing in business websites, restaurant websites,
+              coaching center websites, gym websites, and custom web applications. Built with Next.js, React,
+              Tailwind CSS. Affordable website development starting at Rs 2,500. Hire Mohd Haziq for your next
+              project. Free mockup available. Haziq Portfolio — view live projects and get started today.
             </p>
             <AnimatedText as="p" delay={200} className="text-body-lg text-text-secondary max-w-xl mb-10 leading-relaxed">
               {SITE.age}-year-old Web Developer. I build modern, fast, and high-converting websites 

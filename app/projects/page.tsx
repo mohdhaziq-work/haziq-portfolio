@@ -30,7 +30,7 @@ export default function ProjectsPage() {
         <div className="text-center max-w-3xl mx-auto">
           <AnimatedText as="span" className="section-overline">Portfolio</AnimatedText>
           <AnimatedText as="h1" delay={100} className="text-display-lg text-text-primary mb-6">
-            All <span className="text-accent">Projects</span>
+            Mohd Haziq <span className="text-accent">Portfolio</span>
           </AnimatedText>
           <AnimatedText as="p" delay={200} className="text-body-lg text-text-secondary">
             Each project is built with a specific business goal — converting visitors into customers.

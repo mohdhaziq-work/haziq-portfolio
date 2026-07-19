@@ -1,12 +1,16 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'About Mohd Haziq',
-  description: 'Mohd Haziq is a professional Web Developer who builds high-converting websites for businesses. Skills in Next.js, React, Tailwind CSS. Hire Mohd Haziq for your next website project.',
+  title: 'About Mohd Haziq — Web Developer, Website Builder',
+  description: 'About Mohd Haziq — a professional Web Developer who builds high-converting business websites. Self-taught developer specializing in Next.js, React, Tailwind CSS. Hire Mohd Haziq for restaurant, coaching, gym, and business websites.',
+  keywords: ['About Mohd Haziq', 'Mohd Haziq Web Developer', 'Haziq Developer', 'Hire Mohd Haziq', 'Freelance Web Developer', 'Next.js Developer', 'React Developer'],
   openGraph: {
     title: 'About Mohd Haziq — Web Developer',
-    description: 'Mohd Haziq builds professional websites for businesses. Hire for your next project.',
+    description: 'About Mohd Haziq — professional Web Developer building business websites.',
     url: 'https://mohdhaziq-portfolio.onrender.com/about',
+  },
+  alternates: {
+    canonical: 'https://mohdhaziq-portfolio.onrender.com/about',
   },
 }
 
