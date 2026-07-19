@@ -139,7 +139,7 @@ export const STATS = [
   { value: '3+', label: 'Live Projects' },
   { value: '100%', label: 'Modern Tech' },
   { value: '3+', label: 'Niches Covered' },
-  { value: `${PRICING.currency}${PRICING.plans[0].price.split(',')[0]}`, label: 'Starting At' },
+  { value: `${PRICING.currency}${PRICING.plans[0].price}`, label: 'Starting At' },
 ] as const
 
 // ==================== SKILLS ====================

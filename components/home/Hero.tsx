@@ -17,8 +17,8 @@ export default function Hero() {
               Available for projects
             </AnimatedText>
             <AnimatedText as="h1" delay={100} className="text-display-xl md:text-display-xl text-text-primary mb-6 text-balance">
-              Mohd Haziq{' '}—{' '}
-              <span className="text-accent">Web Developer</span>
+              I build websites that{' '}
+              <span className="text-accent">bring customers</span> to your door.
             </AnimatedText>
             {/* SEO: Hidden semantic description for search engines */}
             <p className="sr-only">

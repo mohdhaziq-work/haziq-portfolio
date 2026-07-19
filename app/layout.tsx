@@ -83,10 +83,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: SITE_URL,
   },
-  applicationName: 'Mohd Haziq Portfolio',
+  applicationName: 'Mohd Haziq',
 }
 
 // JSON-LD Structured Data for Google Rich Results
+// Google uses WebSite schema "name" as the site name in search results
+// This overrides any server header like X-Powered-By: Render
 const jsonLdPerson = {
   '@context': 'https://schema.org',
   '@type': 'Person',
@@ -108,18 +110,13 @@ const jsonLdPerson = {
 const jsonLdWebsite = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
-  name: 'Mohd Haziq Portfolio',
-  alternateName: 'Haziq Portfolio',
+  name: 'Mohd Haziq',
+  alternateName: ['Haziq Portfolio', 'Mohd Haziq Portfolio', 'Haziq'],
   url: SITE_URL,
   description: 'Professional web development portfolio of Mohd Haziq. View live projects, services, and get a free mockup.',
   author: {
     '@type': 'Person',
     name: 'Mohd Haziq',
-  },
-  potentialAction: {
-    '@type': 'SearchAction',
-    target: SITE_URL,
-    'query-input': 'required name=search_string',
   },
 }
 
@@ -138,6 +135,11 @@ export default function RootLayout({
         <meta name="theme-color" content="#1a73e8" />
         <meta name="apple-mobile-web-app-title" content="Mohd Haziq" />
         <meta name="application-name" content="Mohd Haziq" />
+        {/* Override any server-provided site name */}
+        <meta name="author" content="Mohd Haziq" />
+        <meta name="owner" content="Mohd Haziq" />
+        <meta property="og:site_name" content="Mohd Haziq" />
+        <meta property="og:title" content="Mohd Haziq — Web Developer" />
         {/* JSON-LD Structured Data */}
         <script
           type="application/ld+json"
