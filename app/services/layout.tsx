@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Services & Pricing — Mohd Haziq',
-  description: 'Professional website development services by Mohd Haziq. Starter at Rs 2,500, Business at Rs 6,000, Premium at Rs 12,000. Free mockup available. No hidden fees.',
+  title: 'Services by Mohd Haziq',
+  description: 'Website design and development services by Mohd Haziq. Starter, Business, and Premium plans. Professional, mobile-friendly, SEO-optimized websites for businesses. Get a free mockup.',
   openGraph: {
-    title: 'Services & Pricing — Mohd Haziq',
-    description: 'Professional website development services by Mohd Haziq. Starter Rs 2,500, Business Rs 6,000, Premium Rs 12,000. Free mockup available.',
+    title: 'Services — Mohd Haziq Web Developer',
+    description: 'Professional website design services by Mohd Haziq. Get a free mockup for your business.',
     url: 'https://mohdhaziq-portfolio.onrender.com/services',
   },
 }

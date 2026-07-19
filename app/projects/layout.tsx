@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Projects — Mohd Haziq Portfolio',
-  description: 'View live website projects built by Mohd Haziq. Restaurant, coaching, and gym websites — each with unique design, animations, and real functionality. See the live demos.',
+  title: 'Projects by Mohd Haziq',
+  description: 'View live website projects built by Mohd Haziq. Restaurant, coaching, and gym websites with unique design and real functionality. Mohd Haziq Portfolio projects showcase.',
   openGraph: {
     title: 'Projects — Mohd Haziq Portfolio',
-    description: 'View live website projects built by Mohd Haziq. Restaurant, coaching, and gym websites with unique design and real functionality.',
+    description: 'Live website projects built by Mohd Haziq. Restaurant, coaching, and gym demos.',
     url: 'https://mohdhaziq-portfolio.onrender.com/projects',
   },
 }

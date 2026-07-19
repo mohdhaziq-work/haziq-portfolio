@@ -17,9 +17,14 @@ export default function Hero() {
               Available for projects
             </AnimatedText>
             <AnimatedText as="h1" delay={100} className="text-display-xl md:text-display-xl text-text-primary mb-6 text-balance">
-              I build websites that{' '}
-              <span className="text-accent">bring customers</span> to your door.
+              Mohd Haziq{' '}—{' '}
+              <span className="text-accent">Web Developer</span>
             </AnimatedText>
+            {/* SEO: Hidden semantic description for search engines */}
+            <p className="sr-only">
+              Mohd Haziq Portfolio — Professional Web Developer building high-converting websites for businesses.
+              Hire Mohd Haziq for your next website project. View portfolio, projects, and services.
+            </p>
             <AnimatedText as="p" delay={200} className="text-body-lg text-text-secondary max-w-xl mb-10 leading-relaxed">
               {SITE.age}-year-old Web Developer. I build modern, fast, and high-converting websites 
               that help local businesses grow digitally and bring in more customers.
