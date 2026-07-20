@@ -4,10 +4,6 @@ import { sendWelcomeEmail } from '@/lib/email/service'
 /**
  * POST /api/email/welcome
  * Sends a welcome email to a newly signed-up client
- * 
- * Body: { email: string, name: string }
- * 
- * Called from AuthContext when a new user signs in for the first time
  */
 export async function POST(request: NextRequest) {
   try {
@@ -21,7 +17,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
       return NextResponse.json(

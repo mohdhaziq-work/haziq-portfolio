@@ -61,19 +61,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Send welcome email on first login
   const sendWelcomeIfNeeded = useCallback(async (firebaseUser: User) => {
     // Don't send welcome email to admin
-    if (firebaseUser.email === ADMIN_EMAIL) return
+    if (firebaseUser.email === ADMIN_EMAIL) {
+      console.log('[Auth] Skipping welcome email for admin')
+      return
+    }
 
-    // Skip if Firestore is not initialized
-    if (!db) return
+    const displayName = firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'there'
 
-    try {
-      const userDocRef = doc(db, 'users', firebaseUser.uid)
-      const userDoc = await getDoc(userDocRef)
+    // Try to check Firestore for existing user record
+    if (db) {
+      try {
+        const userDocRef = doc(db, 'users', firebaseUser.uid)
+        const userDoc = await getDoc(userDocRef)
 
-      if (!userDoc.exists()) {
-        // First time user - save record and send welcome email
-        const displayName = firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'there'
+        if (userDoc.exists()) {
+          console.log('[Auth] User already exists, skipping welcome email for:', firebaseUser.email)
+          return
+        }
 
+        // First time user - save record
         await setDoc(userDocRef, {
           email: firebaseUser.email,
           name: displayName,
@@ -81,26 +87,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           createdAt: serverTimestamp(),
           welcomeEmailSent: true,
         })
-
-        // Send welcome email via API
-        try {
-          await fetch('/api/email/welcome', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              email: firebaseUser.email,
-              name: displayName,
-            }),
-          })
-          console.log('[Auth] Welcome email triggered for:', firebaseUser.email)
-        } catch (emailErr) {
-          console.error('[Auth] Welcome email API call failed:', emailErr)
-          // Don't block login if email fails
-        }
+      } catch (err) {
+        console.error('[Auth] Firestore check failed, will still try email:', err)
+        // Continue to send email even if Firestore check fails
       }
-    } catch (err) {
-      console.error('[Auth] Error checking/saving user record:', err)
-      // Don't block login if Firestore check fails
+    }
+
+    // Send welcome email via API
+    try {
+      const response = await fetch('/api/email/welcome', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: firebaseUser.email,
+          name: displayName,
+        }),
+      })
+      const result = await response.json()
+      console.log('[Auth] Welcome email API response:', result)
+    } catch (emailErr) {
+      console.error('[Auth] Welcome email API call failed:', emailErr)
     }
   }, [])
 

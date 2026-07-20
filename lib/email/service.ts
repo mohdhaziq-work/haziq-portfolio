@@ -1,29 +1,43 @@
 /**
  * Email Service - Welcome Email + Project Update Emails
- * Uses Resend API (free tier: 100 emails/day)
+ * Uses Gmail SMTP via Nodemailer (FREE - no domain verification needed)
  * 
  * Setup:
- * 1. Go to https://resend.com and create free account
- * 2. Add your domain OR use onboarding domain for testing
- * 3. Create API key at https://resend.com/api-keys
- * 4. Set RESEND_API_KEY in Render Dashboard environment variables
+ * 1. Go to https://myaccount.google.com/apppasswords
+ * 2. Create an App Password (select "Mail" and "Other" -> name it "Portfolio")
+ * 3. Copy the 16-character password
+ * 4. Set these in Render Dashboard:
+ *    - SMTP_USER = mohdhaziq1962@gmail.com
+ *    - SMTP_PASS = xxxx xxxx xxxx xxxx (your app password, no spaces)
  */
 
-import { Resend } from 'resend'
-
-// Lazy init - prevents build-time crash when API key is absent
-let _resend: Resend | null = null
-function getResend(): Resend {
-  if (!_resend) {
-    _resend = new Resend(process.env.RESEND_API_KEY || '')
-  }
-  return _resend
-}
+import nodemailer from 'nodemailer'
 
 const SITE_URL = 'https://mohdhaziq-portfolio.onrender.com'
 const LOGO_URL = `${SITE_URL}/logo-haziq.svg`
 const INSTAGRAM_URL = 'https://www.instagram.com/haziq.built'
-const FROM_EMAIL = 'Mohd Haziq <onboarding@resend.dev>'
+const FROM_EMAIL = '"Mohd Haziq" <mohdhaziq1962@gmail.com>'
+
+// Lazy SMTP transporter
+let _transporter: nodemailer.Transporter | null = null
+function getTransporter(): nodemailer.Transporter {
+  if (!_transporter) {
+    _transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      auth: {
+        user: process.env.SMTP_USER || '',
+        pass: process.env.SMTP_PASS || '',
+      },
+    })
+  }
+  return _transporter
+}
+
+function isSmtpConfigured(): boolean {
+  return !!(process.env.SMTP_USER && process.env.SMTP_PASS)
+}
 
 // ==================== SHARED STYLES ====================
 
@@ -200,22 +214,18 @@ export async function sendWelcomeEmail(
   email: string,
   name: string
 ): Promise<{ success: boolean; error?: string }> {
-  if (!process.env.RESEND_API_KEY) {
-    console.log('[Email] RESEND_API_KEY not set - skipping welcome email')
-    return { success: false, error: 'RESEND_API_KEY not configured' }
+  if (!isSmtpConfigured()) {
+    console.log('[Email] SMTP_USER/SMTP_PASS not set - skipping welcome email')
+    return { success: false, error: 'SMTP not configured' }
   }
   try {
-    const { data, error } = await getResend().emails.send({
+    const info = await getTransporter().sendMail({
       from: FROM_EMAIL,
-      to: [email],
+      to: email,
       subject: 'Welcome to Mohd Haziq — Your Account is Active',
       html: getWelcomeEmailHTML(name),
     })
-    if (error) {
-      console.error('[Email] Welcome error:', error)
-      return { success: false, error: error.message }
-    }
-    console.log('[Email] Welcome sent to:', email, 'ID:', data?.id)
+    console.log('[Email] Welcome sent to:', email, 'ID:', info.messageId)
     return { success: true }
   } catch (err) {
     console.error('[Email] Welcome exception:', err)
@@ -233,23 +243,19 @@ export async function sendProjectUpdateEmail(
     message?: string
   }
 ): Promise<{ success: boolean; error?: string }> {
-  if (!process.env.RESEND_API_KEY) {
-    console.log('[Email] RESEND_API_KEY not set - skipping update email')
-    return { success: false, error: 'RESEND_API_KEY not configured' }
+  if (!isSmtpConfigured()) {
+    console.log('[Email] SMTP not configured - skipping update email')
+    return { success: false, error: 'SMTP not configured' }
   }
   try {
     const statusLabel = data.status.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
-    const { data: result, error } = await getResend().emails.send({
+    const info = await getTransporter().sendMail({
       from: FROM_EMAIL,
-      to: [email],
+      to: email,
       subject: `Project Update: ${data.projectName} — ${statusLabel}`,
       html: getProjectUpdateHTML({ ...data, message: data.message || '' }),
     })
-    if (error) {
-      console.error('[Email] Update error:', error)
-      return { success: false, error: error.message }
-    }
-    console.log('[Email] Update sent to:', email, 'ID:', result?.id)
+    console.log('[Email] Update sent to:', email, 'ID:', info.messageId)
     return { success: true }
   } catch (err) {
     console.error('[Email] Update exception:', err)
@@ -265,22 +271,18 @@ export async function sendProjectDeliveredEmail(
     projectUrl?: string
   }
 ): Promise<{ success: boolean; error?: string }> {
-  if (!process.env.RESEND_API_KEY) {
-    console.log('[Email] RESEND_API_KEY not set - skipping delivered email')
-    return { success: false, error: 'RESEND_API_KEY not configured' }
+  if (!isSmtpConfigured()) {
+    console.log('[Email] SMTP not configured - skipping delivered email')
+    return { success: false, error: 'SMTP not configured' }
   }
   try {
-    const { data: result, error } = await getResend().emails.send({
+    const info = await getTransporter().sendMail({
       from: FROM_EMAIL,
-      to: [email],
+      to: email,
       subject: `Your Website is Ready! — ${data.projectName}`,
       html: getProjectDeliveredHTML(data),
     })
-    if (error) {
-      console.error('[Email] Delivered error:', error)
-      return { success: false, error: error.message }
-    }
-    console.log('[Email] Delivered sent to:', email, 'ID:', result?.id)
+    console.log('[Email] Delivered sent to:', email, 'ID:', info.messageId)
     return { success: true }
   } catch (err) {
     console.error('[Email] Delivered exception:', err)
