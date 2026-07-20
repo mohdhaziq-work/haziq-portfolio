@@ -255,6 +255,9 @@ export default function RootLayout({
         <meta property="og:title" content="Mohd Haziq — Web Developer | Portfolio" />
         <meta property="og:type" content="website" />
         <meta property="og:locale" content="en_IN" />
+        {/* Critical: Tell Google this site name is "Mohd Haziq" NOT "Render" */}
+        <meta name="sitename" content="Mohd Haziq" />
+        <meta name="hostname" content="mohdhaziq-portfolio.onrender.com" />
         {/* JSON-LD Structured Data */}
         <script
           type="application/ld+json"

@@ -193,11 +193,54 @@ function AdminDashboard() {
     if (editingProject === projectId) {
       setEditingProject(null)
     }
+
+    // Send email notification to client about status change
+    try {
+      const project = projects.find(p => p.id === projectId)
+      if (project?.clientEmail) {
+        await fetch('/api/email/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: project.clientEmail,
+            clientName: project.clientName,
+            projectName: project.businessName || project.projectType,
+            status: newStatus,
+            progress: newStatus === 'delivered' ? 100 : (project.progress || 0),
+          }),
+        })
+      }
+    } catch (err) {
+      console.error('[Admin] Failed to send status update email:', err)
+    }
+
     fetchData()
   }
 
   const handleSaveProjectDetails = async (projectId: string) => {
     await updateProjectDetails(projectId, editData)
+
+    // Send email notification to client about progress update
+    try {
+      const project = projects.find(p => p.id === projectId)
+      if (project?.clientEmail) {
+        await fetch('/api/email/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: project.clientEmail,
+            clientName: project.clientName,
+            projectName: project.businessName || project.projectType,
+            status: editData.status || project.status,
+            progress: editData.progress,
+            message: editData.adminNotes || undefined,
+          }),
+        })
+      }
+    } catch (err) {
+      console.error('[Admin] Failed to send update email:', err)
+    }
+
     setEditingProject(null)
     fetchData()
   }

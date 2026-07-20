@@ -8,6 +8,8 @@ import {
   type User,
 } from 'firebase/auth'
 import { auth, googleProvider, isFirebaseConfigured } from '@/lib/firebase/config'
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
+import { db } from '@/lib/firebase/config'
 
 // ==================== ADMIN EMAIL ====================
 // Only this email can access the admin panel
@@ -56,6 +58,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAdmin = !!user && user.email === ADMIN_EMAIL
   const isClient = !!user && user.email !== ADMIN_EMAIL
 
+  // Send welcome email on first login
+  const sendWelcomeIfNeeded = useCallback(async (firebaseUser: User) => {
+    // Don't send welcome email to admin
+    if (firebaseUser.email === ADMIN_EMAIL) return
+
+    // Skip if Firestore is not initialized
+    if (!db) return
+
+    try {
+      const userDocRef = doc(db, 'users', firebaseUser.uid)
+      const userDoc = await getDoc(userDocRef)
+
+      if (!userDoc.exists()) {
+        // First time user - save record and send welcome email
+        const displayName = firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'there'
+
+        await setDoc(userDocRef, {
+          email: firebaseUser.email,
+          name: displayName,
+          photoURL: firebaseUser.photoURL || '',
+          createdAt: serverTimestamp(),
+          welcomeEmailSent: true,
+        })
+
+        // Send welcome email via API
+        try {
+          await fetch('/api/email/welcome', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: firebaseUser.email,
+              name: displayName,
+            }),
+          })
+          console.log('[Auth] Welcome email triggered for:', firebaseUser.email)
+        } catch (emailErr) {
+          console.error('[Auth] Welcome email API call failed:', emailErr)
+          // Don't block login if email fails
+        }
+      }
+    } catch (err) {
+      console.error('[Auth] Error checking/saving user record:', err)
+      // Don't block login if Firestore check fails
+    }
+  }, [])
+
   useEffect(() => {
     // If Firebase is not configured, skip auth
     if (!auth || !isFirebaseConfigured) {
@@ -66,10 +114,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser)
       setLoading(false)
+
+      // Send welcome email on first login (non-blocking)
+      if (firebaseUser) {
+        sendWelcomeIfNeeded(firebaseUser)
+      }
     })
 
     return () => unsubscribe()
-  }, [])
+  }, [sendWelcomeIfNeeded])
 
   // After login, execute pending callback
   useEffect(() => {

@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
+  poweredByHeader: false,
   images: {
     unoptimized: true,
   },
@@ -25,6 +26,11 @@ const nextConfig = {
           {
             key: 'X-Content-Type-Options',
             value: 'nosniff',
+          },
+          // Force Google to recognize site name as "Mohd Haziq" not "Render"
+          {
+            key: 'X-Site-Name',
+            value: 'Mohd Haziq',
           },
         ],
       },
