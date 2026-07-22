@@ -196,19 +196,20 @@ function AdminDashboard() {
       // Step 2: Save to Firestore using the existing db instance
       const { db } = await import('@/lib/firebase/config')
       const { addDoc, collection, Timestamp } = await import('firebase/firestore')
-      if (db) {
-        await addDoc(collection(db, DATABASE.collections.uploads), {
-          url: data.url,
-          thumb: data.thumb || data.url,
-          deleteUrl: data.deleteUrl || '',
-          label: uploadLabel,
-          category: uploadCategory,
-          originalName: file.name,
-          size: data.size || file.size,
-          type: data.type || file.type,
-          createdAt: Timestamp.now(),
-        })
+      if (!db) {
+        throw new Error('Firebase not initialized. Check your Firebase configuration.')
       }
+      await addDoc(collection(db, DATABASE.collections.uploads), {
+        url: data.url,
+        thumb: data.thumb || data.url,
+        deleteUrl: data.deleteUrl || '',
+        label: uploadLabel,
+        category: uploadCategory,
+        originalName: file.name,
+        size: data.size || file.size,
+        type: data.type || file.type,
+        createdAt: Timestamp.now(),
+      })
 
       setUploadLabel('')
       if (fileInputRef.current) fileInputRef.current.value = ''

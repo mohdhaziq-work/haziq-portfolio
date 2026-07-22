@@ -21,15 +21,16 @@ service cloud.firestore {
         && request.auth.token.email == 'mohdhaziq1962@gmail.com';
     }
 
-    // Uploads (Image Gallery): admin only can read/create/delete
-    // These are uploaded images in the admin panel
+    // Uploads (Image Gallery): anyone can read (image URLs are public - shown on website)
+    // Only admin can create/update/delete
     match /uploads/{docId} {
-      allow create, read, update, delete: if request.auth != null
+      allow read: if true;
+      allow create, update, delete: if request.auth != null
         && request.auth.token.email == 'mohdhaziq1962@gmail.com';
     }
 
-    // SSH Keys: admin only can read/create/delete
-    // These are deployment SSH keys stored in the admin panel
+    // SSH Keys: admin only can read/create/delete (private keys - sensitive data)
+    // Server-side API uses Firebase Admin SDK for reads
     match /sshKeys/{docId} {
       allow create, read, update, delete: if request.auth != null
         && request.auth.token.email == 'mohdhaziq1962@gmail.com';
