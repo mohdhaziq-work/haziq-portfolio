@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAuth } from '@/lib/auth/AuthContext'
 import {
   getAllContacts,
@@ -147,6 +147,7 @@ function AdminDashboard() {
   const [uploading, setUploading] = useState(false)
   const [uploadLabel, setUploadLabel] = useState('')
   const [uploadCategory, setUploadCategory] = useState('general')
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // SSH Keys
   const [sshKeys, setSshKeys] = useState<SSHKey[]>([])
@@ -210,6 +211,7 @@ function AdminDashboard() {
       }
 
       setUploadLabel('')
+      if (fileInputRef.current) fileInputRef.current.value = ''
       fetchData()
     } catch (error) {
       console.error('Upload error:', error)
@@ -795,6 +797,7 @@ function AdminDashboard() {
                     'Select Image & Upload'
                   )}
                   <input
+                    ref={fileInputRef}
                     type="file"
                     accept="image/*"
                     className="hidden"
