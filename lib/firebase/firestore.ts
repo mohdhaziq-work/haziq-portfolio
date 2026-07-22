@@ -428,14 +428,20 @@ export async function getSSHKeys(): Promise<SSHKey[]> {
     const snapshot = await getDocs(q)
     return snapshot.docs.map(doc => {
       const data = doc.data()
+      // Use btoa/atob for browser compatibility (Buffer is Node.js only)
+      let keyPreview = ''
+      try {
+        if (data.keyEncoded) {
+          const decoded = atob(data.keyEncoded)
+          keyPreview = decoded.substring(0, 40) + (decoded.length > 40 ? '...' : '')
+        }
+      } catch { keyPreview = '(encoded)' }
       return {
         id: doc.id,
         name: data.name || '',
         type: data.type || 'deploy',
         host: data.host || '',
-        keyPreview: data.keyEncoded
-          ? Buffer.from(data.keyEncoded, 'base64').toString('utf-8').substring(0, 40) + '...'
-          : '',
+        keyPreview,
         createdAt: data.createdAt?.toDate?.() || null,
       }
     })
@@ -448,7 +454,8 @@ export async function getSSHKeys(): Promise<SSHKey[]> {
 export async function addSSHKey(name: string, type: string, host: string, privateKey: string): Promise<string | null> {
   if (!isFirebaseConfigured || !db) return null
   try {
-    const keyEncoded = Buffer.from(privateKey).toString('base64')
+    // Use btoa for browser compatibility (Buffer is Node.js only)
+    const keyEncoded = btoa(privateKey)
     const docRef = await addDoc(collection(db, DATABASE.collections.sshKeys), {
       name,
       type,

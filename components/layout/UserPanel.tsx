@@ -230,18 +230,22 @@ function AdminDashboard() {
   // ===== SSH KEY HANDLERS =====
   const handleAddSSHKey = async () => {
     if (!newKey.name || !newKey.privateKey) {
-      alert('Name and Private Key are required')
+      alert('Name and Key content are required')
       return
     }
     setAddingKey(true)
     try {
-      await addSSHKey(newKey.name, newKey.type, newKey.host, newKey.privateKey)
-      setNewKey({ name: '', type: 'deploy', host: '', privateKey: '' })
-      setShowAddKey(false)
-      fetchData()
+      const result = await addSSHKey(newKey.name, newKey.type, newKey.host, newKey.privateKey)
+      if (result) {
+        setNewKey({ name: '', type: 'deploy', host: '', privateKey: '' })
+        setShowAddKey(false)
+        fetchData()
+      } else {
+        alert('Failed to save SSH key. Check if Firebase is configured.')
+      }
     } catch (error) {
       console.error('Add SSH key error:', error)
-      alert('Failed to add SSH key')
+      alert('Failed to add SSH key: ' + String(error))
     } finally {
       setAddingKey(false)
     }
@@ -249,7 +253,10 @@ function AdminDashboard() {
 
   const handleDeleteSSHKey = async (keyId: string) => {
     if (!confirm('Delete this SSH key? This cannot be undone.')) return
-    await deleteSSHKey(keyId)
+    const result = await deleteSSHKey(keyId)
+    if (!result) {
+      alert('Failed to delete SSH key')
+    }
     fetchData()
   }
 
