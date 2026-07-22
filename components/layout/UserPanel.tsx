@@ -184,10 +184,9 @@ function AdminDashboard() {
     if (!file) return
     setUploading(true)
     try {
-      // Step 1: Upload to ImgBB via API route
+      // Step 1: Upload to ImgBB via API route (server reads IMGBB_API_KEY from env)
       const formData = new FormData()
       formData.append('image', file)
-      formData.append('apiKey', DATABASE.imgbbApiKey || '')
       
       const res = await fetch('/api/upload', { method: 'POST', body: formData })
       const data = await res.json()

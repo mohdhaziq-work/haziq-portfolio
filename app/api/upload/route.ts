@@ -1,7 +1,7 @@
 /**
  * API Route: Upload Image to ImgBB
- * No Firebase Admin SDK needed - uses ImgBB API directly
- * Firestore saving is done from client side via firestore.ts functions
+ * Server-side route so ImgBB API key stays secure (not exposed to client)
+ * Reads IMGBB_API_KEY from environment variables
  */
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -9,14 +9,16 @@ export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData()
     const file = formData.get('image') as File | null
-    const imgbbApiKey = formData.get('apiKey') as string || ''
 
     if (!file) {
       return NextResponse.json({ error: 'No image file provided' }, { status: 400 })
     }
 
+    // Get API key from server-side env var OR from client-sent key
+    const imgbbApiKey = process.env.IMGBB_API_KEY || process.env.NEXT_PUBLIC_IMGBB_API_KEY || formData.get('apiKey') as string || ''
+
     if (!imgbbApiKey) {
-      return NextResponse.json({ error: 'ImgBB API key required' }, { status: 400 })
+      return NextResponse.json({ error: 'ImgBB API key not configured. Set IMGBB_API_KEY in Render env vars.' }, { status: 400 })
     }
 
     // Convert file to base64
@@ -38,7 +40,7 @@ export async function POST(req: NextRequest) {
     if (!imgbbRes.ok) {
       const errText = await imgbbRes.text()
       console.error('ImgBB upload failed:', errText)
-      return NextResponse.json({ error: 'Image upload failed', details: errText }, { status: 500 })
+      return NextResponse.json({ error: 'Image upload to ImgBB failed', details: errText }, { status: 500 })
     }
 
     const imgbbData = await imgbbRes.json()
