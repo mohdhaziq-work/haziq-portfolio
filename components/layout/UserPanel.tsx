@@ -18,12 +18,17 @@ import {
   addSSHKey,
   getSSHKeys,
   deleteSSHKey,
+  getVideos,
+  addVideo,
+  deleteVideo,
   type ContactSubmission,
   type ProjectInquiry,
   type ContactStatus,
   type ProjectStatus,
   type UploadedImage,
   type SSHKey,
+  type VideoEntry,
+  type VideoPlatform,
 } from '@/lib/firebase/firestore'
 import { PERSONAL, DATABASE } from '@/config/site-config'
 import { openInstagramDM } from '@/lib/instagram'
@@ -121,7 +126,7 @@ export default function UserPanel() {
 
 // ==================== ADMIN DASHBOARD ====================
 
-type AdminTab = 'overview' | 'contacts' | 'projects' | 'images' | 'ssh'
+type AdminTab = 'overview' | 'contacts' | 'projects' | 'images' | 'reels' | 'ssh'
 
 function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<AdminTab>('overview')
@@ -155,19 +160,29 @@ function AdminDashboard() {
   const [newKey, setNewKey] = useState({ name: '', type: 'deploy', host: '', privateKey: '' })
   const [addingKey, setAddingKey] = useState(false)
 
+  // Videos / Reels
+  const [videos, setVideos] = useState<VideoEntry[]>([])
+  const [showAddVideo, setShowAddVideo] = useState(false)
+  const [newVideoUrl, setNewVideoUrl] = useState('')
+  const [newVideoTitle, setNewVideoTitle] = useState('')
+  const [newVideoDesc, setNewVideoDesc] = useState('')
+  const [addingVideo, setAddingVideo] = useState(false)
+
   const fetchData = useCallback(async () => {
     setLoading(true)
     try {
-      const [contactsData, projectsData, uploadsData, sshKeysData] = await Promise.all([
+      const [contactsData, projectsData, uploadsData, sshKeysData, videosData] = await Promise.all([
         getAllContacts(),
         getAllProjects(),
         getUploadedImages(),
         getSSHKeys(),
+        getVideos(),
       ])
       setContacts(contactsData)
       setProjects(projectsData)
       setUploads(uploadsData)
       setSshKeys(sshKeysData)
+      setVideos(videosData)
     } catch (error) {
       console.error('Fetch error:', error)
     } finally {
@@ -257,6 +272,41 @@ function AdminDashboard() {
     const result = await deleteSSHKey(keyId)
     if (!result) {
       alert('Failed to delete SSH key')
+    }
+    fetchData()
+  }
+
+  // ===== VIDEO / REEL HANDLERS =====
+  const handleAddVideo = async () => {
+    if (!newVideoUrl) {
+      alert('Video URL is required')
+      return
+    }
+    setAddingVideo(true)
+    try {
+      const result = await addVideo(newVideoUrl, newVideoTitle, newVideoDesc)
+      if (result) {
+        setNewVideoUrl('')
+        setNewVideoTitle('')
+        setNewVideoDesc('')
+        setShowAddVideo(false)
+        fetchData()
+      } else {
+        alert('Failed to save video. Check if Firebase is configured and Firestore rules are deployed.')
+      }
+    } catch (error) {
+      console.error('Add video error:', error)
+      alert('Failed to add video: ' + String(error))
+    } finally {
+      setAddingVideo(false)
+    }
+  }
+
+  const handleDeleteVideo = async (videoId: string) => {
+    if (!confirm('Delete this video/reel?')) return
+    const result = await deleteVideo(videoId)
+    if (!result) {
+      alert('Failed to delete video')
     }
     fetchData()
   }
@@ -411,7 +461,7 @@ function AdminDashboard() {
 
       {/* Tabs */}
       <div className="flex gap-1.5 mb-4 bg-surface rounded-lg p-1">
-        {(['overview', 'contacts', 'projects', 'images', 'ssh'] as AdminTab[]).map(tab => (
+        {(['overview', 'contacts', 'projects', 'images', 'reels', 'ssh'] as AdminTab[]).map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -419,7 +469,7 @@ function AdminDashboard() {
               activeTab === tab ? 'bg-white text-accent shadow-sm' : 'text-text-secondary hover:text-text-primary'
             }`}
           >
-            {tab}
+            {tab === 'reels' ? 'Reels' : tab === 'ssh' ? 'SSH' : tab}
             {tab === 'contacts' && newContacts > 0 && (
               <span className="ml-1.5 px-1.5 py-0.5 bg-red-500 text-white text-[9px] rounded-full">{newContacts}</span>
             )}
@@ -861,6 +911,157 @@ function AdminDashboard() {
                         >
                           Delete
                         </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ===== REELS / VIDEOS TAB ===== */}
+          {activeTab === 'reels' && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-text-primary">Reels & Videos ({videos.length})</h3>
+                <button
+                  onClick={() => setShowAddVideo(!showAddVideo)}
+                  className="text-xs font-semibold text-accent hover:underline"
+                >
+                  {showAddVideo ? 'Cancel' : '+ Add'}
+                </button>
+              </div>
+
+              {/* Add Video Form */}
+              {showAddVideo && (
+                <div className="bg-surface rounded-lg p-3 space-y-2">
+                  <p className="text-xs font-semibold text-text-primary mb-1">Paste Video/Reel URL</p>
+                  <div className="bg-blue-50 rounded-md p-2 mb-2">
+                    <p className="text-[10px] text-blue-700">
+                      Supported: Instagram Reels, YouTube Videos, YouTube Shorts. Just paste the URL and the platform is auto-detected.
+                    </p>
+                  </div>
+                  <input
+                    type="url"
+                    placeholder="Paste URL here (e.g. https://www.instagram.com/reel/xxxxx/)"
+                    value={newVideoUrl}
+                    onChange={(e) => setNewVideoUrl(e.target.value)}
+                    className="w-full px-3 py-2 border border-border rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-accent"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Title (e.g. Spice Garden Demo Reel)"
+                    value={newVideoTitle}
+                    onChange={(e) => setNewVideoTitle(e.target.value)}
+                    className="w-full px-3 py-2 border border-border rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-accent"
+                  />
+                  <textarea
+                    placeholder="Description (optional)"
+                    value={newVideoDesc}
+                    onChange={(e) => setNewVideoDesc(e.target.value)}
+                    rows={2}
+                    className="w-full px-3 py-2 border border-border rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-accent resize-none"
+                  />
+                  {/* URL Preview */}
+                  {newVideoUrl && (
+                    <div className="bg-gray-50 rounded-md p-2">
+                      <p className="text-[9px] text-text-tertiary uppercase font-semibold mb-1">Auto-Detected Platform:</p>
+                      {newVideoUrl.match(/(?:youtube\.com|youtu\.be)/) ? (
+                        <div className="flex items-center gap-1.5">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-red-500"><rect width="20" height="14" x="2" y="5" rx="2"/><polygon points="10,9 10,15 16,12" fill="currentColor"/></svg>
+                          <span className="text-[10px] font-semibold text-red-500">YouTube</span>
+                        </div>
+                      ) : newVideoUrl.match(/instagram\.com/) ? (
+                        <div className="flex items-center gap-1.5">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-purple-500"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/></svg>
+                          <span className="text-[10px] font-semibold text-purple-500">Instagram Reel</span>
+                        </div>
+                      ) : (
+                        <span className="text-[10px] text-text-tertiary">Other / Unknown</span>
+                      )}
+                    </div>
+                  )}
+                  <button
+                    onClick={handleAddVideo}
+                    disabled={addingVideo || !newVideoUrl}
+                    className="w-full px-3 py-2 bg-accent text-white rounded-md text-xs font-semibold hover:bg-accent-dark disabled:opacity-50"
+                  >
+                    {addingVideo ? 'Adding...' : 'Add Video/Reel'}
+                  </button>
+                </div>
+              )}
+
+              {/* Videos List */}
+              {videos.length === 0 ? (
+                <p className="text-xs text-text-tertiary text-center py-8">No reels or videos added yet. Paste your first Instagram or YouTube URL above.</p>
+              ) : (
+                <div className="space-y-3">
+                  {videos.map(video => (
+                    <div key={video.id} className="bg-surface rounded-lg overflow-hidden border border-border">
+                      {/* Video Embed */}
+                      <div className="w-full bg-gray-900">
+                        {video.platform === 'youtube' ? (
+                          <iframe
+                            src={video.embedUrl}
+                            title={video.title || 'Video'}
+                            className="w-full aspect-video"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            loading="lazy"
+                          />
+                        ) : video.platform === 'instagram' ? (
+                          <iframe
+                            src={video.embedUrl}
+                            title={video.title || 'Reel'}
+                            className="w-full aspect-square max-h-[400px] mx-auto"
+                            allowTransparency={true}
+                            allowFullScreen
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="w-full aspect-video flex items-center justify-center text-white text-xs">
+                            <a href={video.url} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-white/10 rounded-md hover:bg-white/20 transition-colors">
+                              Open Video Link
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                      {/* Video Info */}
+                      <div className="p-2.5">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <p className="text-xs font-semibold text-text-primary truncate">{video.title || 'Untitled'}</p>
+                            {video.description && (
+                              <p className="text-[10px] text-text-secondary truncate">{video.description}</p>
+                            )}
+                            <div className="flex items-center gap-1.5 mt-1">
+                              {video.platform === 'youtube' ? (
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="text-red-500"><rect width="20" height="14" x="2" y="5" rx="2"/><polygon points="10,9 10,15 16,12" fill="currentColor"/></svg>
+                              ) : video.platform === 'instagram' ? (
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-purple-500"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/></svg>
+                              ) : null}
+                              <span className="text-[9px] text-text-tertiary capitalize">{video.platform}</span>
+                              {video.createdAt && (
+                                <span className="text-[9px] text-text-tertiary">{new Date(video.createdAt).toLocaleDateString()}</span>
+                              )}
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => handleDeleteVideo(video.id)}
+                            className="px-2 py-1 bg-red-50 text-red-600 rounded text-[9px] font-semibold hover:bg-red-100 flex-shrink-0"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                        {/* Open original URL */}
+                        <a
+                          href={video.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block mt-1.5 w-full px-2 py-1 bg-accent-light text-accent rounded text-[9px] font-semibold hover:bg-accent/10 text-center"
+                        >
+                          Open Original Link
+                        </a>
                       </div>
                     </div>
                   ))}

@@ -197,6 +197,7 @@ export const DATABASE = {
     testimonials: 'testimonials', // Client reviews
     analytics: 'analytics',      // Visitor tracking
     uploads: 'uploads',          // Uploaded images (ImgBB URLs)
+    videos: 'videos',            // Video/reel URLs (Instagram/YouTube)
     sshKeys: 'sshKeys',          // SSH keys for deployment
   },
 

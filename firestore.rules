@@ -35,5 +35,13 @@ service cloud.firestore {
       allow create, read, update, delete: if request.auth != null
         && request.auth.token.email == 'mohdhaziq1962@gmail.com';
     }
+
+    // Videos/Reels: anyone can READ (video embeds shown on portfolio)
+    // Only admin can create/update/delete
+    match /videos/{docId} {
+      allow read: if true;
+      allow create, update, delete: if request.auth != null
+        && request.auth.token.email == 'mohdhaziq1962@gmail.com';
+    }
   }
 }

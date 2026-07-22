@@ -480,3 +480,107 @@ export async function deleteSSHKey(keyId: string): Promise<boolean> {
     return false
   }
 }
+
+// ==================== VIDEOS / REELS ====================
+
+export type VideoPlatform = 'youtube' | 'instagram' | 'other'
+
+export type VideoEntry = {
+  id: string
+  url: string              // Original URL user pasted
+  platform: VideoPlatform  // Auto-detected: youtube/instagram/other
+  embedUrl: string         // Embed-ready URL for iframe
+  thumbnail: string        // YouTube auto-thumb, Instagram placeholder
+  title: string            // User-given title
+  description: string      // User-given description
+  createdAt: Date | null
+}
+
+/**
+ * Parse URL to detect platform and generate embed URL + thumbnail
+ */
+function parseVideoUrl(url: string): { platform: VideoPlatform; embedUrl: string; thumbnail: string } {
+  // YouTube patterns
+  const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/)
+  if (ytMatch) {
+    const videoId = ytMatch[1]
+    return {
+      platform: 'youtube',
+      embedUrl: `https://www.youtube.com/embed/${videoId}`,
+      thumbnail: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
+    }
+  }
+
+  // Instagram patterns (reels, posts)
+  const igMatch = url.match(/instagram\.com\/(?:reel|p|tv)\/([a-zA-Z0-9_-]+)/)
+  if (igMatch) {
+    const shortcode = igMatch[1]
+    return {
+      platform: 'instagram',
+      embedUrl: `https://www.instagram.com/reel/${shortcode}/embed/`,
+      thumbnail: '',  // Instagram thumbnails need oEmbed API, leave empty
+    }
+  }
+
+  // Fallback
+  return {
+    platform: 'other',
+    embedUrl: url,
+    thumbnail: '',
+  }
+}
+
+export async function getVideos(): Promise<VideoEntry[]> {
+  if (!isFirebaseConfigured || !db) return []
+  try {
+    const q = query(collection(db, DATABASE.collections.videos), orderBy('createdAt', 'desc'))
+    const snapshot = await getDocs(q)
+    return snapshot.docs.map(doc => {
+      const data = doc.data()
+      return {
+        id: doc.id,
+        url: data.url || '',
+        platform: data.platform || 'other',
+        embedUrl: data.embedUrl || '',
+        thumbnail: data.thumbnail || '',
+        title: data.title || '',
+        description: data.description || '',
+        createdAt: data.createdAt?.toDate?.() || null,
+      }
+    })
+  } catch (error) {
+    console.error('Get videos error:', error)
+    return []
+  }
+}
+
+export async function addVideo(url: string, title: string, description: string): Promise<string | null> {
+  if (!isFirebaseConfigured || !db) return null
+  try {
+    const parsed = parseVideoUrl(url)
+    const docRef = await addDoc(collection(db, DATABASE.collections.videos), {
+      url,
+      platform: parsed.platform,
+      embedUrl: parsed.embedUrl,
+      thumbnail: parsed.thumbnail,
+      title,
+      description,
+      createdAt: Timestamp.now(),
+    })
+    return docRef.id
+  } catch (error) {
+    console.error('Add video error:', error)
+    return null
+  }
+}
+
+export async function deleteVideo(videoId: string): Promise<boolean> {
+  if (!isFirebaseConfigured || !db) return false
+  try {
+    await deleteDoc(doc(db, DATABASE.collections.videos, videoId))
+    return true
+  } catch (error) {
+    console.error('Delete video error:', error)
+    return false
+  }
+}
