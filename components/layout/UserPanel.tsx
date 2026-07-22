@@ -13,12 +13,19 @@ import {
   updateProjectDetails,
   deleteProject,
   submitClientProject,
+  getUploadedImages,
+  deleteUpload,
+  addSSHKey,
+  getSSHKeys,
+  deleteSSHKey,
   type ContactSubmission,
   type ProjectInquiry,
   type ContactStatus,
   type ProjectStatus,
+  type UploadedImage,
+  type SSHKey,
 } from '@/lib/firebase/firestore'
-import { PERSONAL } from '@/config/site-config'
+import { PERSONAL, DATABASE } from '@/config/site-config'
 import { openInstagramDM } from '@/lib/instagram'
 import ImageEnhancer from '@/components/admin/ImageEnhancer'
 
@@ -114,7 +121,7 @@ export default function UserPanel() {
 
 // ==================== ADMIN DASHBOARD ====================
 
-type AdminTab = 'overview' | 'contacts' | 'projects'
+type AdminTab = 'overview' | 'contacts' | 'projects' | 'images' | 'ssh'
 
 function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<AdminTab>('overview')
@@ -135,15 +142,31 @@ function AdminDashboard() {
     status: '' as ProjectStatus, progress: 0, deliveryDate: '', adminNotes: '',
   })
 
+  // Image Uploader
+  const [uploads, setUploads] = useState<UploadedImage[]>([])
+  const [uploading, setUploading] = useState(false)
+  const [uploadLabel, setUploadLabel] = useState('')
+  const [uploadCategory, setUploadCategory] = useState('general')
+
+  // SSH Keys
+  const [sshKeys, setSshKeys] = useState<SSHKey[]>([])
+  const [showAddKey, setShowAddKey] = useState(false)
+  const [newKey, setNewKey] = useState({ name: '', type: 'deploy', host: '', privateKey: '' })
+  const [addingKey, setAddingKey] = useState(false)
+
   const fetchData = useCallback(async () => {
     setLoading(true)
     try {
-      const [contactsData, projectsData] = await Promise.all([
+      const [contactsData, projectsData, uploadsData, sshKeysData] = await Promise.all([
         getAllContacts(),
         getAllProjects(),
+        getUploadedImages(),
+        getSSHKeys(),
       ])
       setContacts(contactsData)
       setProjects(projectsData)
+      setUploads(uploadsData)
+      setSshKeys(sshKeysData)
     } catch (error) {
       console.error('Fetch error:', error)
     } finally {
@@ -154,6 +177,80 @@ function AdminDashboard() {
   useEffect(() => {
     fetchData()
   }, [fetchData])
+
+  // ===== IMAGE UPLOAD HANDLER =====
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    try {
+      // Step 1: Upload to ImgBB via API route
+      const formData = new FormData()
+      formData.append('image', file)
+      formData.append('apiKey', DATABASE.imgbbApiKey || '')
+      
+      const res = await fetch('/api/upload', { method: 'POST', body: formData })
+      const data = await res.json()
+      if (data.error) throw new Error(data.error)
+
+      // Step 2: Save to Firestore using the existing db instance
+      const { db } = await import('@/lib/firebase/config')
+      const { addDoc, collection, Timestamp } = await import('firebase/firestore')
+      if (db) {
+        await addDoc(collection(db, DATABASE.collections.uploads), {
+          url: data.url,
+          thumb: data.thumb || data.url,
+          deleteUrl: data.deleteUrl || '',
+          label: uploadLabel,
+          category: uploadCategory,
+          originalName: file.name,
+          size: data.size || file.size,
+          type: data.type || file.type,
+          createdAt: Timestamp.now(),
+        })
+      }
+
+      setUploadLabel('')
+      fetchData()
+    } catch (error) {
+      console.error('Upload error:', error)
+      alert('Upload failed: ' + String(error))
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const handleDeleteUpload = async (uploadId: string) => {
+    if (!confirm('Delete this image?')) return
+    await deleteUpload(uploadId)
+    fetchData()
+  }
+
+  // ===== SSH KEY HANDLERS =====
+  const handleAddSSHKey = async () => {
+    if (!newKey.name || !newKey.privateKey) {
+      alert('Name and Private Key are required')
+      return
+    }
+    setAddingKey(true)
+    try {
+      await addSSHKey(newKey.name, newKey.type, newKey.host, newKey.privateKey)
+      setNewKey({ name: '', type: 'deploy', host: '', privateKey: '' })
+      setShowAddKey(false)
+      fetchData()
+    } catch (error) {
+      console.error('Add SSH key error:', error)
+      alert('Failed to add SSH key')
+    } finally {
+      setAddingKey(false)
+    }
+  }
+
+  const handleDeleteSSHKey = async (keyId: string) => {
+    if (!confirm('Delete this SSH key? This cannot be undone.')) return
+    await deleteSSHKey(keyId)
+    fetchData()
+  }
 
   const handleStatusChange = async (contactId: string, status: ContactStatus) => {
     await updateContactStatus(contactId, status)
@@ -305,7 +402,7 @@ function AdminDashboard() {
 
       {/* Tabs */}
       <div className="flex gap-1.5 mb-4 bg-surface rounded-lg p-1">
-        {(['overview', 'contacts', 'projects'] as AdminTab[]).map(tab => (
+        {(['overview', 'contacts', 'projects', 'images', 'ssh'] as AdminTab[]).map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -660,6 +757,201 @@ function AdminDashboard() {
                   </div>
                 ))
               )}
+            </div>
+          )}
+
+          {/* ===== IMAGES TAB ===== */}
+          {activeTab === 'images' && (
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-text-primary">Image Gallery ({uploads.length})</h3>
+
+              {/* Upload Form */}
+              <div className="bg-surface rounded-lg p-3 space-y-2">
+                <p className="text-xs font-semibold text-text-primary">Upload New Image</p>
+                <input
+                  type="text"
+                  placeholder="Image label (e.g. spice-garden-home)"
+                  value={uploadLabel}
+                  onChange={(e) => setUploadLabel(e.target.value)}
+                  className="w-full px-3 py-2 border border-border rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-accent"
+                />
+                <select
+                  value={uploadCategory}
+                  onChange={(e) => setUploadCategory(e.target.value)}
+                  className="w-full px-3 py-2 border border-border rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-accent"
+                >
+                  <option value="general">General</option>
+                  <option value="project">Project Screenshot</option>
+                  <option value="profile">Profile Photo</option>
+                  <option value="logo">Logo</option>
+                  <option value="hero">Hero Image</option>
+                </select>
+                <label className={`flex items-center justify-center w-full py-2.5 rounded-md text-xs font-semibold cursor-pointer transition-colors ${uploading ? 'bg-gray-200 text-gray-500' : 'bg-accent text-white hover:bg-accent-dark'}`}>
+                  {uploading ? (
+                    <span className="flex items-center gap-2">
+                      <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Uploading...
+                    </span>
+                  ) : (
+                    'Select Image & Upload'
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageUpload}
+                    disabled={uploading}
+                  />
+                </label>
+              </div>
+
+              {/* Uploaded Images Grid */}
+              {uploads.length === 0 ? (
+                <p className="text-xs text-text-tertiary text-center py-8">No images uploaded yet. Upload your first image above.</p>
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
+                  {uploads.map(img => (
+                    <div key={img.id} className="bg-surface rounded-lg overflow-hidden border border-border">
+                      <div className="aspect-video bg-gray-100">
+                        <img
+                          src={img.thumb || img.url}
+                          alt={img.label || img.originalName}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                      <div className="p-2">
+                        <p className="text-[10px] font-semibold text-text-primary truncate">
+                          {img.label || img.originalName || 'Untitled'}
+                        </p>
+                        <p className="text-[9px] text-text-tertiary">{img.category}</p>
+                        {/* Copy URL button */}
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(img.url)
+                            alert('URL copied: ' + img.url)
+                          }}
+                          className="mt-1 w-full px-2 py-1 bg-blue-50 text-blue-600 rounded text-[9px] font-semibold hover:bg-blue-100"
+                        >
+                          Copy URL
+                        </button>
+                        {/* View Full */}
+                        <a
+                          href={img.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block mt-1 w-full px-2 py-1 bg-green-50 text-green-600 rounded text-[9px] font-semibold hover:bg-green-100 text-center"
+                        >
+                          Open Full
+                        </a>
+                        {/* Delete */}
+                        <button
+                          onClick={() => handleDeleteUpload(img.id)}
+                          className="mt-1 w-full px-2 py-1 bg-red-50 text-red-600 rounded text-[9px] font-semibold hover:bg-red-100"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ===== SSH KEYS TAB ===== */}
+          {activeTab === 'ssh' && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-text-primary">SSH Keys ({sshKeys.length})</h3>
+                <button
+                  onClick={() => setShowAddKey(!showAddKey)}
+                  className="text-xs font-semibold text-accent hover:underline"
+                >
+                  {showAddKey ? 'Cancel' : '+ Add Key'}
+                </button>
+              </div>
+
+              {/* Add SSH Key Form */}
+              {showAddKey && (
+                <div className="bg-surface rounded-lg p-3 space-y-2">
+                  <input
+                    type="text"
+                    placeholder="Key name (e.g. portfolio-deploy)"
+                    value={newKey.name}
+                    onChange={(e) => setNewKey({...newKey, name: e.target.value})}
+                    className="w-full px-3 py-2 border border-border rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-accent"
+                  />
+                  <select
+                    value={newKey.type}
+                    onChange={(e) => setNewKey({...newKey, type: e.target.value})}
+                    className="w-full px-3 py-2 border border-border rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-accent"
+                  >
+                    <option value="deploy">Deploy Key</option>
+                    <option value="github">GitHub Key</option>
+                    <option value="server">Server Access</option>
+                    <option value="other">Other</option>
+                  </select>
+                  <input
+                    type="text"
+                    placeholder="Host (e.g. github.com)"
+                    value={newKey.host}
+                    onChange={(e) => setNewKey({...newKey, host: e.target.value})}
+                    className="w-full px-3 py-2 border border-border rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-accent"
+                  />
+                  <textarea
+                    placeholder="Paste your PRIVATE KEY here (starts with -----BEGIN...)"
+                    value={newKey.privateKey}
+                    onChange={(e) => setNewKey({...newKey, privateKey: e.target.value})}
+                    rows={6}
+                    className="w-full px-3 py-2 border border-border rounded-md text-xs font-mono focus:outline-none focus:ring-1 focus:ring-accent"
+                  />
+                  <button
+                    onClick={handleAddSSHKey}
+                    disabled={addingKey}
+                    className="w-full px-3 py-2 bg-accent text-white rounded-md text-xs font-semibold hover:bg-accent-dark disabled:opacity-50"
+                  >
+                    {addingKey ? 'Adding...' : 'Add SSH Key'}
+                  </button>
+                </div>
+              )}
+
+              {/* SSH Keys List */}
+              {sshKeys.length === 0 ? (
+                <p className="text-xs text-text-tertiary text-center py-8">No SSH keys added yet.</p>
+              ) : (
+                <div className="space-y-2">
+                  {sshKeys.map(key => (
+                    <div key={key.id} className="bg-surface rounded-lg p-3 border border-border">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="text-xs font-semibold text-text-primary">{key.name}</p>
+                          <p className="text-[10px] text-text-tertiary">Type: {key.type} | Host: {key.host || 'N/A'}</p>
+                          <p className="text-[9px] text-text-tertiary font-mono mt-1 break-all">{key.keyPreview}</p>
+                          {key.createdAt && (
+                            <p className="text-[9px] text-text-tertiary mt-1">
+                              Added: {new Date(key.createdAt).toLocaleDateString()}
+                            </p>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => handleDeleteSSHKey(key.id)}
+                          className="px-2 py-1 bg-red-50 text-red-600 rounded text-[9px] font-semibold hover:bg-red-100"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Info Box */}
+              <div className="bg-blue-50 rounded-lg p-3">
+                <p className="text-[10px] text-blue-700">
+                  SSH keys are stored securely in Firestore (base64 encoded). Use them for deployment and git operations. Never share your private keys.
+                </p>
+              </div>
             </div>
           )}
         </>

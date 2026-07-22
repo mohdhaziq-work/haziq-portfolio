@@ -196,7 +196,12 @@ export const DATABASE = {
     projects: 'projects',        // Project data
     testimonials: 'testimonials', // Client reviews
     analytics: 'analytics',      // Visitor tracking
+    uploads: 'uploads',          // Uploaded images (ImgBB URLs)
+    sshKeys: 'sshKeys',          // SSH keys for deployment
   },
+
+  /** ImgBB API key for image uploads - get free at api.imgbb.com */
+  imgbbApiKey: '',  // Set in Render Env: IMGBB_API_KEY
 
   /**
    * CONTACT FORM STORAGE:

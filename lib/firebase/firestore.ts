@@ -363,3 +363,113 @@ export async function deleteProject(projectId: string): Promise<boolean> {
     return false
   }
 }
+
+// ==================== UPLOADS (Image Gallery) ====================
+
+export type UploadedImage = {
+  id: string
+  url: string
+  thumb: string
+  label: string
+  category: string
+  originalName: string
+  createdAt: Date | null
+}
+
+export async function getUploadedImages(): Promise<UploadedImage[]> {
+  if (!isFirebaseConfigured || !db) return []
+  try {
+    const q = query(collection(db, DATABASE.collections.uploads), orderBy('createdAt', 'desc'))
+    const snapshot = await getDocs(q)
+    return snapshot.docs.map(doc => {
+      const data = doc.data()
+      return {
+        id: doc.id,
+        url: data.url || '',
+        thumb: data.thumb || data.url || '',
+        label: data.label || '',
+        category: data.category || 'general',
+        originalName: data.originalName || '',
+        createdAt: data.createdAt?.toDate?.() || null,
+      }
+    })
+  } catch (error) {
+    console.error('Get uploads error:', error)
+    return []
+  }
+}
+
+export async function deleteUpload(uploadId: string): Promise<boolean> {
+  if (!isFirebaseConfigured || !db) return false
+  try {
+    await deleteDoc(doc(db, DATABASE.collections.uploads, uploadId))
+    return true
+  } catch (error) {
+    console.error('Delete upload error:', error)
+    return false
+  }
+}
+
+// ==================== SSH KEYS ====================
+
+export type SSHKey = {
+  id: string
+  name: string
+  type: string
+  host: string
+  keyPreview: string
+  createdAt: Date | null
+}
+
+export async function getSSHKeys(): Promise<SSHKey[]> {
+  if (!isFirebaseConfigured || !db) return []
+  try {
+    const q = query(collection(db, DATABASE.collections.sshKeys), orderBy('createdAt', 'desc'))
+    const snapshot = await getDocs(q)
+    return snapshot.docs.map(doc => {
+      const data = doc.data()
+      return {
+        id: doc.id,
+        name: data.name || '',
+        type: data.type || 'deploy',
+        host: data.host || '',
+        keyPreview: data.keyEncoded
+          ? Buffer.from(data.keyEncoded, 'base64').toString('utf-8').substring(0, 40) + '...'
+          : '',
+        createdAt: data.createdAt?.toDate?.() || null,
+      }
+    })
+  } catch (error) {
+    console.error('Get SSH keys error:', error)
+    return []
+  }
+}
+
+export async function addSSHKey(name: string, type: string, host: string, privateKey: string): Promise<string | null> {
+  if (!isFirebaseConfigured || !db) return null
+  try {
+    const keyEncoded = Buffer.from(privateKey).toString('base64')
+    const docRef = await addDoc(collection(db, DATABASE.collections.sshKeys), {
+      name,
+      type,
+      host,
+      keyEncoded,
+      createdAt: Timestamp.now(),
+    })
+    return docRef.id
+  } catch (error) {
+    console.error('Add SSH key error:', error)
+    return null
+  }
+}
+
+export async function deleteSSHKey(keyId: string): Promise<boolean> {
+  if (!isFirebaseConfigured || !db) return false
+  try {
+    await deleteDoc(doc(db, DATABASE.collections.sshKeys, keyId))
+    return true
+  } catch (error) {
+    console.error('Delete SSH key error:', error)
+    return false
+  }
+}
