@@ -20,5 +20,19 @@ service cloud.firestore {
       allow update, delete: if request.auth != null 
         && request.auth.token.email == 'mohdhaziq1962@gmail.com';
     }
+
+    // Uploads (Image Gallery): admin only can read/create/delete
+    // These are uploaded images in the admin panel
+    match /uploads/{docId} {
+      allow create, read, update, delete: if request.auth != null
+        && request.auth.token.email == 'mohdhaziq1962@gmail.com';
+    }
+
+    // SSH Keys: admin only can read/create/delete
+    // These are deployment SSH keys stored in the admin panel
+    match /sshKeys/{docId} {
+      allow create, read, update, delete: if request.auth != null
+        && request.auth.token.email == 'mohdhaziq1962@gmail.com';
+    }
   }
 }
