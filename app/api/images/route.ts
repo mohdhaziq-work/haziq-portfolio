@@ -6,6 +6,10 @@
 import { NextResponse } from 'next/server'
 import { getUploadedImages } from '@/lib/firebase/firestore'
 
+// Force dynamic: always fetch fresh Firestore data (never cache at build time)
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export async function GET() {
   try {
     const images = await getUploadedImages()
