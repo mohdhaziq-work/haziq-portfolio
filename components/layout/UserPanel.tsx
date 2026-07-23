@@ -21,6 +21,10 @@ import {
   getVideos,
   addVideo,
   deleteVideo,
+  addClientUpload,
+  getAllClientUploads,
+  getClientUploadsByEmail,
+  deleteClientUpload,
   type ContactSubmission,
   type ProjectInquiry,
   type ContactStatus,
@@ -29,6 +33,7 @@ import {
   type SSHKey,
   type VideoEntry,
   type VideoPlatform,
+  type ClientUpload,
 } from '@/lib/firebase/firestore'
 import { PERSONAL, DATABASE } from '@/config/site-config'
 import { openInstagramDM } from '@/lib/instagram'
@@ -126,7 +131,7 @@ export default function UserPanel() {
 
 // ==================== ADMIN DASHBOARD ====================
 
-type AdminTab = 'overview' | 'contacts' | 'projects' | 'images' | 'reels' | 'ssh'
+type AdminTab = 'overview' | 'contacts' | 'projects' | 'images' | 'reels' | 'clientfiles' | 'ssh'
 
 function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<AdminTab>('overview')
@@ -168,21 +173,27 @@ function AdminDashboard() {
   const [newVideoDesc, setNewVideoDesc] = useState('')
   const [addingVideo, setAddingVideo] = useState(false)
 
+  // Client Uploads (files/images sent by clients)
+  const [clientUploads, setClientUploads] = useState<ClientUpload[]>([])
+  const [clientUploadFilter, setClientUploadFilter] = useState<string>('all')
+
   const fetchData = useCallback(async () => {
     setLoading(true)
     try {
-      const [contactsData, projectsData, uploadsData, sshKeysData, videosData] = await Promise.all([
+      const [contactsData, projectsData, uploadsData, sshKeysData, videosData, clientUploadsData] = await Promise.all([
         getAllContacts(),
         getAllProjects(),
         getUploadedImages(),
         getSSHKeys(),
         getVideos(),
+        getAllClientUploads(),
       ])
       setContacts(contactsData)
       setProjects(projectsData)
       setUploads(uploadsData)
       setSshKeys(sshKeysData)
       setVideos(videosData)
+      setClientUploads(clientUploadsData)
     } catch (error) {
       console.error('Fetch error:', error)
     } finally {
@@ -461,7 +472,7 @@ function AdminDashboard() {
 
       {/* Tabs */}
       <div className="flex gap-1.5 mb-4 bg-surface rounded-lg p-1">
-        {(['overview', 'contacts', 'projects', 'images', 'reels', 'ssh'] as AdminTab[]).map(tab => (
+        {(['overview', 'contacts', 'projects', 'images', 'reels', 'clientfiles', 'ssh'] as AdminTab[]).map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -469,9 +480,12 @@ function AdminDashboard() {
               activeTab === tab ? 'bg-white text-accent shadow-sm' : 'text-text-secondary hover:text-text-primary'
             }`}
           >
-            {tab === 'reels' ? 'Reels' : tab === 'ssh' ? 'SSH' : tab}
+            {tab === 'reels' ? 'Reels' : tab === 'ssh' ? 'SSH' : tab === 'clientfiles' ? 'Client Files' : tab}
             {tab === 'contacts' && newContacts > 0 && (
               <span className="ml-1.5 px-1.5 py-0.5 bg-red-500 text-white text-[9px] rounded-full">{newContacts}</span>
+            )}
+            {tab === 'clientfiles' && clientUploads.length > 0 && (
+              <span className="ml-1.5 px-1.5 py-0.5 bg-accent text-white text-[9px] rounded-full">{clientUploads.length}</span>
             )}
           </button>
         ))}
@@ -1070,6 +1084,107 @@ function AdminDashboard() {
             </div>
           )}
 
+          {/* ===== CLIENT FILES TAB ===== */}
+          {activeTab === 'clientfiles' && (
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-text-primary">Client Files ({clientUploads.length})</h3>
+
+              {clientUploads.length === 0 ? (
+                <div className="text-center py-10">
+                  <p className="text-xs text-text-tertiary">No files uploaded by clients yet.</p>
+                  <p className="text-[10px] text-text-tertiary mt-1">Clients can upload images from their portal.</p>
+                </div>
+              ) : (
+                <>
+                  {/* Filter by client */}
+                  <div className="flex flex-wrap gap-1.5">
+                    <button
+                      onClick={() => setClientUploadFilter('all')}
+                      className={`px-2.5 py-1 rounded-full text-[10px] font-semibold ${clientUploadFilter === 'all' ? 'bg-accent text-white' : 'bg-surface text-text-secondary'}`}
+                    >
+                      All ({clientUploads.length})
+                    </button>
+                    {Array.from(new Set(clientUploads.map(u => u.clientEmail))).map(email => {
+                      const count = clientUploads.filter(u => u.clientEmail === email).length
+                      return (
+                        <button
+                          key={email}
+                          onClick={() => setClientUploadFilter(email)}
+                          className={`px-2.5 py-1 rounded-full text-[10px] font-semibold ${clientUploadFilter === email ? 'bg-accent text-white' : 'bg-surface text-text-secondary'}`}
+                        >
+                          {email.split('@')[0]} ({count})
+                        </button>
+                      )
+                    })}
+                  </div>
+
+                  <div className="space-y-3">
+                    {clientUploads
+                      .filter(u => clientUploadFilter === 'all' || u.clientEmail === clientUploadFilter)
+                      .map(file => (
+                      <div key={file.id} className="bg-surface rounded-lg overflow-hidden border border-border">
+                        <div className="aspect-video bg-gray-100">
+                          <img
+                            src={file.thumb || file.url}
+                            alt={file.label || file.fileName}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                        </div>
+                        <div className="p-2.5">
+                          <div className="flex items-start justify-between gap-2 mb-1">
+                            <div className="min-w-0">
+                              <p className="text-xs font-semibold text-text-primary truncate">{file.label || file.fileName || 'Untitled'}</p>
+                              <p className="text-[10px] text-text-tertiary truncate">
+                                From: {file.clientName} ({file.clientEmail})
+                              </p>
+                            </div>
+                            <span className="text-[9px] text-text-tertiary flex-shrink-0">
+                              {file.createdAt ? new Date(file.createdAt).toLocaleDateString() : ''}
+                            </span>
+                          </div>
+                          <div className="flex gap-1.5 mt-2">
+                            {/* Download */}
+                            <a
+                              href={file.url}
+                              download={file.fileName || 'client-file'}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex-1 px-2 py-1.5 bg-green-50 text-green-600 rounded text-[10px] font-semibold hover:bg-green-100 text-center"
+                            >
+                              Download
+                            </a>
+                            {/* Open */}
+                            <a
+                              href={file.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex-1 px-2 py-1.5 bg-blue-50 text-blue-600 rounded text-[10px] font-semibold hover:bg-blue-100 text-center"
+                            >
+                              Open
+                            </a>
+                            {/* Delete */}
+                            <button
+                              onClick={async () => {
+                                if (confirm('Delete this client file?')) {
+                                  await deleteClientUpload(file.id)
+                                  fetchData()
+                                }
+                              }}
+                              className="px-2 py-1.5 bg-red-50 text-red-600 rounded text-[10px] font-semibold hover:bg-red-100"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
           {/* ===== SSH KEYS TAB ===== */}
           {activeTab === 'ssh' && (
             <div className="space-y-3">
@@ -1173,7 +1288,7 @@ function AdminDashboard() {
 
 // ==================== CLIENT PORTAL ====================
 
-type ClientTab = 'projects' | 'new'
+type ClientTab = 'projects' | 'new' | 'uploads'
 
 function ClientPortal() {
   const { user } = useAuth()
@@ -1188,6 +1303,12 @@ function ClientPortal() {
     notes: '',
   })
   const [submitting, setSubmitting] = useState(false)
+
+  // Client Uploads (their own files)
+  const [myUploads, setMyUploads] = useState<ClientUpload[]>([])
+  const [uploadingFile, setUploadingFile] = useState(false)
+  const [fileLabel, setFileLabel] = useState('')
+  const clientFileInputRef = useRef<HTMLInputElement>(null)
 
   const fetchProjects = useCallback(async () => {
     if (!user?.email) return
@@ -1205,6 +1326,67 @@ function ClientPortal() {
   useEffect(() => {
     fetchProjects()
   }, [fetchProjects])
+
+  // Fetch client's own uploads
+  const fetchMyUploads = useCallback(async () => {
+    if (!user?.email) return
+    try {
+      const data = await getClientUploadsByEmail(user.email)
+      setMyUploads(data)
+    } catch (error) {
+      console.error('Fetch my uploads error:', error)
+    }
+  }, [user?.email])
+
+  useEffect(() => {
+    if (activeTab === 'uploads') fetchMyUploads()
+  }, [activeTab, fetchMyUploads])
+
+  // Handle file upload (client uploads image for admin)
+  const handleClientUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadingFile(true)
+    try {
+      // Step 1: Upload to ImgBB via API route
+      const formData = new FormData()
+      formData.append('image', file)
+      const res = await fetch('/api/upload', { method: 'POST', body: formData })
+      const data = await res.json()
+      if (data.error) throw new Error(data.error)
+
+      // Step 2: Save to Firestore clientUploads collection with client email
+      const result = await addClientUpload({
+        clientEmail: user?.email || '',
+        clientName: user?.displayName || user?.email?.split('@')[0] || 'Client',
+        url: data.url,
+        thumb: data.thumb || data.url,
+        label: fileLabel,
+        fileName: file.name,
+        size: data.size || file.size,
+        type: data.type || file.type,
+      })
+
+      if (result) {
+        setFileLabel('')
+        if (clientFileInputRef.current) clientFileInputRef.current.value = ''
+        fetchMyUploads()
+      } else {
+        alert('Failed to save file. Please try again.')
+      }
+    } catch (error) {
+      console.error('Client upload error:', error)
+      alert('Upload failed: ' + String(error))
+    } finally {
+      setUploadingFile(false)
+    }
+  }
+
+  const handleDeleteMyUpload = async (id: string) => {
+    if (!confirm('Delete this file?')) return
+    await deleteClientUpload(id)
+    fetchMyUploads()
+  }
 
   const handleSubmitProject = async () => {
     if (!user?.email || !user?.displayName) return
@@ -1307,6 +1489,14 @@ function ClientPortal() {
           }`}
         >
           New Project
+        </button>
+        <button
+          onClick={() => setActiveTab('uploads')}
+          className={`flex-1 px-3 py-2 rounded-md text-xs font-semibold transition-all ${
+            activeTab === 'uploads' ? 'bg-white text-accent shadow-sm' : 'text-text-secondary hover:text-text-primary'
+          }`}
+        >
+          Upload Files
         </button>
       </div>
 
@@ -1477,6 +1667,84 @@ function ClientPortal() {
                     Your request will be reviewed and you can track progress here.
                   </p>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* ===== UPLOAD FILES TAB ===== */}
+          {activeTab === 'uploads' && (
+            <div className="space-y-3">
+              <div className="bg-accent-light/40 rounded-lg p-3 mb-1">
+                <p className="text-xs font-semibold text-text-primary mb-0.5">Share Files with Haziq</p>
+                <p className="text-[10px] text-text-tertiary">
+                  Upload images (logos, photos, references). Only Haziq can view and download them.
+                </p>
+              </div>
+
+              {/* Upload Form */}
+              <div className="bg-surface rounded-lg p-3 space-y-2">
+                <input
+                  type="text"
+                  placeholder="File label (e.g. my-logo, business-photo)"
+                  value={fileLabel}
+                  onChange={(e) => setFileLabel(e.target.value)}
+                  className="w-full px-3 py-2 border border-border rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-accent"
+                />
+                <label className={`flex items-center justify-center w-full py-2.5 rounded-md text-xs font-semibold cursor-pointer transition-colors ${uploadingFile ? 'bg-gray-200 text-gray-500' : 'bg-accent text-white hover:bg-accent-dark'}`}>
+                  {uploadingFile ? (
+                    <span className="flex items-center gap-2">
+                      <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Uploading...
+                    </span>
+                  ) : (
+                    'Select Image & Upload'
+                  )}
+                  <input
+                    ref={clientFileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleClientUpload}
+                    disabled={uploadingFile}
+                  />
+                </label>
+              </div>
+
+              {/* My Uploaded Files */}
+              <div>
+                <h3 className="text-sm font-semibold text-text-primary mb-2">My Files ({myUploads.length})</h3>
+                {myUploads.length === 0 ? (
+                  <p className="text-xs text-text-tertiary text-center py-6">No files uploaded yet.</p>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2">
+                    {myUploads.map(file => (
+                      <div key={file.id} className="bg-surface rounded-lg overflow-hidden border border-border">
+                        <div className="aspect-video bg-gray-100">
+                          <img
+                            src={file.thumb || file.url}
+                            alt={file.label || file.fileName}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                        </div>
+                        <div className="p-2">
+                          <p className="text-[10px] font-semibold text-text-primary truncate">
+                            {file.label || file.fileName || 'Untitled'}
+                          </p>
+                          <p className="text-[9px] text-text-tertiary">
+                            {file.createdAt ? new Date(file.createdAt).toLocaleDateString() : ''}
+                          </p>
+                          <button
+                            onClick={() => handleDeleteMyUpload(file.id)}
+                            className="mt-1 w-full px-2 py-1 bg-red-50 text-red-600 rounded text-[9px] font-semibold hover:bg-red-100"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}

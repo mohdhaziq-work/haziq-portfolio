@@ -43,5 +43,19 @@ service cloud.firestore {
       allow create, update, delete: if request.auth != null
         && request.auth.token.email == 'mohdhaziq1962@gmail.com';
     }
+
+    // Client Uploads: clients upload files/images for admin to view + download
+    // - Any logged-in user can CREATE (upload)
+    // - Admin sees ALL; client sees only OWN uploads
+    // - Admin or owner can delete
+    match /clientUploads/{docId} {
+      allow create: if request.auth != null;
+      allow read: if request.auth != null
+        && (request.auth.token.email == 'mohdhaziq1962@gmail.com'
+            || resource.data.clientEmail == request.auth.token.email);
+      allow update, delete: if request.auth != null
+        && (request.auth.token.email == 'mohdhaziq1962@gmail.com'
+            || resource.data.clientEmail == request.auth.token.email);
+    }
   }
 }

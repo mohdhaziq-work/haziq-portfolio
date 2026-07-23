@@ -584,3 +584,125 @@ export async function deleteVideo(videoId: string): Promise<boolean> {
     return false
   }
 }
+
+// ==================== CLIENT UPLOADS (Files/Images sent by clients) ====================
+// Clients upload images -> only Admin can view + download (and client sees own)
+
+export type ClientUpload = {
+  id: string
+  clientEmail: string
+  clientName: string
+  url: string
+  thumb: string
+  label: string
+  fileName: string
+  size: number
+  type: string
+  createdAt: Date | null
+}
+
+/** Client uploads an image/file (stored with their email) */
+export async function addClientUpload(data: {
+  clientEmail: string
+  clientName: string
+  url: string
+  thumb: string
+  label: string
+  fileName: string
+  size: number
+  type: string
+}): Promise<string | null> {
+  if (!isFirebaseConfigured || !db) return null
+  try {
+    const docRef = await addDoc(collection(db, DATABASE.collections.clientUploads), {
+      clientEmail: data.clientEmail,
+      clientName: data.clientName,
+      url: data.url,
+      thumb: data.thumb || data.url,
+      label: data.label,
+      fileName: data.fileName,
+      size: data.size,
+      type: data.type,
+      createdAt: Timestamp.now(),
+    })
+    return docRef.id
+  } catch (error) {
+    console.error('Add client upload error:', error)
+    return null
+  }
+}
+
+/** Admin: get ALL client uploads */
+export async function getAllClientUploads(): Promise<ClientUpload[]> {
+  if (!isFirebaseConfigured || !db) return []
+  try {
+    const q = query(collection(db, DATABASE.collections.clientUploads), orderBy('createdAt', 'desc'))
+    const snapshot = await getDocs(q)
+    return snapshot.docs.map(doc => {
+      const data = doc.data()
+      return {
+        id: doc.id,
+        clientEmail: data.clientEmail || '',
+        clientName: data.clientName || '',
+        url: data.url || '',
+        thumb: data.thumb || data.url || '',
+        label: data.label || '',
+        fileName: data.fileName || '',
+        size: data.size || 0,
+        type: data.type || '',
+        createdAt: data.createdAt?.toDate?.() || null,
+      }
+    })
+  } catch (error) {
+    console.error('Get client uploads error:', error)
+    return []
+  }
+}
+
+/** Client: get only their own uploads */
+export async function getClientUploadsByEmail(email: string): Promise<ClientUpload[]> {
+  if (!isFirebaseConfigured || !db) return []
+  try {
+    const q = query(
+      collection(db, DATABASE.collections.clientUploads),
+      where('clientEmail', '==', email)
+    )
+    const snapshot = await getDocs(q)
+    const items = snapshot.docs.map(doc => {
+      const data = doc.data()
+      return {
+        id: doc.id,
+        clientEmail: data.clientEmail || '',
+        clientName: data.clientName || '',
+        url: data.url || '',
+        thumb: data.thumb || data.url || '',
+        label: data.label || '',
+        fileName: data.fileName || '',
+        size: data.size || 0,
+        type: data.type || '',
+        createdAt: data.createdAt?.toDate?.() || null,
+      } as ClientUpload
+    })
+    // sort client-side by createdAt desc (no composite index needed)
+    return items.sort((a, b) => {
+      const at = a.createdAt?.getTime() || 0
+      const bt = b.createdAt?.getTime() || 0
+      return bt - at
+    })
+  } catch (error) {
+    console.error('Get client uploads by email error:', error)
+    return []
+  }
+}
+
+/** Delete a client upload (admin or owner) */
+export async function deleteClientUpload(id: string): Promise<boolean> {
+  if (!isFirebaseConfigured || !db) return false
+  try {
+    await deleteDoc(doc(db, DATABASE.collections.clientUploads, id))
+    return true
+  } catch (error) {
+    console.error('Delete client upload error:', error)
+    return false
+  }
+}
