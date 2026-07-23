@@ -135,3 +135,36 @@ export async function POST(req: NextRequest) {
     )
   }
 }
+
+// =====================================================
+// DELETE: Remove a video from Firestore (AI / cleanup)
+// Protected by ADMIN_API_SECRET
+// =====================================================
+export async function DELETE(req: NextRequest) {
+  try {
+    const secret = process.env.ADMIN_API_SECRET
+    const providedSecret =
+      req.headers.get('x-admin-secret') ||
+      req.nextUrl.searchParams.get('secret') ||
+      ''
+    if (!secret || providedSecret !== secret) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    if (!isAdminConfigured || !adminDb) {
+      return NextResponse.json({ error: 'Firebase Admin not configured' }, { status: 500 })
+    }
+
+    const { searchParams } = new URL(req.url)
+    const id = searchParams.get('id')
+    if (!id) {
+      return NextResponse.json({ error: 'Missing video id (?id=...)' }, { status: 400 })
+    }
+
+    await adminDb.collection('videos').doc(id).delete()
+    return NextResponse.json({ success: true, message: `Video ${id} deleted` })
+  } catch (error) {
+    console.error('Delete video error:', error)
+    return NextResponse.json({ error: 'Failed to delete video', details: String(error) }, { status: 500 })
+  }
+}
+
