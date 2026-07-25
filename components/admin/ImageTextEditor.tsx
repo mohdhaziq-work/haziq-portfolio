@@ -9,8 +9,6 @@ type Line = {
   confidence: number
 }
 
-type Lang = 'eng' | 'eng+hin'
-
 export default function ImageTextEditor() {
   const [image, setImage] = useState<HTMLImageElement | null>(null)
   const [imgName, setImgName] = useState('image')
@@ -19,7 +17,6 @@ export default function ImageTextEditor() {
   const [hidden, setHidden] = useState<Record<number, boolean>>({}) // line index -> hidden
   const [scanning, setScanning] = useState(false)
   const [progress, setProgress] = useState(0)
-  const [lang, setLang] = useState<Lang>('eng')
   const [selected, setSelected] = useState<number | null>(null)
   const [editingOrigCanvas, setEditingOrigCanvas] = useState<HTMLCanvasElement | null>(null)
 
@@ -54,8 +51,7 @@ export default function ImageTextEditor() {
     setScanning(true)
     setProgress(0)
     try {
-      // prepare a canvas at a reasonable OCR resolution
-      const maxDim = 1600
+      const maxDim = 2200
       const scale = Math.min(1, maxDim / Math.max(image.naturalWidth, image.naturalHeight))
       const ow = Math.round(image.naturalWidth * scale)
       const oh = Math.round(image.naturalHeight * scale)
@@ -67,36 +63,38 @@ export default function ImageTextEditor() {
       ocrCanvasRef.current = oc
 
       const Tesseract = await import('tesseract.js')
-      const result = await Tesseract.recognize(oc, lang, {
-        logger: (m: { status: string; progress: number }) => {
-          if (m.status === 'recognizing text') setProgress(Math.round(m.progress * 100))
-        },
-      })
-
-      const data = result.data
-      // prefer lines; fallback to words
-      let raw: Line[] = []
-      const lineArr = (data as { lines?: Line[] }).lines
-      if (lineArr && lineArr.length) {
-        raw = lineArr
-          .filter((l) => l.text && l.text.trim().length > 0 && l.confidence > 30)
-          .map((l) => ({ text: l.text.trim(), bbox: l.bbox, confidence: l.confidence }))
-      } else {
-        const words = (data as { words?: Line[] }).words || []
-        raw = words.filter((w) => w.text && w.text.trim().length > 0).map((w) => ({ text: w.text.trim(), bbox: w.bbox, confidence: w.confidence }))
+      const tryLang = async (l: string) => {
+        const result = await Tesseract.recognize(oc, l, {
+          logger: (m: { status: string; progress: number }) => {
+            if (m.status === 'recognizing text') setProgress(Math.round(m.progress * 100))
+          },
+        })
+        const data = result.data as { text?: string; lines?: Line[]; words?: Line[]; paragraphs?: Line[] }
+        let raw: Line[] = []
+        const fromArr = (arr?: Line[]) =>
+          (arr || []).filter((x) => x && x.text && x.text.trim().length > 0).map((x) => ({ text: x.text.trim(), bbox: x.bbox, confidence: x.confidence || 50 }))
+        if (data.lines && data.lines.length) raw = fromArr(data.lines)
+        else if (data.paragraphs && data.paragraphs.length) raw = fromArr(data.paragraphs)
+        else if (data.words && data.words.length) raw = fromArr(data.words)
+        return raw
       }
-      // sort by reading order (top to bottom, left to right)
+
+      let raw = await tryLang('eng')
+      if (raw.length === 0) { setProgress(10); raw = await tryLang('eng+hin') }
+
+      console.log('[OCR] detected blocks:', raw.length)
       raw.sort((a, b) => (a.bbox.y0 - b.bbox.y0) || (a.bbox.x0 - b.bbox.x0))
-      // scale bboxes back to original image coords
       const inv = 1 / scale
       raw = raw.map((l) => ({ ...l, bbox: { x0: l.bbox.x0 * inv, y0: l.bbox.y0 * inv, x1: l.bbox.x1 * inv, y1: l.bbox.y1 * inv } }))
       setLines(raw)
       setEdits({})
       setHidden({})
-      if (raw.length === 0) alert('No text detected. Try a clearer image or switch language (English/Hindi).')
+      if (raw.length === 0) {
+        alert('No text detected. TIP: use a clear, high-contrast image with readable text (poster, document, screenshot). Handwritten or very small text is hard to read.')
+      }
     } catch (err) {
       console.error('OCR error:', err)
-      alert('Scan failed: ' + String(err))
+      alert('Scan failed. OCR engine may have failed to load. Error: ' + String(err))
     } finally {
       setScanning(false)
     }
@@ -271,15 +269,9 @@ export default function ImageTextEditor() {
 
       {/* Scan controls */}
       <div className="card mb-3 space-y-2">
-        <div className="flex gap-2">
-          <select value={lang} onChange={(e) => setLang(e.target.value as Lang)} className="input flex-1 text-sm" disabled={scanning}>
-            <option value="eng">English</option>
-            <option value="eng+hin">English + Hindi</option>
-          </select>
-          <button onClick={scanText} disabled={scanning} className="btn-primary flex-1">
-            {scanning ? `Scanning ${progress}%` : lines.length ? 'Re-scan' : '🔍 Scan Text'}
-          </button>
-        </div>
+        <button onClick={scanText} disabled={scanning} className="btn-primary w-full">
+          {scanning ? `Scanning ${progress}%` : lines.length ? 'Re-scan Text' : '🔍 Scan Text'}
+        </button>
         {scanning && (
           <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
             <div className="h-full bg-accent transition-all" style={{ width: `${progress}%` }} />
@@ -289,6 +281,9 @@ export default function ImageTextEditor() {
           <p className="text-[11px] text-text-tertiary text-center">
             {lines.length} text block{lines.length > 1 ? 's' : ''} found · {editedCount} edited
           </p>
+        )}
+        {!lines.length && !scanning && (
+          <p className="text-[10px] text-text-tertiary text-center">Auto-detects English + Hindi text</p>
         )}
       </div>
 
