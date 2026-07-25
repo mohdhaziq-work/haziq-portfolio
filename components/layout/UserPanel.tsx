@@ -39,6 +39,7 @@ import { PERSONAL, DATABASE } from '@/config/site-config'
 import { openInstagramDM } from '@/lib/instagram'
 import ImageEnhancer from '@/components/admin/ImageEnhancer'
 import ImageStudio from '@/components/admin/ImageStudio'
+import ImageTextEditor from '@/components/admin/ImageTextEditor'
 
 // ==================== MAIN USER PANEL ====================
 
@@ -127,6 +128,31 @@ export default function UserPanel() {
 
       {/* Animations handled via globals.css */}
     </>
+  )
+}
+
+// ==================== STUDIO WRAPPER (toggle between editors) ====================
+
+function StudioWrapper() {
+  const [mode, setMode] = useState<'text' | 'design'>('text')
+  return (
+    <div>
+      <div className="flex gap-1 mb-3 bg-surface rounded-lg p-1 mx-3 mt-3">
+        <button
+          onClick={() => setMode('text')}
+          className={`flex-1 px-3 py-2 rounded-md text-xs font-semibold ${mode === 'text' ? 'bg-white text-accent shadow-sm' : 'text-text-secondary'}`}
+        >
+          Text Editor
+        </button>
+        <button
+          onClick={() => setMode('design')}
+          className={`flex-1 px-3 py-2 rounded-md text-xs font-semibold ${mode === 'design' ? 'bg-white text-accent shadow-sm' : 'text-text-secondary'}`}
+        >
+          Design Studio
+        </button>
+      </div>
+      {mode === 'text' ? <ImageTextEditor /> : <ImageStudio />}
+    </div>
   )
 }
 
@@ -1186,8 +1212,8 @@ function AdminDashboard() {
             </div>
           )}
 
-          {/* ===== STUDIO TAB (Image Editor) ===== */}
-          {activeTab === 'studio' && <ImageStudio />}
+          {/* ===== STUDIO TAB (Image Editors) ===== */}
+          {activeTab === 'studio' && <StudioWrapper />}
 
           {/* ===== SSH KEYS TAB ===== */}
           {activeTab === 'ssh' && (
