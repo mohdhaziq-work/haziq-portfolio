@@ -95,6 +95,20 @@ export const PROJECTS = [
     accent: '#ff3e3e',
     bgColor: '#000000',
   },
+  {
+    id: 'skeuomorphism',
+    title: 'SkeuoCraft Studio',
+    category: 'Skeuomorphic Design',
+    description: 'A realistic, depth-rich demo website showcasing Skeuomorphism design philosophy. Interactive 3D controls, tactile surfaces, and physical metaphors that make digital feel physical.',
+    longDescription: 'SkeuoCraft Studio is a showcase of Skeuomorphism design — where digital interfaces mimic the real world. Featuring interactive toggle switches, rotating volume dials, gauge meters, LED indicators, and push buttons that all respond like their physical counterparts. The design uses multi-layered shadows, leather textures, wood grain, brushed metal, and glass effects to create a truly tactile web experience.',
+    techStack: ['Next.js 14', 'TypeScript', 'Tailwind CSS', 'CSS Gradients', 'Skeuomorphic Design'],
+    features: ['Interactive 3D Controls', 'Realistic Toggle Switches', 'Rotating Volume Dials', 'Gauge Meters', 'Material Textures', 'Physical Metaphors'],
+    liveUrl: 'https://mohdhaziq-portfolio.onrender.com/skeuomorphism',
+    githubUrl: 'https://github.com/mohdhaziq-work/haziq-portfolio',
+    thumbnail: '',
+    accent: '#8b7355',
+    bgColor: '#e8e0d8',
+  },
 ] as const
 
 // ==================== SERVICES ====================
