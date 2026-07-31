@@ -1,12 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
-import UserPanel from '@/components/layout/UserPanel'
-import LoginPopup from '@/components/auth/LoginPopup'
-import { AuthProvider } from '@/lib/auth/AuthContext'
-import { TutorialProvider } from '@/lib/tutorial/TutorialContext'
-import TourOverlay from '@/lib/tutorial/TourOverlay'
+import LayoutShell from '@/components/layout/LayoutShell'
 
 const SITE_URL = 'https://mohdhaziq-portfolio.onrender.com'
 
@@ -273,16 +267,7 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-background text-text-primary antialiased">
-        <AuthProvider>
-          <TutorialProvider>
-            <Header />
-            <main>{children}</main>
-            <Footer />
-            <UserPanel />
-            <LoginPopup />
-            <TourOverlay />
-          </TutorialProvider>
-        </AuthProvider>
+        <LayoutShell>{children}</LayoutShell>
       </body>
     </html>
   )

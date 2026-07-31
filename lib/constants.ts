@@ -109,6 +109,20 @@ export const PROJECTS = [
     accent: '#8b7355',
     bgColor: '#e8e0d8',
   },
+  {
+    id: 'neomorphism',
+    title: 'NeuraSoft Studio',
+    category: 'Neumorphic Design',
+    description: 'A soft, extruded UI demo showcasing Neumorphism design. Gentle dual shadows, interactive soft controls, and a calm, minimal aesthetic that feels like pressed plastic.',
+    longDescription: 'NeuraSoft Studio is a showcase of Neumorphism (Soft UI) design — where elements appear to be pressed into or raised from a soft surface. Featuring interactive toggle switches, brightness sliders, play buttons, status indicators, and a live clock — all with the signature dual-shadow depth effect. The design uses low contrast, large border-radius, and a single color family to create a calm, tactile experience.',
+    techStack: ['Next.js 14', 'TypeScript', 'Tailwind CSS', 'CSS Dual Shadows', 'Neumorphic Design'],
+    features: ['Interactive Soft Controls', 'Dual-Shadow System', 'Inset Toggle Switches', 'Soft Sliders', 'Neumorphic Clock', 'Gradient Accents'],
+    liveUrl: 'https://mohdhaziq-portfolio.onrender.com/neomorphism',
+    githubUrl: 'https://github.com/mohdhaziq-work/haziq-portfolio',
+    thumbnail: '',
+    accent: '#6c63ff',
+    bgColor: '#e0e5ec',
+  },
 ] as const
 
 // ==================== SERVICES ====================
