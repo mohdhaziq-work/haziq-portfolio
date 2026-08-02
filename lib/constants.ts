@@ -167,7 +167,7 @@ export const STATS = [
   { value: '3+', label: 'Live Projects' },
   { value: '100%', label: 'Modern Tech' },
   { value: '3+', label: 'Niches Covered' },
-  { value: `${PRICING.currency}${PRICING.plans[0].price}`, label: 'Starting At' },
+  { value: '2hr', label: 'Response Time' },
 ] as const
 
 // ==================== SKILLS ====================
