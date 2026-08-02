@@ -7,8 +7,8 @@ const SITE_URL = 'https://mohdhaziq-portfolio.onrender.com'
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Mohd Haziq — Web Developer | Portfolio | Hire Me',
-    template: '%s | Mohd Haziq Web Developer',
+    default: 'Mohd Haziq Portfolio',
+    template: '%s | Mohd Haziq Portfolio',
   },
   description: 'Mohd Haziq is a professional Web Developer who builds high-converting websites for businesses. Restaurant websites, coaching websites, gym websites, and custom business websites. Affordable, fast, mobile-friendly. Get a free mockup today.',
   keywords: [
@@ -101,12 +101,12 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: 'Mohd Haziq — Web Developer | Portfolio | Hire Me',
+    title: 'Mohd Haziq Portfolio',
     description: 'Mohd Haziq builds high-converting websites for businesses. Restaurant, coaching, gym, and custom websites. Affordable, fast, mobile-friendly. Get a free mockup.',
     type: 'website',
     locale: 'en_IN',
     url: SITE_URL,
-    siteName: 'Mohd Haziq',
+    siteName: 'Mohd Haziq Portfolio',
     images: [
       {
         url: '/apple-touch-icon.png',
@@ -118,7 +118,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary',
-    title: 'Mohd Haziq — Web Developer | Portfolio',
+    title: 'Mohd Haziq Portfolio',
     description: 'Mohd Haziq builds professional websites for businesses. Get a free mockup today.',
     images: ['/apple-touch-icon.png'],
   },
@@ -245,11 +245,11 @@ export default function RootLayout({
         <meta name="owner" content="Mohd Haziq" />
         <meta name="rating" content="general" />
         <meta name="revisit-after" content="3 days" />
-        <meta property="og:site_name" content="Mohd Haziq" />
-        <meta property="og:title" content="Mohd Haziq — Web Developer | Portfolio" />
+        <meta property="og:site_name" content="Mohd Haziq Portfolio" />
+        <meta property="og:title" content="Mohd Haziq Portfolio" />
         <meta property="og:type" content="website" />
         <meta property="og:locale" content="en_IN" />
-        {/* Critical: Tell Google this site name is "Mohd Haziq" NOT "Render" */}
+        {/* Critical: Tell Google this site name is "Mohd Haziq Portfolio" NOT "Render" */}
         <meta name="sitename" content="Mohd Haziq" />
         <meta name="hostname" content="mohdhaziq-portfolio.onrender.com" />
         {/* JSON-LD Structured Data */}

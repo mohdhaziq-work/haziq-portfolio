@@ -239,7 +239,7 @@ export const WEBSITE = {
    * SEO TITLE:
    * Browser tab mein ye dikhega
    */
-  title: 'Mohd Haziq — Web Developer',
+  title: 'Mohd Haziq Portfolio',
 
   /**
    * SEO DESCRIPTION:
