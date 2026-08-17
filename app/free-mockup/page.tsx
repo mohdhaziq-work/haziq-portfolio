@@ -5,6 +5,8 @@ import Section from '@/components/ui/Section'
 import AnimatedText from '@/components/ui/AnimatedText'
 import { openInstagramDM } from '@/lib/instagram'
 import { useAuth } from '@/lib/auth/AuthContext'
+import { resolveBusinessFromClientId, CLIENT_BUSINESSES, type ClientBusiness } from '@/lib/client-registry'
+import MockupRenderer from '@/components/mockups/MockupRenderer'
 
 export default function FreeMockupPage() {
   const { user, requireLogin } = useAuth()
@@ -12,12 +14,14 @@ export default function FreeMockupPage() {
   const [businessName, setBusinessName] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [feedback, setFeedback] = useState('')
-  const [submitted, setSubmitted] = useState(false)
+  const [claimResult, setClaimResult] = useState<ClientBusiness | null>(null)
+  const [notFound, setNotFound] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (submitting) return
     setFeedback('')
+    setNotFound(false)
 
     // Must login first before entering client_id
     if (!requireLogin()) {
@@ -30,69 +34,86 @@ export default function FreeMockupPage() {
       return
     }
 
+    // Resolve which business this Client ID belongs to
+    const business = resolveBusinessFromClientId(clientId)
+    if (!business) {
+      setNotFound(true)
+      setFeedback('This Client ID could not be found. Please double-check the ID you received via DM, or message Haziq.')
+      return
+    }
+
     setSubmitting(true)
     try {
+      // Save the claim to Firestore
       const { submitClientMockup } = await import('@/lib/firebase/firestore')
-      const result = await submitClientMockup({
+      await submitClientMockup({
         clientId: clientId.trim().toUpperCase(),
         clientEmail: user?.email || '',
         businessName,
       })
-
-      if (result.success) {
-        // Show a thank-you screen instead of force-opening Instagram
-        setSubmitted(true)
-      } else {
-        setFeedback(result.error || 'Something went wrong. Please try again.')
-      }
+      // Show this business's mockup
+      setClaimResult(business)
     } catch {
-      // Still show the success screen even if Firebase isn't configured
-      setSubmitted(true)
+      // Even if Firestore fails, show the mockup
+      setClaimResult(business)
     } finally {
       setSubmitting(false)
     }
   }
 
-  // If the request was submitted, show a confirmation screen (no forced Instagram redirect)
-  if (submitted) {
+  // ---- STEP 2: Mockup revealed ----
+  if (claimResult) {
     return (
-      <div className="pt-24">
+      <div className="pt-24 pb-16">
         <Section background="white" padding="small">
-          <div className="max-w-2xl mx-auto text-center">
-            <div className="w-20 h-20 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg width="40" height="40" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" className="text-success">
+          <div className="max-w-3xl mx-auto text-center">
+            <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg width="34" height="34" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" className="text-success">
                 <path d="M20 6 9 17l-5-5" />
               </svg>
             </div>
-            <AnimatedText as="span" className="section-overline">Request Received</AnimatedText>
-            <AnimatedText as="h1" delay={100} className="text-display-lg text-text-primary mb-6">
-              Thank You, <span className="text-accent">{businessName || 'Friend'}</span>!
+            <AnimatedText as="span" className="section-overline">Free Mockup Ready</AnimatedText>
+            <AnimatedText as="h1" delay={100} className="text-display-lg text-text-primary mb-4">
+              Here&apos;s your free mockup, <span className="text-accent">{businessName || claimResult.name}</span>!
             </AnimatedText>
             <AnimatedText as="p" delay={200} className="text-body-lg text-text-secondary mb-2">
-              Your free mockup request has been received. ✅
+              This is a preview of a website design concept for <strong className="text-text-primary">{claimResult.name}</strong>.
             </AnimatedText>
-            <AnimatedText as="p" delay={300} className="text-body-md text-text-secondary mb-8">
-              I&apos;ll design a mockup of your homepage and reach out to you soon. You can also message me
-              directly on Instagram to speed things up.
+            <AnimatedText as="p" delay={250} className="text-body-md text-text-secondary mb-8">
+              Like what you see? Let&apos;s turn this into your real website. Message me on Instagram and I&apos;ll walk you through it.
             </AnimatedText>
-            <AnimatedText as="div" delay={400} className="flex flex-col sm:flex-row gap-4 justify-center">
+          </div>
+        </Section>
+
+        <Section background="surface">
+          <div className="max-w-4xl mx-auto">
+            <MockupRenderer businessId={claimResult.id} />
+
+            <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
               <button
-                onClick={() => openInstagramDM(`Hi Haziq! I just claimed my free mockup. Client ID: ${clientId.trim().toUpperCase()}. Business: ${businessName}.`)}
+                onClick={() => openInstagramDM(`Hi Haziq! I just saw my free mockup for ${claimResult.name} (Client ID: ${clientId.trim().toUpperCase()}). I love it, let's build my website!`)}
                 className="btn-primary px-8 py-4 text-body-md"
               >
-                Message Me on Instagram
+                I Love It — Let&apos;s Build It!
                 <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="m9 18 6-6-6-6"/></svg>
               </button>
-              <a href="/" className="btn-outline px-8 py-4 text-body-md">
-                Back to Home
-              </a>
-            </AnimatedText>
+              <button
+                onClick={() => { setClaimResult(null); setClientId(''); setBusinessName(''); }}
+                className="btn-outline px-8 py-4 text-body-md"
+              >
+                Claim Another Client
+              </button>
+            </div>
+            <p className="text-center text-caption text-text-tertiary mt-4">
+              This is a design concept. The final website will be fully responsive with your real photos, menu, and contact details.
+            </p>
           </div>
         </Section>
       </div>
     )
   }
 
+  // ---- STEP 1: Claim form ----
   return (
     <div className="pt-24">
       <Section background="white" padding="small">
@@ -114,7 +135,7 @@ export default function FreeMockupPage() {
             <div className="elevated-card p-8 md:p-10">
               <h2 className="text-headline text-text-primary mb-2">Enter Your Client ID</h2>
               <p className="text-body-sm text-text-secondary mb-8">
-                You received a unique Client ID from Haziq via DM. Enter it below to claim your free mockup.
+                You received a unique Client ID from Haziq via DM. Enter it below to see your free website mockup.
               </p>
 
               {/* Login state notice */}
@@ -158,7 +179,7 @@ export default function FreeMockupPage() {
                 </div>
 
                 {feedback && (
-                  <div className="p-3 rounded-lg border border-accent/20 bg-accent-light/40 text-sm text-text-secondary">
+                  <div className={`p-3 rounded-lg border text-sm ${notFound ? 'border-red-300 bg-red-50 text-red-700' : 'border-accent/20 bg-accent-light/40 text-text-secondary'}`}>
                     {feedback}
                   </div>
                 )}
@@ -167,19 +188,35 @@ export default function FreeMockupPage() {
                   {submitting ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Processing...
+                      Claiming...
                     </>
                   ) : (
                     <>
-                      Claim Free Mockup
+                      Claim My Free Mockup
                       <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="m9 18 6-6-6-6"/></svg>
                     </>
                   )}
                 </button>
                 <p className="text-center text-caption text-text-tertiary">
-                  After submitting, you&apos;ll see a confirmation screen. You can choose to message me on Instagram from there.
+                  After submitting, your free website mockup will appear right here.
                 </p>
               </form>
+            </div>
+          </AnimatedText>
+
+          {/* Note about linked businesses */}
+          <AnimatedText as="div" delay={150} className="mt-6">
+            <div className="elevated-card p-5 text-center">
+              <p className="text-caption text-text-tertiary mb-3">
+                Free mockups are available for these businesses:
+              </p>
+              <div className="flex flex-wrap gap-2 justify-center">
+                {CLIENT_BUSINESSES.map((b) => (
+                  <span key={b.id} className="inline-block px-3 py-1.5 rounded-full bg-accent-light text-accent text-xs font-semibold">
+                    {b.name}
+                  </span>
+                ))}
+              </div>
             </div>
           </AnimatedText>
         </div>
