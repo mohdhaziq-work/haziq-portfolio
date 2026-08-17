@@ -10,8 +10,6 @@ export default function FreeMockupPage() {
   const { user, requireLogin } = useAuth()
   const [clientId, setClientId] = useState('')
   const [businessName, setBusinessName] = useState('')
-  const [instagramHandle, setInstagramHandle] = useState('')
-  const [message, setMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [feedback, setFeedback] = useState('')
 
@@ -38,8 +36,6 @@ export default function FreeMockupPage() {
         clientId: clientId.trim().toUpperCase(),
         clientEmail: user?.email || '',
         businessName,
-        instagramHandle,
-        message,
       })
 
       if (result.success && result.instagramDmUrl) {
@@ -108,36 +104,15 @@ export default function FreeMockupPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-body-sm font-medium text-text-primary mb-2">Business Name</label>
+                  <label className="block text-body-sm font-medium text-text-primary mb-2">Business Name *</label>
                   <input
                     type="text"
                     value={businessName}
                     onChange={(e) => setBusinessName(e.target.value)}
+                    required
                     placeholder="Your business name"
                     disabled={submitting}
                     className="w-full px-4 py-3 rounded-lg border border-border bg-background text-text-primary text-body-md placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all disabled:opacity-50"
-                  />
-                </div>
-                <div>
-                  <label className="block text-body-sm font-medium text-text-primary mb-2">Instagram Handle</label>
-                  <input
-                    type="text"
-                    value={instagramHandle}
-                    onChange={(e) => setInstagramHandle(e.target.value)}
-                    placeholder="@yourbusiness"
-                    disabled={submitting}
-                    className="w-full px-4 py-3 rounded-lg border border-border bg-background text-text-primary text-body-md placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all disabled:opacity-50"
-                  />
-                </div>
-                <div>
-                  <label className="block text-body-sm font-medium text-text-primary mb-2">Tell me about your business</label>
-                  <textarea
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    rows={4}
-                    placeholder="What does your business do? What kind of look do you like?"
-                    disabled={submitting}
-                    className="w-full px-4 py-3 rounded-lg border border-border bg-background text-text-primary text-body-md placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all resize-none disabled:opacity-50"
                   />
                 </div>
 

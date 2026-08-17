@@ -57,5 +57,19 @@ service cloud.firestore {
         && (request.auth.token.email == 'mohdhaziq1962@gmail.com'
             || resource.data.clientEmail == request.auth.token.email);
     }
+
+    // Client Mockups (Free Mockup): client submits a mockup request with their client_id
+    // - Any logged-in user can CREATE (submit a free mockup request)
+    // - Admin can read/update/delete all
+    // - Client can read only their own requests
+    match /clientMockups/{docId} {
+      allow create: if request.auth != null
+        && request.resource.data.clientEmail == request.auth.token.email;
+      allow read: if request.auth != null
+        && (request.auth.token.email == 'mohdhaziq1962@gmail.com'
+            || resource.data.clientEmail == request.auth.token.email);
+      allow update, delete: if request.auth != null
+        && request.auth.token.email == 'mohdhaziq1962@gmail.com';
+    }
   }
 }

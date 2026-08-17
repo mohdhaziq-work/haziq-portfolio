@@ -131,10 +131,8 @@ export async function submitClientMockup(data: {
   clientId: string
   clientEmail: string
   businessName: string
-  instagramHandle: string
-  message: string
 }): Promise<{ success: boolean; docId?: string; instagramDmUrl?: string; error?: string }> {
-  const dmMessage = `Hi Haziq! I am requesting my FREE website mockup. Client ID: ${data.clientId}. Business: ${data.businessName || 'N/A'}. ${data.message}`
+  const dmMessage = `Hi Haziq! I am requesting my FREE website mockup. Client ID: ${data.clientId}. Business: ${data.businessName || 'N/A'}.`
   const instagramDmUrl = getInstagramDMLink(dmMessage)
 
   if (!isFirebaseConfigured || !db) {
@@ -147,8 +145,6 @@ export async function submitClientMockup(data: {
       clientId: data.clientId,
       clientEmail: data.clientEmail,
       businessName: data.businessName,
-      instagramHandle: data.instagramHandle,
-      message: data.message,
       status: 'new',
       source: 'free-mockup',
       createdAt: Timestamp.now(),
