@@ -1,15 +1,31 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { SITE } from '@/lib/constants'
 import Section from '@/components/ui/Section'
 import AnimatedText from '@/components/ui/AnimatedText'
 import { openInstagramDM } from '@/lib/instagram'
 import { useAuth } from '@/lib/auth/AuthContext'
 
-export default function ContactPage() {
+const PLAN_LABELS: Record<string, string> = {
+  starter: 'Starter — ₹2,500',
+  business: 'Business — ₹6,000',
+  premium: 'Premium — ₹12,000',
+  custom: 'Custom Project',
+  'free-mockup': 'Free Mockup First',
+}
+
+const PLAN_OPTIONS = ['starter', 'business', 'premium', 'custom', 'free-mockup']
+
+function ContactPageContent() {
   const { user, requireLogin } = useAuth()
+  const searchParams = useSearchParams()
+  const selectedPlan = searchParams.get('plan')
   const [submitting, setSubmitting] = useState(false)
+  const [service, setService] = useState(
+    selectedPlan && PLAN_OPTIONS.includes(selectedPlan) ? selectedPlan : ''
+  )
 
   return (
     <div className="pt-24">
@@ -35,6 +51,22 @@ export default function ContactPage() {
               <h2 className="text-headline text-text-primary mb-2">Send a Message</h2>
               <p className="text-body-sm text-text-secondary mb-8">Fill out the form and I&apos;ll respond via Instagram DM.</p>
 
+              {selectedPlan && (
+                <div className="mb-6 flex items-start gap-3 p-4 bg-accent-light/50 rounded-xl border-2 border-accent/20" data-tour="selected-plan">
+                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" className="text-accent flex-shrink-0 mt-0.5">
+                    <path d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                  </svg>
+                  <div>
+                    <p className="text-body-sm font-semibold text-text-primary">
+                      You&apos;ve selected: {PLAN_LABELS[selectedPlan] || 'Your plan'}
+                    </p>
+                    <p className="text-caption text-text-secondary mt-0.5">
+                      Your plan is pre-selected below. Just fill in the rest of your details and send.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               <form className="space-y-6" data-tour="contact-form" onSubmit={async (e) => {
                 e.preventDefault()
                 if (submitting) return
@@ -50,7 +82,7 @@ export default function ContactPage() {
                   fullName: formData.get('fullName') as string,
                   businessName: formData.get('businessName') as string,
                   instagramHandle: formData.get('instagram') as string,
-                  service: formData.get('service') as string,
+                  service,
                   message: formData.get('message') as string,
                 }
 
@@ -121,11 +153,17 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <label className="block text-body-sm font-medium text-text-primary mb-2">What do you need?</label>
-                  <select name="service" disabled={submitting} className="w-full px-4 py-3 rounded-lg border border-border bg-background text-text-primary text-body-md focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all appearance-none disabled:opacity-50">
+                  <select
+                    name="service"
+                    value={service}
+                    onChange={(e) => setService(e.target.value)}
+                    disabled={submitting}
+                    className="w-full px-4 py-3 rounded-lg border border-border bg-background text-text-primary text-body-md focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all appearance-none disabled:opacity-50"
+                  >
                     <option value="">Select a service</option>
-                    <option value="starter">Starter -- 2,500</option>
-                    <option value="business">Business -- 6,000</option>
-                    <option value="premium">Premium -- 12,000</option>
+                    <option value="starter">Starter — ₹2,500</option>
+                    <option value="business">Business — ₹6,000</option>
+                    <option value="premium">Premium — ₹12,000</option>
                     <option value="custom">Custom Project</option>
                     <option value="free-mockup">Free Mockup First</option>
                   </select>
@@ -232,5 +270,13 @@ export default function ContactPage() {
         </div>
       </Section>
     </div>
+  )
+}
+
+export default function ContactPage() {
+  return (
+    <Suspense fallback={null}>
+      <ContactPageContent />
+    </Suspense>
   )
 }

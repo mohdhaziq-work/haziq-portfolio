@@ -5,8 +5,20 @@ import Section from '@/components/ui/Section'
 import AnimatedText from '@/components/ui/AnimatedText'
 import Link from 'next/link'
 import { openInstagramDM } from '@/lib/instagram'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/lib/auth/AuthContext'
 
 export default function ServicesPreview() {
+  const { requireLogin } = useAuth()
+  const router = useRouter()
+
+  // Select a plan: require login first, then redirect to contact with plan preselected
+  const handlePlanSelect = (planId: string) => {
+    requireLogin(() => {
+      router.push(`/contact?plan=${planId}`)
+    })
+  }
+
   return (
     <Section id="services" background="surface" data-tour="services-section">
       <div className="text-center mb-16">
@@ -53,7 +65,7 @@ export default function ServicesPreview() {
               </ul>
 
               <button
-                onClick={() => openInstagramDM(`Hi Haziq! I am interested in the ${plan.name} plan (${plan.price}).`)}
+                onClick={() => handlePlanSelect(plan.id)}
                 className={`w-full py-3.5 rounded-full font-semibold text-body-sm transition-all duration-200 text-center ${
                   plan.popular
                     ? 'bg-accent text-white hover:bg-accent-hover shadow-chip'
