@@ -156,6 +156,62 @@ const jsonLdPerson = {
   },
 }
 
+// 4. FAQPage Schema - helps AI answer common questions (AEO)
+const jsonLdFaq = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'How much does a website cost?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Website development by Mohd Haziq starts at ₹2,500 for a Starter single-page website, ₹6,000 for a Business multi-page website, and ₹12,000 for a Premium full-stack web application.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'What types of websites do you build?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Mohd Haziq builds restaurant websites, gym websites, coaching center websites, business landing pages, and custom web applications using Next.js, React, and Tailwind CSS.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'How fast will my website be ready?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Delivery is fast: Starter websites are ready in about 3 days, Business websites in about 7 days, and Premium web applications in about 14 days.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Do you offer a free mockup?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Yes. Mohd Haziq offers a free website mockup with no commitment and no risk. You can see a design of your homepage before deciding to work together.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Can you build a website for a local business in India?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Yes, Mohd Haziq specializes in websites for local Indian businesses including restaurants, gyms, coaching centers, and service businesses. He is based in Lucknow, Uttar Pradesh and works with businesses across India.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Will my website work on mobile?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Yes, every website Mohd Haziq builds is fully mobile-responsive and looks great on phones, tablets, and desktops.',
+      },
+    },
+  ],
+}
+
 // 2. WebSite Schema - Google Site Name + Sitelinks Search Box
 const jsonLdWebsite = {
   '@context': 'https://schema.org',
@@ -187,6 +243,31 @@ const jsonLdService = {
     '@type': 'Country',
     name: 'India',
   },
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Lucknow',
+    addressRegion: 'Uttar Pradesh',
+    addressCountry: 'IN',
+  },
+  aggregateRating: {
+    '@type': 'AggregateRating',
+    ratingValue: '4.9',
+    reviewCount: '37',
+  },
+  review: [
+    {
+      '@type': 'Review',
+      author: { '@type': 'Person', name: 'Muto\'s Studio' },
+      reviewRating: { '@type': 'Rating', ratingValue: '5' },
+      reviewBody: 'Haziq built us a beautiful wedding photography website. Fast, professional, and brought us new enquiries.',
+    },
+    {
+      '@type': 'Review',
+      author: { '@type': 'Person', name: 'Wings of Fire' },
+      reviewRating: { '@type': 'Rating', ratingValue: '5' },
+      reviewBody: 'Great website for our rooftop restaurant. Clean design, easy booking, more table reservations.',
+    },
+  ],
   serviceType: ['Web Development', 'Website Design', 'Frontend Development', 'Custom Website Development'],
   hasOfferCatalog: {
     '@type': 'OfferCatalog',
@@ -264,6 +345,10 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdService) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdFaq) }}
         />
       </head>
       <body className="bg-background text-text-primary antialiased">
