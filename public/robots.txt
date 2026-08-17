@@ -3,6 +3,29 @@ Allow: /
 Disallow: /api/
 Disallow: /admin
 
+# Explicitly allow AI & search bots
+User-agent: GPTbot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Meta-ExternalAgent
+Allow: /
+
+# Keep default crawlers
 User-agent: Googlebot
 Allow: /
 Crawl-delay: 0
