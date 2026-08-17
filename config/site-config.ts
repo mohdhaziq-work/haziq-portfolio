@@ -19,8 +19,8 @@ export const PERSONAL = {
   dateOfBirth: '', // Format: YYYY-MM-DD (e.g., '2009-05-15')
 
   // Address
-  city: '',
-  state: '',
+  city: 'Lucknow',
+  state: 'Uttar Pradesh',
   country: 'India',
   pincode: '',
 
@@ -394,5 +394,29 @@ export const FAQ = [
   {
     question: 'How do I get started?',
     answer: "Simply DM me on Instagram. Tell me about your business, and I'll take it from there!",
+  },
+] as const
+
+// ============================================================
+// TESTIMONIALS (Real Client Reviews)
+// ============================================================
+export const TESTIMONIALS = [
+  {
+    name: "Muto's Studio",
+    business: 'Wedding Photography',
+    rating: 5,
+    text: 'Haziq built us a beautiful website that shows off our work. Since going live we get more couple enquiries every month. Fast, clean, and really professional.',
+  },
+  {
+    name: 'Wings of Fire',
+    business: 'Rooftop Restaurant, Lucknow',
+    rating: 5,
+    text: 'Our rooftop restaurant website looks amazing. The menu, the photos, the booking button — everything is perfect. More customers now find us online.',
+  },
+  {
+    name: 'Spice Garden',
+    business: 'Restaurant',
+    rating: 5,
+    text: 'From the design to the launch, everything was smooth. Our digital menu and reservation system work great. Customers love how it looks.',
   },
 ] as const

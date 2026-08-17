@@ -39,6 +39,31 @@ export default function AboutPage() {
               My goal isn&apos;t just to make websites — it&apos;s to create digital tools that bring you more customers.
             </AnimatedText>
 
+            {/* Location + Experience (AEO / local queries) */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8" data-tour="about-facts">
+              <div className="p-4 rounded-xl bg-surface border border-border">
+                <div className="text-accent mb-1">
+                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                </div>
+                <div className="font-semibold text-text-primary text-body-sm">{SITE.city}, {SITE.state}</div>
+                <div className="text-caption text-text-tertiary">Based in India</div>
+              </div>
+              <div className="p-4 rounded-xl bg-surface border border-border">
+                <div className="text-accent mb-1">
+                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                </div>
+                <div className="font-semibold text-text-primary text-body-sm">3+ Years</div>
+                <div className="text-caption text-text-tertiary">Experience</div>
+              </div>
+              <div className="p-4 rounded-xl bg-surface border border-border">
+                <div className="text-accent mb-1">
+                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                </div>
+                <div className="font-semibold text-text-primary text-body-sm">10+ Projects</div>
+                <div className="text-caption text-text-tertiary">Delivered</div>
+              </div>
+            </div>
+
             <AnimatedText as="div" delay={400} className="flex gap-4">
               <button onClick={() => openInstagramDM()} className="btn-primary px-6 py-3">
                 DM Me on Instagram

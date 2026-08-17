@@ -16,6 +16,7 @@ import {
   PRICING,
   IMAGES,
   FAQ,
+  TESTIMONIALS,
 } from '@/config/site-config'
 
 // ==================== SITE ====================
@@ -48,6 +49,7 @@ export const NAV_LINKS = [
   { label: 'Projects', href: '/projects' },
   { label: 'Services', href: '/services' },
   { label: 'Free Mockup', href: '/free-mockup' },
+  { label: 'Blog', href: '/blog' },
   { label: 'Tutorials', href: '/tutorials' },
   { label: 'Contact', href: '/contact' },
 ] as const
@@ -189,6 +191,9 @@ export const PROCESS_STEPS = [
 
 // ==================== FAQ ====================
 export { FAQ }
+
+// ==================== TESTIMONIALS ====================
+export { TESTIMONIALS }
 
 // ==================== CONTACT ====================
 export const CONTACT_INFO = {
