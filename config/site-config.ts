@@ -200,6 +200,7 @@ export const DATABASE = {
     videos: 'videos',            // Video/reel URLs (Instagram/YouTube)
     sshKeys: 'sshKeys',          // SSH keys for deployment
     clientUploads: 'clientUploads', // Files/images uploaded by clients (admin-only view + download)
+    clientMockups: 'clientMockups', // Free mockup requests keyed by client_id
   },
 
   /** ImgBB API key for image uploads - get free at api.imgbb.com */
