@@ -27,7 +27,7 @@ export const CLIENT_BUSINESSES: ClientBusiness[] = [
     name: "Muto's Studio",
     type: 'Wedding Photography',
     tagline: 'Capturing your love story, frame by frame.',
-    clientIds: ['MS-N8YPRZ', 'MS-DUSAZ9'],
+    clientIds: ['MS-75X2DJ'],
   },
   {
     prefix: 'WF',
@@ -35,7 +35,7 @@ export const CLIENT_BUSINESSES: ClientBusiness[] = [
     name: 'Wings of Fire',
     type: 'Rooftop Restaurant & Lounge',
     tagline: 'Good food. Great vibes. Rooftop evenings in Lucknow.',
-    clientIds: [],
+    clientIds: ['WF-WEH7VQ'],
   },
 ]
 
