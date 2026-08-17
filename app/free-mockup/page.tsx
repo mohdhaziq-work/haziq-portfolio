@@ -12,6 +12,7 @@ export default function FreeMockupPage() {
   const [businessName, setBusinessName] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [feedback, setFeedback] = useState('')
+  const [submitted, setSubmitted] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -38,18 +39,58 @@ export default function FreeMockupPage() {
         businessName,
       })
 
-      if (result.success && result.instagramDmUrl) {
-        setFeedback('Thank you! Your mockup request is noted. Opening Instagram DM to confirm with Haziq...')
-        window.location.href = result.instagramDmUrl
+      if (result.success) {
+        // Show a thank-you screen instead of force-opening Instagram
+        setSubmitted(true)
       } else {
         setFeedback(result.error || 'Something went wrong. Please try again.')
       }
     } catch {
-      setFeedback('Thank you! Redirecting to Instagram DM...')
-      openInstagramDM()
+      // Still show the success screen even if Firebase isn't configured
+      setSubmitted(true)
     } finally {
       setSubmitting(false)
     }
+  }
+
+  // If the request was submitted, show a confirmation screen (no forced Instagram redirect)
+  if (submitted) {
+    return (
+      <div className="pt-24">
+        <Section background="white" padding="small">
+          <div className="max-w-2xl mx-auto text-center">
+            <div className="w-20 h-20 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg width="40" height="40" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" className="text-success">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+            </div>
+            <AnimatedText as="span" className="section-overline">Request Received</AnimatedText>
+            <AnimatedText as="h1" delay={100} className="text-display-lg text-text-primary mb-6">
+              Thank You, <span className="text-accent">{businessName || 'Friend'}</span>!
+            </AnimatedText>
+            <AnimatedText as="p" delay={200} className="text-body-lg text-text-secondary mb-2">
+              Your free mockup request has been received. ✅
+            </AnimatedText>
+            <AnimatedText as="p" delay={300} className="text-body-md text-text-secondary mb-8">
+              I&apos;ll design a mockup of your homepage and reach out to you soon. You can also message me
+              directly on Instagram to speed things up.
+            </AnimatedText>
+            <AnimatedText as="div" delay={400} className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                onClick={() => openInstagramDM(`Hi Haziq! I just claimed my free mockup. Client ID: ${clientId.trim().toUpperCase()}. Business: ${businessName}.`)}
+                className="btn-primary px-8 py-4 text-body-md"
+              >
+                Message Me on Instagram
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="m9 18 6-6-6-6"/></svg>
+              </button>
+              <a href="/" className="btn-outline px-8 py-4 text-body-md">
+                Back to Home
+              </a>
+            </AnimatedText>
+          </div>
+        </Section>
+      </div>
+    )
   }
 
   return (
@@ -136,7 +177,7 @@ export default function FreeMockupPage() {
                   )}
                 </button>
                 <p className="text-center text-caption text-text-tertiary">
-                  After submitting, you&apos;ll be redirected to Instagram DM to confirm with Haziq directly.
+                  After submitting, you&apos;ll see a confirmation screen. You can choose to message me on Instagram from there.
                 </p>
               </form>
             </div>
