@@ -178,12 +178,12 @@ export const DATABASE = {
    * Agar Firebase use nahi kar rahe toh sab blank chhod do
    */
   firebase: {
-    apiKey: '',  // ⚠️ Add in Render Env: NEXT_PUBLIC_FIREBASE_API_KEY
-    authDomain: '',  // ⚠️ Set in Render Env: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN = mohdhaziq-portfolio.onrender.com
-    projectId: '',  // ⚠️ Add in Render Env: NEXT_PUBLIC_FIREBASE_PROJECT_ID
-    storageBucket: '',  // ⚠️ Add in Render Env: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
-    messagingSenderId: '',  // ⚠️ Add in Render Env: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
-    appId: '',  // ⚠️ Add in Render Env: NEXT_PUBLIC_FIREBASE_APP_ID
+    apiKey: '',  // ⚠️ Add in Render/Vercel Env: NEXT_PUBLIC_FIREBASE_API_KEY
+    authDomain: 'mohdhaziq-portfolio.vercel.app',  // ⚠️ Set in Env: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN (use your deployed domain so Google sign-in works)
+    projectId: '',  // ⚠️ Add in Render/Vercel Env: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    storageBucket: '',  // ⚠️ Add in Env: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    messagingSenderId: '',  // ⚠️ Add in Env: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+    appId: '',  // ⚠️ Add in Env: NEXT_PUBLIC_FIREBASE_APP_ID
     measurementId: '', // Optional
   },
 
