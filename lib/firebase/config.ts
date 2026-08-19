@@ -10,9 +10,24 @@ import { getFirestore } from 'firebase/firestore'
 import { getAuth, GoogleAuthProvider } from 'firebase/auth'
 import { DATABASE } from '@/config/site-config'
 
+// Current live domain. Change this when you move hosting.
+// Google sign-in ONLY works on domains added in Firebase Console →
+// Authentication → Settings → Authorized domains.
+const LIVE_AUTH_DOMAIN = 'mohdhaziq-portfolio.vercel.app'
+
+// Build authDomain, falling back to the live domain if the env var is
+// missing OR points at a dead domain (e.g. suspended Render onrender.com).
+const rawAuthDomain =
+  process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || DATABASE.firebase.authDomain || ''
+
+const authDomain =
+  rawAuthDomain && !rawAuthDomain.includes('onrender.com')
+    ? rawAuthDomain
+    : LIVE_AUTH_DOMAIN
+
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || DATABASE.firebase.apiKey,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || DATABASE.firebase.authDomain,
+  authDomain,
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || DATABASE.firebase.projectId,
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || DATABASE.firebase.storageBucket,
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || DATABASE.firebase.messagingSenderId,
