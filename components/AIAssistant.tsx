@@ -21,7 +21,7 @@ export default function AIAssistant() {
     {
       role: 'assistant',
       content:
-        "Hi! 👋 I'm Haziq AI — Haziq's assistant. Ask me about his services, pricing, projects, or how to get a free website mockup!",
+        "Hey! 👋 I'm HaziqBot — here to help you learn about Haziq's work. Ask me about his services, pricing, projects, or how to get a free website mockup!",
     },
   ])
   const [loading, setLoading] = useState(false)
@@ -72,7 +72,7 @@ export default function AIAssistant() {
       {/* Floating button */}
       <button
         onClick={() => setOpen((o) => !o)}
-        aria-label="Chat with Haziq AI"
+        aria-label="Chat with HaziqBot"
         className="fixed bottom-5 right-5 z-[90] w-16 h-16 rounded-full bg-accent text-white shadow-2xl flex items-center justify-center hover:scale-105 transition-transform"
       >
         {open ? (
@@ -98,7 +98,7 @@ export default function AIAssistant() {
               </svg>
             </div>
             <div>
-              <div className="font-semibold text-body-md">Haziq AI</div>
+              <div className="font-semibold text-body-md">HaziqBot</div>
               <div className="text-xs text-white/80 flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-green-300 animate-pulse" />
                 Online · Assistant
