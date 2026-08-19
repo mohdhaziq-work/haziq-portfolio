@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import LayoutShell from '@/components/layout/LayoutShell'
+import AIAssistant from '@/components/AIAssistant'
 
 const SITE_URL = 'https://mohdhaziq-portfolio.onrender.com'
 
@@ -353,6 +354,7 @@ export default function RootLayout({
       </head>
       <body className="bg-background text-text-primary antialiased">
         <LayoutShell>{children}</LayoutShell>
+        <AIAssistant />
       </body>
     </html>
   )
