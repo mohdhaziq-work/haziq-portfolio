@@ -5,6 +5,29 @@ const NIM_BASE = process.env.NVIDIA_BASE_URL || 'https://integrate.api.nvidia.co
 const NIM_API_KEY = process.env.NVIDIA_API_KEY || ''
 const MODEL = process.env.NVIDIA_MODEL || 'nvidia/nemotron-3-ultra-550b-a55b'
 
+// ===== Simple in-memory rate limiter =====
+// Protects the NVIDIA API key from spam / quota exhaustion.
+const RATE_LIMIT_WINDOW_MS = 60 * 1000 // 1 minute
+const RATE_LIMIT_MAX = 20 // max requests per IP per window
+const hits = new Map<string, { count: number; resetAt: number }>()
+
+function rateLimit(ip: string): boolean {
+  const now = Date.now()
+  const rec = hits.get(ip)
+  if (!rec || now > rec.resetAt) {
+    hits.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS })
+    return true
+  }
+  rec.count += 1
+  return rec.count <= RATE_LIMIT_MAX
+}
+
+function getClientIp(req: Request): string {
+  const fwd = req.headers.get('x-forwarded-for')
+  if (fwd) return fwd.split(',')[0].trim()
+  return req.headers.get('x-real-ip') || 'unknown'
+}
+
 // System prompt = "training" with all portfolio details
 const SYSTEM_PROMPT = `You are "HaziqBot", a warm and friendly chat companion for Mohd Haziq's web development portfolio (https://mohdhaziq-portfolio.onrender.com). Your job is to help website visitors understand who Haziq is, what he offers, pricing, projects, and how to get started.
 
@@ -73,6 +96,17 @@ KEY FACTS:
 TONE: Friendly, professional, encouraging. Always give a unique, natural reply that fits the question — never a fixed answer. Keep responses concise (under ~120 words) unless asked for detail.`
 
 export async function POST(req: Request) {
+  // Rate limit per IP to protect the NVIDIA key
+  if (!rateLimit(getClientIp(req))) {
+    return NextResponse.json(
+      {
+        reply:
+          "You're sending too many messages quickly. Please wait a moment and try again. 😊",
+      },
+      { status: 429 }
+    )
+  }
+
   // Basic guard - if no API key configured, return a friendly message
   if (!NIM_API_KEY) {
     return NextResponse.json({
