@@ -12,6 +12,7 @@
  */
 
 import nodemailer from 'nodemailer'
+import { Resend } from 'resend'
 import { escapeHtml } from '@/lib/auth/serverAuth'
 
 // Site URL - use the deployed domain (Vercel)
@@ -19,8 +20,18 @@ const SITE_URL = process.env.SITE_URL || 'https://mohdhaziq-portfolio.vercel.app
 const LOGO_URL = `${SITE_URL}/logo-haziq.svg`
 const INSTAGRAM_URL = 'https://www.instagram.com/haziq.built'
 const FROM_EMAIL = '"Mohd Haziq" <mohdhaziq1962@gmail.com>'
+const RESEND_FROM = process.env.RESEND_FROM || 'Mohd Haziq <onboarding@resend.dev>' // verified Resend sender
 
-// Lazy SMTP transporter
+// Lazy Resend client (preferred - better inbox delivery than Gmail SMTP)
+let _resend: Resend | null = null
+function getResend(): Resend | null {
+  const key = process.env.RESEND_API_KEY
+  if (!key) return null
+  if (!_resend) _resend = new Resend(key)
+  return _resend
+}
+
+// Lazy Gmail SMTP transporter (fallback if Resend not configured)
 let _transporter: nodemailer.Transporter | null = null
 function getTransporter(): nodemailer.Transporter {
   if (!_transporter) {
@@ -37,8 +48,55 @@ function getTransporter(): nodemailer.Transporter {
   return _transporter
 }
 
-function isSmtpConfigured(): boolean {
+function emailIsConfigured(): boolean {
+  // Prefer Resend, fall back to Gmail SMTP
+  if (process.env.RESEND_API_KEY) return true
   return !!(process.env.SMTP_USER && process.env.SMTP_PASS)
+}
+
+// ==================== SEND HELPER ====================
+
+interface SendOpts {
+  to: string
+  subject: string
+  html: string
+}
+
+async function dispatch(opts: SendOpts): Promise<{ success: boolean; error?: string }> {
+  // 1) Prefer Resend (better inbox delivery)
+  const resend = getResend()
+  if (resend) {
+    try {
+      await resend.emails.send({
+        from: RESEND_FROM,
+        to: opts.to,
+        subject: opts.subject,
+        html: opts.html,
+      })
+      return { success: true }
+    } catch (err) {
+      console.error('[Email] Resend failed, trying Gmail SMTP:', err)
+      // fall through to Gmail SMTP
+    }
+  }
+
+  // 2) Fallback: Gmail SMTP
+  if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+    try {
+      await getTransporter().sendMail({
+        from: FROM_EMAIL,
+        to: opts.to,
+        subject: opts.subject,
+        html: opts.html,
+      })
+      return { success: true }
+    } catch (err) {
+      console.error('[Email] Gmail SMTP failed:', err)
+      return { success: false, error: String(err) }
+    }
+  }
+
+  return { success: false, error: 'No email provider configured (set RESEND_API_KEY or SMTP_USER/SMTP_PASS)' }
 }
 
 // ==================== SHARED STYLES & LAYOUT ====================
@@ -309,43 +367,27 @@ export async function sendWelcomeEmail(
   email: string,
   name: string
 ): Promise<{ success: boolean; error?: string }> {
-  if (!isSmtpConfigured()) {
-    console.log('[Email] SMTP not configured - skipping welcome email')
-    return { success: false, error: 'SMTP not configured' }
+  if (!emailIsConfigured()) {
+    console.log('[Email] No provider configured - skipping welcome email')
+    return { success: false, error: 'Email not configured' }
   }
-  try {
-    await getTransporter().sendMail({
-      from: FROM_EMAIL,
-      to: email,
-      subject: 'Welcome to Mohd Haziq 🎉 — Your Account is Active',
-      html: getWelcomeEmailHTML(name),
-    })
-    console.log('[Email] Welcome sent to:', email)
-    return { success: true }
-  } catch (err) {
-    console.error('[Email] Welcome exception:', err)
-    return { success: false, error: String(err) }
-  }
+  return dispatch({
+    to: email,
+    subject: 'Welcome to Mohd Haziq 🎉 — Your Account is Active',
+    html: getWelcomeEmailHTML(name),
+  })
 }
 
 export async function sendWelcomeBackEmail(
   email: string,
   name: string
 ): Promise<{ success: boolean; error?: string }> {
-  if (!isSmtpConfigured()) return { success: false, error: 'SMTP not configured' }
-  try {
-    await getTransporter().sendMail({
-      from: FROM_EMAIL,
-      to: email,
-      subject: `Welcome back, ${name} 👋`,
-      html: getWelcomeBackEmailHTML(name),
-    })
-    console.log('[Email] Welcome-back sent to:', email)
-    return { success: true }
-  } catch (err) {
-    console.error('[Email] Welcome-back exception:', err)
-    return { success: false, error: String(err) }
-  }
+  if (!emailIsConfigured()) return { success: false, error: 'Email not configured' }
+  return dispatch({
+    to: email,
+    subject: `Welcome back, ${name} 👋`,
+    html: getWelcomeBackEmailHTML(name),
+  })
 }
 
 export async function sendOrderConfirmedEmail(
@@ -358,20 +400,12 @@ export async function sendOrderConfirmedEmail(
     deliveryDate: string
   }
 ): Promise<{ success: boolean; error?: string }> {
-  if (!isSmtpConfigured()) return { success: false, error: 'SMTP not configured' }
-  try {
-    await getTransporter().sendMail({
-      from: FROM_EMAIL,
-      to: email,
-      subject: `Order Confirmed 🎉 — ${data.projectName}`,
-      html: getOrderConfirmedEmailHTML(data),
-    })
-    console.log('[Email] Order confirmed sent to:', email)
-    return { success: true }
-  } catch (err) {
-    console.error('[Email] Order confirmed exception:', err)
-    return { success: false, error: String(err) }
-  }
+  if (!emailIsConfigured()) return { success: false, error: 'Email not configured' }
+  return dispatch({
+    to: email,
+    subject: `Order Confirmed 🎉 — ${data.projectName}`,
+    html: getOrderConfirmedEmailHTML(data),
+  })
 }
 
 export async function sendProjectUpdateEmail(
@@ -385,59 +419,35 @@ export async function sendProjectUpdateEmail(
     deliveryDate?: string
   }
 ): Promise<{ success: boolean; error?: string }> {
-  if (!isSmtpConfigured()) return { success: false, error: 'SMTP not configured' }
-  try {
-    const meta = STATUS_META[data.status] || STATUS_META.inquiry
-    await getTransporter().sendMail({
-      from: FROM_EMAIL,
-      to: email,
-      subject: `Project Update: ${data.projectName} — ${meta.label}`,
-      html: getProjectUpdateEmailHTML({ ...data, message: data.message || '' }),
-    })
-    console.log('[Email] Update sent to:', email)
-    return { success: true }
-  } catch (err) {
-    console.error('[Email] Update exception:', err)
-    return { success: false, error: String(err) }
-  }
+  if (!emailIsConfigured()) return { success: false, error: 'Email not configured' }
+  const meta = STATUS_META[data.status] || STATUS_META.inquiry
+  return dispatch({
+    to: email,
+    subject: `Project Update: ${data.projectName} — ${meta.label}`,
+    html: getProjectUpdateEmailHTML({ ...data, message: data.message || '' }),
+  })
 }
 
 export async function sendProjectDeliveredEmail(
   email: string,
   data: { clientName: string; projectName: string; projectUrl?: string }
 ): Promise<{ success: boolean; error?: string }> {
-  if (!isSmtpConfigured()) return { success: false, error: 'SMTP not configured' }
-  try {
-    await getTransporter().sendMail({
-      from: FROM_EMAIL,
-      to: email,
-      subject: `Your Website is Ready! 🚀 — ${data.projectName}`,
-      html: getProjectDeliveredEmailHTML(data),
-    })
-    console.log('[Email] Delivered sent to:', email)
-    return { success: true }
-  } catch (err) {
-    console.error('[Email] Delivered exception:', err)
-    return { success: false, error: String(err) }
-  }
+  if (!emailIsConfigured()) return { success: false, error: 'Email not configured' }
+  return dispatch({
+    to: email,
+    subject: `Your Website is Ready! 🚀 — ${data.projectName}`,
+    html: getProjectDeliveredEmailHTML(data),
+  })
 }
 
 export async function sendMockupRequestEmail(
   email: string,
   data: { clientName: string; businessName: string; clientId: string }
 ): Promise<{ success: boolean; error?: string }> {
-  if (!isSmtpConfigured()) return { success: false, error: 'SMTP not configured' }
-  try {
-    await getTransporter().sendMail({
-      from: FROM_EMAIL,
-      to: email,
-      subject: 'Free Mockup Request 🎨 — Confirmed',
-      html: getMockupRequestEmailHTML(data),
-    })
-    console.log('[Email] Mockup request sent to:', email)
-    return { success: true }
-  } catch (err) {
-    console.error('[Email] Mockup request exception:', err)
-    return { success: false, error: String(err) }
-  }
+  if (!emailIsConfigured()) return { success: false, error: 'Email not configured' }
+  return dispatch({
+    to: email,
+    subject: 'Free Mockup Request 🎨 — Confirmed',
+    html: getMockupRequestEmailHTML(data),
+  })
 }
