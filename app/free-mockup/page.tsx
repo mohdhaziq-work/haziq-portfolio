@@ -51,6 +51,29 @@ export default function FreeMockupPage() {
         clientEmail: user?.email || '',
         businessName,
       })
+
+      // Send a mockup-request confirmation email to the client
+      try {
+        const token = await user?.getIdToken()
+        if (token && user?.email) {
+          await fetch('/api/email/mockup', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              email: user.email,
+              clientName: user.displayName || user.email.split('@')[0],
+              businessName,
+              clientId: clientId.trim().toUpperCase(),
+            }),
+          })
+        }
+      } catch (emailErr) {
+        console.error('[Mockup] Email send failed:', emailErr)
+      }
+
       // Show this business's mockup
       setClaimResult(business)
     } catch {

@@ -1,12 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getBearerToken, requireAdmin, verifyIdToken } from '@/lib/auth/serverAuth'
-import { sendProjectUpdateEmail } from '@/lib/email/service'
+import {
+  sendWelcomeEmail,
+  sendWelcomeBackEmail,
+  sendOrderConfirmedEmail,
+  sendProjectUpdateEmail,
+  sendProjectDeliveredEmail,
+  sendMockupRequestEmail,
+} from '@/lib/email/service'
 
 /**
  * Email diagnostic endpoint (admin only).
  *
- * GET  /api/email/test  -> reports email-system state
- * POST /api/email/test  -> attempts to send a test email to the admin's own address
+ * GET  /api/email/test              -> reports email-system state
+ * POST /api/email/test              -> sends a set of test emails to the admin
  */
 export async function GET(request: NextRequest) {
   const token = getBearerToken(request)
@@ -38,14 +45,53 @@ export async function POST(request: NextRequest) {
 
   const caller = await verifyIdToken(token)
   const to = caller?.email || ''
+  const name = 'Haziq'
 
-  const result = await sendProjectUpdateEmail(to, {
-    clientName: 'Haziq (self-test)',
-    projectName: 'Email Test',
-    status: 'confirmed',
-    progress: 25,
-    message: 'This is a test email to verify the email system is working.',
-  })
+  // Send every email template as a test so the admin can see each design
+  const results: Record<string, boolean> = {}
+  const errors: Record<string, string> = {}
 
-  return NextResponse.json({ sent: result.success, to, error: result.error || null })
+  async function run(key: string, fn: () => Promise<{ success: boolean; error?: string }>) {
+    const r = await fn()
+    results[key] = r.success
+    if (r.error) errors[key] = r.error
+  }
+
+  await run('welcome', () => sendWelcomeEmail(to, name))
+  await run('welcome-back', () => sendWelcomeBackEmail(to, name))
+  await run('order-confirmed', () =>
+    sendOrderConfirmedEmail(to, {
+      clientName: name,
+      projectName: 'Test Business Website',
+      projectType: 'business',
+      budget: '₹6,000',
+      deliveryDate: '7 days',
+    })
+  )
+  await run('project-update', () =>
+    sendProjectUpdateEmail(to, {
+      clientName: name,
+      projectName: 'Test Business Website',
+      status: 'in-progress',
+      progress: 50,
+      message: 'Your website is coming along great!',
+      deliveryDate: '5 days',
+    })
+  )
+  await run('delivered', () =>
+    sendProjectDeliveredEmail(to, {
+      clientName: name,
+      projectName: 'Test Business Website',
+      projectUrl: 'https://mohdhaziq-portfolio.vercel.app',
+    })
+  )
+  await run('mockup', () =>
+    sendMockupRequestEmail(to, {
+      clientName: name,
+      businessName: 'Test Business',
+      clientId: 'MS-TEST123',
+    })
+  )
+
+  return NextResponse.json({ sent: true, to, results, errors })
 }

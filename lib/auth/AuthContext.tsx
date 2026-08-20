@@ -58,45 +58,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAdmin = !!user && user.email === ADMIN_EMAIL
   const isClient = !!user && user.email !== ADMIN_EMAIL
 
-  // Send welcome email on first login
+  // Send welcome email on first login, welcome-back email on returning login
   const sendWelcomeIfNeeded = useCallback(async (firebaseUser: User) => {
-    // Don't send welcome email to admin
+    // Don't send emails to admin
     if (firebaseUser.email === ADMIN_EMAIL) {
       console.log('[Auth] Skipping welcome email for admin')
       return
     }
 
     const displayName = firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'there'
+    const token = await firebaseUser.getIdToken()
+    let isNewUser = true
 
-    // Try to check Firestore for existing user record
+    // Check Firestore for existing user record
     if (db) {
       try {
         const userDocRef = doc(db, 'users', firebaseUser.uid)
         const userDoc = await getDoc(userDocRef)
 
         if (userDoc.exists()) {
-          console.log('[Auth] User already exists, skipping welcome email for:', firebaseUser.email)
-          return
+          isNewUser = false
+        } else {
+          // First time user - save record
+          await setDoc(userDocRef, {
+            email: firebaseUser.email,
+            name: displayName,
+            photoURL: firebaseUser.photoURL || '',
+            createdAt: serverTimestamp(),
+            welcomeEmailSent: true,
+          })
         }
-
-        // First time user - save record
-        await setDoc(userDocRef, {
-          email: firebaseUser.email,
-          name: displayName,
-          photoURL: firebaseUser.photoURL || '',
-          createdAt: serverTimestamp(),
-          welcomeEmailSent: true,
-        })
       } catch (err) {
-        console.error('[Auth] Firestore check failed, will still try email:', err)
-        // Continue to send email even if Firestore check fails
+        console.error('[Auth] Firestore check failed:', err)
       }
     }
 
-    // Send welcome email via API (authenticated request)
+    // Send appropriate email via API (authenticated request)
     try {
-      const token = await firebaseUser.getIdToken()
-      const response = await fetch('/api/email/welcome', {
+      const response = await fetch(isNewUser ? '/api/email/welcome' : '/api/email/welcome-back', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -108,9 +107,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }),
       })
       const result = await response.json()
-      console.log('[Auth] Welcome email API response:', result)
+      console.log(`[Auth] ${isNewUser ? 'Welcome' : 'Welcome-back'} email API response:`, result)
     } catch (emailErr) {
-      console.error('[Auth] Welcome email API call failed:', emailErr)
+      console.error('[Auth] Email API call failed:', emailErr)
     }
   }, [])
 

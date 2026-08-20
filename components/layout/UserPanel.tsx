@@ -497,17 +497,33 @@ function AdminDashboard() {
       const token = await getAuthToken()
       const project = projects.find(p => p.id === projectId)
       if (project?.clientEmail && token) {
-        await fetch('/api/email/update', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({
-            email: project.clientEmail,
-            clientName: project.clientName,
-            projectName: project.businessName || project.projectType,
-            status: newStatus,
-            progress: newStatus === 'delivered' ? 100 : (project.progress || 0),
-          }),
-        })
+        // If status becomes confirmed, send the Order Confirmed email
+        if (newStatus === 'confirmed') {
+          await fetch('/api/email/order-confirmed', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({
+              email: project.clientEmail,
+              clientName: project.clientName,
+              projectName: project.businessName || project.projectType,
+              projectType: project.projectType,
+              budget: project.budget || '',
+              deliveryDate: project.deliveryDate || '',
+            }),
+          })
+        } else {
+          await fetch('/api/email/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({
+              email: project.clientEmail,
+              clientName: project.clientName,
+              projectName: project.businessName || project.projectType,
+              status: newStatus,
+              progress: newStatus === 'delivered' ? 100 : (project.progress || 0),
+            }),
+          })
+        }
       }
     } catch (err) {
       console.error('[Admin] Failed to send status update email:', err)
@@ -531,6 +547,7 @@ function AdminDashboard() {
             status: editData.status || project.status,
             progress: editData.progress,
             message: editData.adminNotes || undefined,
+            deliveryDate: editData.deliveryDate || project.deliveryDate || undefined,
           }),
         })
       }

@@ -68,7 +68,7 @@ export default function EmailTest() {
           disabled={loading}
           className="px-4 py-2 bg-green-600 text-white rounded-xl text-xs font-semibold hover:bg-green-700 disabled:opacity-50"
         >
-          {loading ? 'Sending...' : '2. Send Test Email'}
+          {loading ? 'Sending...' : '2. Send All Test Emails'}
         </button>
       </div>
 
@@ -96,15 +96,22 @@ export default function EmailTest() {
       )}
 
       {result && (
-        <div className="bg-white border border-border rounded-xl p-4">
-          <p className="text-[10px] text-green-600 uppercase font-semibold mb-1">Test Email Result</p>
-          <p className="text-xs text-text-primary">
-            Sent to: <b>{result.to}</b> — {result.sent ? '✅ Email sent successfully!' : '❌ Failed: ' + result.error}
+        <div className="bg-white border border-border rounded-xl p-4 space-y-2">
+          <p className="text-[10px] text-green-600 uppercase font-semibold">Test Emails Result</p>
+          <p className="text-xs text-text-secondary">
+            Sent to: <b>{result.to}</b> — sab email templates bhej diye gaye hain. Inbox + spam check karo.
           </p>
-          {result.sent && (
-            <p className="text-[11px] text-text-secondary mt-1">
-              Check {result.to} inbox (aur spam folder bhi).
-            </p>
+          {result.results && (
+            <div className="space-y-1.5">
+              {Object.entries(result.results).map(([key, ok]) => (
+                <div key={key} className="flex justify-between items-center py-1 border-b border-border/50 last:border-0">
+                  <span className="text-xs text-text-tertiary capitalize">{key.replace(/-/g, ' ')}</span>
+                  <span className={`text-xs font-semibold ${ok ? 'text-green-600' : 'text-red-600'}`}>
+                    {ok ? '✅ Sent' : '❌ ' + (result.errors?.[key] || 'Failed')}
+                  </span>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       )}
