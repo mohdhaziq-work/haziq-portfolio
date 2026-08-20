@@ -49,9 +49,9 @@ function getTransporter(): nodemailer.Transporter {
 }
 
 function emailIsConfigured(): boolean {
-  // Prefer Resend, fall back to Gmail SMTP
-  if (process.env.RESEND_API_KEY) return true
-  return !!(process.env.SMTP_USER && process.env.SMTP_PASS)
+  // Prefer Gmail SMTP, fall back to Resend
+  if (process.env.SMTP_USER && process.env.SMTP_PASS) return true
+  return !!process.env.RESEND_API_KEY
 }
 
 // ==================== SEND HELPER ====================
@@ -63,24 +63,7 @@ interface SendOpts {
 }
 
 async function dispatch(opts: SendOpts): Promise<{ success: boolean; error?: string }> {
-  // 1) Prefer Resend (better inbox delivery)
-  const resend = getResend()
-  if (resend) {
-    try {
-      await resend.emails.send({
-        from: RESEND_FROM,
-        to: opts.to,
-        subject: opts.subject,
-        html: opts.html,
-      })
-      return { success: true }
-    } catch (err) {
-      console.error('[Email] Resend failed, trying Gmail SMTP:', err)
-      // fall through to Gmail SMTP
-    }
-  }
-
-  // 2) Fallback: Gmail SMTP
+  // 1) Prefer Gmail SMTP (personal sender from own Gmail -> best free inbox delivery)
   if (process.env.SMTP_USER && process.env.SMTP_PASS) {
     try {
       await getTransporter().sendMail({
@@ -92,11 +75,27 @@ async function dispatch(opts: SendOpts): Promise<{ success: boolean; error?: str
       return { success: true }
     } catch (err) {
       console.error('[Email] Gmail SMTP failed:', err)
+    }
+  }
+
+  // 2) Fallback: Resend (if Gmail SMTP not configured)
+  const resend = getResend()
+  if (resend) {
+    try {
+      await resend.emails.send({
+        from: RESEND_FROM,
+        to: opts.to,
+        subject: opts.subject,
+        html: opts.html,
+      })
+      return { success: true }
+    } catch (err) {
+      console.error('[Email] Resend failed:', err)
       return { success: false, error: String(err) }
     }
   }
 
-  return { success: false, error: 'No email provider configured (set RESEND_API_KEY or SMTP_USER/SMTP_PASS)' }
+  return { success: false, error: 'No email provider configured (set SMTP_USER/SMTP_PASS or RESEND_API_KEY)' }
 }
 
 // ==================== SHARED STYLES & LAYOUT ====================
@@ -373,7 +372,7 @@ export async function sendWelcomeEmail(
   }
   return dispatch({
     to: email,
-    subject: 'Welcome to Mohd Haziq 🎉 — Your Account is Active',
+    subject: 'Welcome to Mohd Haziq - Your Account is Active',
     html: getWelcomeEmailHTML(name),
   })
 }
@@ -385,7 +384,7 @@ export async function sendWelcomeBackEmail(
   if (!emailIsConfigured()) return { success: false, error: 'Email not configured' }
   return dispatch({
     to: email,
-    subject: `Welcome back, ${name} 👋`,
+    subject: `Welcome back, ${name}!`,
     html: getWelcomeBackEmailHTML(name),
   })
 }
@@ -403,7 +402,7 @@ export async function sendOrderConfirmedEmail(
   if (!emailIsConfigured()) return { success: false, error: 'Email not configured' }
   return dispatch({
     to: email,
-    subject: `Order Confirmed 🎉 — ${data.projectName}`,
+    subject: `Order Confirmed - ${data.projectName}`,
     html: getOrderConfirmedEmailHTML(data),
   })
 }
@@ -435,7 +434,7 @@ export async function sendProjectDeliveredEmail(
   if (!emailIsConfigured()) return { success: false, error: 'Email not configured' }
   return dispatch({
     to: email,
-    subject: `Your Website is Ready! 🚀 — ${data.projectName}`,
+    subject: `Your Website is Ready! - ${data.projectName}`,
     html: getProjectDeliveredEmailHTML(data),
   })
 }
@@ -447,7 +446,7 @@ export async function sendMockupRequestEmail(
   if (!emailIsConfigured()) return { success: false, error: 'Email not configured' }
   return dispatch({
     to: email,
-    subject: 'Free Mockup Request 🎨 — Confirmed',
+    subject: 'Free Mockup Request - Confirmed',
     html: getMockupRequestEmailHTML(data),
   })
 }
