@@ -41,6 +41,7 @@ import ImageEnhancer from '@/components/admin/ImageEnhancer'
 import ImageStudio from '@/components/admin/ImageStudio'
 import ImageTextEditor from '@/components/admin/ImageTextEditor'
 import AdminAIChat from '@/components/admin/AdminAIChat'
+import EmailTest from '@/components/admin/EmailTest'
 import { getAuthToken } from '@/lib/auth/clientAuth'
 
 /* ============================================================
@@ -274,7 +275,7 @@ function StudioWrapper() {
    ADMIN DASHBOARD
    ============================================================ */
 
-type AdminTab = 'overview' | 'contacts' | 'projects' | 'images' | 'reels' | 'clientfiles' | 'studio' | 'ssh' | 'assistant'
+type AdminTab = 'overview' | 'contacts' | 'projects' | 'images' | 'reels' | 'clientfiles' | 'studio' | 'ssh' | 'assistant' | 'email'
 
 function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<AdminTab>('overview')
@@ -560,6 +561,7 @@ function AdminDashboard() {
     studio: 'Studio',
     ssh: 'SSH',
     assistant: 'AI Assistant',
+    email: 'Email',
   }
 
   return (
@@ -1072,6 +1074,14 @@ function AdminDashboard() {
             <div className="space-y-2">
               <SectionTitle title="AI Assistant" subtitle="Private chat for Haziq — replies, content, ideas, onboarding." />
               <AdminAIChat />
+            </div>
+          )}
+
+          {/* ===== EMAIL TEST TAB (admin only) ===== */}
+          {activeTab === 'email' && (
+            <div className="space-y-2">
+              <SectionTitle title="Email Test" subtitle="Check if the email system (Gmail SMTP) is working and send a test email." />
+              <EmailTest />
             </div>
           )}
         </>
