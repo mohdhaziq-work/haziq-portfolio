@@ -41,6 +41,7 @@ import ImageEnhancer from '@/components/admin/ImageEnhancer'
 import ImageStudio from '@/components/admin/ImageStudio'
 import ImageTextEditor from '@/components/admin/ImageTextEditor'
 import AdminAIChat from '@/components/admin/AdminAIChat'
+import WebsiteAnalyzer from '@/components/admin/WebsiteAnalyzer'
 
 // ==================== MAIN USER PANEL ====================
 
@@ -159,7 +160,7 @@ function StudioWrapper() {
 
 // ==================== ADMIN DASHBOARD ====================
 
-type AdminTab = 'overview' | 'contacts' | 'projects' | 'images' | 'reels' | 'clientfiles' | 'studio' | 'ssh' | 'assistant'
+type AdminTab = 'overview' | 'contacts' | 'projects' | 'images' | 'reels' | 'clientfiles' | 'studio' | 'ssh' | 'assistant' | 'analyzer'
 
 function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<AdminTab>('overview')
@@ -500,7 +501,7 @@ function AdminDashboard() {
 
       {/* Tabs */}
       <div className="flex gap-1.5 mb-4 bg-surface rounded-lg p-1">
-        {(['overview', 'contacts', 'projects', 'images', 'reels', 'clientfiles', 'studio', 'ssh', 'assistant'] as AdminTab[]).map(tab => (
+        {(['overview', 'contacts', 'projects', 'images', 'reels', 'clientfiles', 'studio', 'ssh', 'assistant', 'analyzer'] as AdminTab[]).map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -508,7 +509,7 @@ function AdminDashboard() {
               activeTab === tab ? 'bg-white text-accent shadow-sm' : 'text-text-secondary hover:text-text-primary'
             }`}
           >
-            {tab === 'reels' ? 'Reels' : tab === 'ssh' ? 'SSH' : tab === 'clientfiles' ? 'Client Files' : tab === 'studio' ? 'Studio' : tab === 'assistant' ? 'AI Assistant' : tab}
+            {tab === 'reels' ? 'Reels' : tab === 'ssh' ? 'SSH' : tab === 'clientfiles' ? 'Client Files' : tab === 'studio' ? 'Studio' : tab === 'assistant' ? 'AI Assistant' : tab === 'analyzer' ? 'Analyzer' : tab}
             {tab === 'contacts' && newContacts > 0 && (
               <span className="ml-1.5 px-1.5 py-0.5 bg-red-500 text-white text-[9px] rounded-full">{newContacts}</span>
             )}
@@ -1321,6 +1322,11 @@ function AdminDashboard() {
               </p>
               <AdminAIChat />
             </div>
+          )}
+
+          {/* ===== ANALYZER TAB (admin only) ===== */}
+          {activeTab === 'analyzer' && (
+            <WebsiteAnalyzer />
           )}
         </>
       )}
