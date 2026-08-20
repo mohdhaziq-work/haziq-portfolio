@@ -47,32 +47,33 @@ const BASE_STYLES = `
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f4f6fb; color: #1a1a2e; line-height: 1.6; }
   .ew { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 18px; overflow: hidden; box-shadow: 0 8px 32px rgba(20,40,80,0.10); }
-  .hd { background: linear-gradient(135deg, #1a73e8, #0d47a1); padding: 36px 32px; text-align: center; }
-  .hd .brand { display: inline-flex; align-items: center; gap: 12px; margin-bottom: 14px; }
-  .hd .brand img { width: 48px; height: 48px; border-radius: 12px; }
-  .hd h1 { color: #ffffff; font-size: 24px; font-weight: 700; letter-spacing: -0.4px; }
-  .hd p { color: #a8c7fa; font-size: 14px; margin-top: 4px; }
-  .ct { padding: 32px; }
-  .gr { font-size: 18px; font-weight: 700; color: #1a1a2e; margin-bottom: 10px; }
-  .bt { font-size: 15px; color: #4a4a6a; margin-bottom: 18px; line-height: 1.7; }
-  .card { background: #f6f9ff; border: 1px solid #e6eefc; border-radius: 14px; padding: 20px 22px; margin: 20px 0; }
-  .card h3 { font-size: 15px; font-weight: 700; color: #1a73e8; margin-bottom: 10px; }
-  .card p, .card li { font-size: 14px; color: #4a4a6a; }
-  .status { display: inline-block; padding: 6px 16px; border-radius: 30px; font-size: 13px; font-weight: 700; color: #fff; margin: 6px 0; }
-  .row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #e0e8f5; font-size: 14px; }
+  .hd { background: linear-gradient(135deg, #1a73e8, #0d47a1); padding: 30px 32px 26px; text-align: center; }
+  .hd .brand { display: inline-block; width: 64px; height: 64px; border-radius: 50%; background: #ffffff; padding: 6px; box-shadow: 0 4px 14px rgba(0,0,0,0.18); margin-bottom: 14px; }
+  .hd .brand img { width: 52px; height: 52px; border-radius: 50%; display: block; margin: 0 auto; }
+  .hd h1 { color: #ffffff; font-size: 22px; font-weight: 800; letter-spacing: -0.4px; }
+  .hd p { color: #b8d0f5; font-size: 13px; margin-top: 3px; }
+  .ct { padding: 30px 32px; }
+  .gr { font-size: 19px; font-weight: 800; color: #111827; margin-bottom: 10px; }
+  .bt { font-size: 15px; color: #4b5563; margin-bottom: 16px; line-height: 1.7; }
+  .card { background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 14px; padding: 20px 22px; margin: 18px 0; }
+  .card h3 { font-size: 15px; font-weight: 800; color: #1a73e8; margin-bottom: 10px; }
+  .card ul { list-style: none; padding: 0; }
+  .card li { font-size: 14px; color: #4b5563; padding: 5px 0; }
+  .status { display: inline-block; padding: 6px 16px; border-radius: 30px; font-size: 12px; font-weight: 800; color: #fff; margin: 6px 0; }
+  .row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px dashed #e5e7eb; font-size: 14px; }
   .row:last-child { border-bottom: none; }
-  .row span:first-child { color: #8a94a6; }
-  .row span:last-child { color: #1a1a2e; font-weight: 600; }
-  .cb { display: inline-block; background: linear-gradient(135deg, #1a73e8, #0d47a1); color: #ffffff !important; text-decoration: none; padding: 14px 36px; border-radius: 12px; font-size: 15px; font-weight: 700; margin: 18px 0; }
-  .cb.green { background: linear-gradient(135deg, #10b981, #059669); }
-  .dv { height: 1px; background: #e8ecf2; margin: 22px 0; }
-  .ft { background: #f8f9fc; padding: 24px 32px; text-align: center; border-top: 1px solid #e8ecf2; }
-  .ft .f-logo { font-weight: 800; color: #1a1a2e; font-size: 15px; }
-  .ft p { font-size: 13px; color: #8a8aaa; margin: 4px 0; }
+  .row span:first-child { color: #6b7280; }
+  .row span:last-child { color: #111827; font-weight: 700; }
+  .cb { display: inline-block; background: #1a73e8; color: #ffffff !important; text-decoration: none; padding: 14px 38px; border-radius: 10px; font-size: 15px; font-weight: 800; margin: 16px 0; }
+  .cb.green { background: #10b981; }
+  .dv { height: 1px; background: #e5e7eb; margin: 22px 0; }
+  .ft { background: #f8fafc; padding: 24px 32px; text-align: center; border-top: 1px solid #e5e7eb; }
+  .ft .f-logo { font-weight: 800; color: #111827; font-size: 15px; }
+  .ft p { font-size: 13px; color: #6b7280; margin: 4px 0; }
   .ft a { color: #1a73e8; text-decoration: none; }
   .sl { margin-top: 12px; }
-  .sl a { display: inline-block; margin: 0 8px; color: #1a73e8; font-size: 13px; text-decoration: none; font-weight: 600; }
-  .reply { font-size: 13px; color: #8a8aaa; text-align: center; padding: 16px 32px; }
+  .sl a { display: inline-block; margin: 0 8px; color: #1a73e8; font-size: 13px; text-decoration: none; font-weight: 700; }
+  .reply { font-size: 12px; color: #9ca3af; text-align: center; padding: 14px 32px; }
 `
 
 const FOOTER_HTML = `
@@ -122,7 +123,7 @@ const STATUS_META: Record<string, { label: string; color: string; title: string;
     msg: 'Your project is confirmed! Thank you for trusting me. I am preparing your project and will begin work soon. You can track progress anytime.',
   },
   'in-progress': {
-    label: 'In Progress', color: '#3b82f6', title: 'Project In Progress',
+    label: 'In Progress', color: '#2563eb', title: 'Project In Progress',
     msg: 'I am actively building your website right now. I will share progress updates here as your project takes shape.',
   },
   review: {
@@ -130,11 +131,11 @@ const STATUS_META: Record<string, { label: string; color: string; title: string;
     msg: 'Your website is ready for review! Please take a look and let me know your feedback so I can make it perfect for you.',
   },
   delivered: {
-    label: 'Delivered', color: '#10b981', title: 'Your Website is Live!',
+    label: 'Delivered', color: '#059669', title: 'Your Website is Live!',
     msg: 'Congratulations! Your website is complete and live. It is ready to bring customers to your business.',
   },
   cancelled: {
-    label: 'Cancelled', color: '#ef4444', title: 'Project Update',
+    label: 'Cancelled', color: '#dc2626', title: 'Project Update',
     msg: 'Your project has been cancelled. If you would like to discuss anything or restart, just reach out — I am happy to help.',
   },
 }
