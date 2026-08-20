@@ -201,13 +201,13 @@ const STATUS_META: Record<string, { label: string; color: string; title: string;
 function getWelcomeEmailHTML(name: string): string {
   const n = escapeHtml(name)
   const body = `
-    <p class="gr">Hey ${n}, welcome aboard! 👋</p>
+    <p class="gr">Hey ${n}, welcome aboard!</p>
     <p class="bt">Thanks for signing up on my portfolio. Your account is now active — you can track projects, submit requests, and stay updated on everything from your portal.</p>
     <div class="card">
       <h3>What you can do now:</h3>
       <ul>
         <li>📦 Track your project progress in real time</li>
-        <li>🚀 Submit new project requests directly</li>
+        <li>Submit new project requests directly</li>
         <li>📅 See delivery dates and updates from me</li>
         <li>🔔 Get notified when your project status changes</li>
       </ul>
@@ -218,20 +218,20 @@ function getWelcomeEmailHTML(name: string): string {
     <p class="bt" style="font-size:14px;">The fastest way to reach me is Instagram DM — I reply within 2 hours (9 AM - 10 PM IST).</p>
     <div style="text-align:center;"><a href="${INSTAGRAM_URL}" style="display:inline-block;background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;text-decoration:none;padding:10px 24px;border-radius:10px;font-size:14px;font-weight:700;">DM on Instagram</a></div>
   `
-  return wrapper('Welcome to Mohd Haziq 🎉', 'Welcome, ' + n + '!', 'Mohd Haziq — Web Developer', body)
+  return wrapper('Welcome to Mohd Haziq', 'Welcome, ' + n + '!', 'Mohd Haziq — Web Developer', body)
 }
 
 // ==================== TEMPLATE: WELCOME BACK ====================
 function getWelcomeBackEmailHTML(name: string): string {
   const n = escapeHtml(name)
   const body = `
-    <p class="gr">Welcome back, ${n}! 👋</p>
+    <p class="gr">Welcome back, ${n}!</p>
     <p class="bt">It is great to see you again. Your account is ready — here is a quick look at what you can do.</p>
     <div class="card">
       <h3>Quick shortcuts:</h3>
       <ul>
         <li>📦 Check your project status</li>
-        <li>🚀 Start a new project</li>
+        <li>Start a new project</li>
         <li>📤 Upload files for your project</li>
         <li>💬 DM me directly for anything</li>
       </ul>
@@ -241,7 +241,7 @@ function getWelcomeBackEmailHTML(name: string): string {
     <p class="bt" style="font-size:14px;">Need help with anything? I am always one DM away — usually reply within 2 hours.</p>
     <div style="text-align:center;"><a href="${INSTAGRAM_URL}" style="display:inline-block;background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;text-decoration:none;padding:10px 24px;border-radius:10px;font-size:14px;font-weight:700;">DM on Instagram</a></div>
   `
-  return wrapper('Welcome Back, ' + n + ' 👋', 'Welcome back, ' + n + '!', 'Your project portal is ready', body)
+  return wrapper('Welcome Back, ' + n, 'Welcome back, ' + n + '!', 'Your project portal is ready', body)
 }
 
 // ==================== TEMPLATE: ORDER CONFIRMED ====================
@@ -258,7 +258,7 @@ function getOrderConfirmedEmailHTML(data: {
   const b = escapeHtml(data.budget)
   const dd = escapeHtml(data.deliveryDate)
   const body = `
-    <p class="gr">Order Confirmed 🎉</p>
+    <p class="gr">Order Confirmed</p>
     <p class="bt">Thank you, ${c}! Your order has been placed successfully. Here is a summary of your project:</p>
     <div class="card">
       <h3>Order Summary</h3>
@@ -270,7 +270,7 @@ function getOrderConfirmedEmailHTML(data: {
     <p class="bt">I am now preparing your project. You can track progress anytime from your portal.</p>
     <div style="text-align:center;"><a href="${SITE_URL}" class="cb">Track My Project</a></div>
   `
-  return wrapper('Order Confirmed — ' + p, 'Order Confirmed! 🎉', 'Your project is placed', body, 'linear-gradient(135deg,#10b981,#047857)')
+  return wrapper('Order Confirmed — ' + p, 'Order Confirmed', 'Your project is placed', body, 'linear-gradient(135deg,#10b981,#047857)')
 }
 
 // ==================== TEMPLATE: PROJECT STATUS UPDATE ====================
@@ -317,15 +317,15 @@ function getProjectDeliveredEmailHTML(data: {
   const p = escapeHtml(data.projectName)
   const url = escapeHtml(data.projectUrl || '')
   const body = `
-    <p class="gr">Your Website is Live! 🚀</p>
+    <p class="gr">Your Website is Live</p>
     <p class="bt">Congratulations, ${c}! Your website <strong>${p}</strong> has been delivered and is now live on the internet.</p>
     <div class="card">
       <h3>What is included:</h3>
       <ul>
-        <li>✅ Professional, mobile-friendly design</li>
-        <li>✅ Fast loading and SEO optimized</li>
-        <li>✅ Contact form and Instagram integration</li>
-        <li>✅ Fully deployed and live</li>
+        <li>Professional, mobile-friendly design</li>
+        <li>Fast loading and SEO optimized</li>
+        <li>Contact form and Instagram integration</li>
+        <li>Fully deployed and live</li>
       </ul>
     </div>
     ${url ? `<div style="text-align:center;"><a href="${url}" class="cb green">Visit Your Website</a></div>` : ''}
@@ -333,7 +333,7 @@ function getProjectDeliveredEmailHTML(data: {
     <p class="bt" style="font-size:14px;">Need any changes or have questions? I am always here to help — just DM me on Instagram.</p>
     <div style="text-align:center;"><a href="${INSTAGRAM_URL}" style="display:inline-block;background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;text-decoration:none;padding:10px 24px;border-radius:10px;font-size:14px;font-weight:700;">DM on Instagram</a></div>
   `
-  return wrapper('Your Website is Ready! 🚀', 'Your Website is Live!', 'Mohd Haziq — Web Developer', body, 'linear-gradient(135deg,#10b981,#059669)')
+  return wrapper('Your Website is Ready', 'Your Website is Live!', 'Mohd Haziq — Web Developer', body, 'linear-gradient(135deg,#10b981,#059669)')
 }
 
 // ==================== TEMPLATE: MOCKUP REQUEST ====================
@@ -346,7 +346,7 @@ function getMockupRequestEmailHTML(data: {
   const b = escapeHtml(data.businessName)
   const id = escapeHtml(data.clientId)
   const body = `
-    <p class="gr">Free Mockup Request Received 🎨</p>
+    <p class="gr">Free Mockup Request Received</p>
     <p class="bt">Hi ${c}, thank you! I have received your free mockup request for <strong>${b}</strong>.</p>
     <div class="card">
       <h3>Your Client ID</h3>
@@ -357,7 +357,7 @@ function getMockupRequestEmailHTML(data: {
     <p class="bt" style="font-size:14px;">Want to speed things up? DM me on Instagram and mention your Client ID.</p>
     <div style="text-align:center;"><a href="${INSTAGRAM_URL}" style="display:inline-block;background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;text-decoration:none;padding:10px 24px;border-radius:10px;font-size:14px;font-weight:700;">DM on Instagram</a></div>
   `
-  return wrapper('Free Mockup Request 🎨', 'Mockup Request Received!', 'Mohd Haziq — Web Developer', body, 'linear-gradient(135deg,#8b5cf6,#6d28d9)')
+  return wrapper('Free Mockup Request', 'Mockup Request Received!', 'Mohd Haziq — Web Developer', body, 'linear-gradient(135deg,#8b5cf6,#6d28d9)')
 }
 
 // ==================== SEND FUNCTIONS ====================
