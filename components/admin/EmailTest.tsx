@@ -13,6 +13,7 @@ export default function EmailTest() {
   const [result, setResult] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [testEmail, setTestEmail] = useState('')
 
   const runStatus = async () => {
     setLoading(true)
@@ -42,7 +43,8 @@ export default function EmailTest() {
       if (!token) throw new Error('Not signed in — please log in first.')
       const res = await fetch('/api/email/test', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ email: testEmail || undefined }),
       })
       const data = await res.json()
       setResult(data)
@@ -70,6 +72,22 @@ export default function EmailTest() {
         >
           {loading ? 'Sending...' : '2. Send All Test Emails'}
         </button>
+      </div>
+
+      <div className="bg-white border border-border rounded-xl p-3">
+        <label className="block text-[11px] font-medium text-text-secondary mb-1.5">
+          Test delivery to another email (blank = admin email)
+        </label>
+        <input
+          type="email"
+          value={testEmail}
+          onChange={(e) => setTestEmail(e.target.value)}
+          placeholder="e.g. tabsam1201@gmail.com"
+          className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-white text-xs focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent"
+        />
+        <p className="text-[10px] text-text-tertiary mt-1.5">
+          Ye check karega ki email doosre Gmail account tak ja raha hai ya nahi (spam folder bhi check karo).
+        </p>
       </div>
 
       {error && (

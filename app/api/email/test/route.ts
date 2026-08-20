@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getBearerToken, requireAdmin, verifyIdToken } from '@/lib/auth/serverAuth'
+import { getBearerToken, requireAdmin, verifyIdToken, isValidEmail } from '@/lib/auth/serverAuth'
 import {
   sendWelcomeEmail,
   sendWelcomeBackEmail,
@@ -44,8 +44,11 @@ export async function POST(request: NextRequest) {
   }
 
   const caller = await verifyIdToken(token)
-  const to = caller?.email || ''
-  const name = 'Haziq'
+  // Allow admin to test delivery to an external address
+  let body: any = {}
+  try { body = await request.json() } catch {}
+  const to = (body.email && isValidEmail(body.email)) ? body.email : (caller?.email || '')
+  const name = body.name || 'Haziq'
 
   // Send every email template as a test so the admin can see each design
   const results: Record<string, boolean> = {}
