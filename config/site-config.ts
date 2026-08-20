@@ -204,7 +204,7 @@ export const DATABASE = {
   },
 
   /** ImgBB API key for image uploads - get free at api.imgbb.com */
-  imgbbApiKey: '5c98189c2624fae1709a5d3d65ea1d8d',  // Set in Render Env: IMGBB_API_KEY
+  imgbbApiKey: '',  // ⚠️ SECURITY: Set via env var IMGBB_API_KEY (do NOT hardcode keys in source)
 
   /**
    * CONTACT FORM STORAGE:

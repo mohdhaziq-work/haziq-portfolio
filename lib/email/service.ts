@@ -12,6 +12,7 @@
  */
 
 import nodemailer from 'nodemailer'
+import { escapeHtml } from '@/lib/auth/serverAuth'
 
 const SITE_URL = 'https://mohdhaziq-portfolio.onrender.com'
 const LOGO_URL = `${SITE_URL}/logo-haziq.svg`
@@ -81,16 +82,17 @@ const FOOTER_HTML = `
 // ==================== WELCOME EMAIL ====================
 
 function getWelcomeEmailHTML(name: string): string {
+  const safeName = escapeHtml(name)
   return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Welcome to Mohd Haziq</title></head>
 <body style="background-color:#f5f7fa;padding:20px;">
 <div class="ew">
   <div class="hd">
     <img src="${LOGO_URL}" alt="Mohd Haziq Logo" />
-    <h1>Welcome, ${name}!</h1>
+    <h1>Welcome, ${safeName}!</h1>
     <p>Mohd Haziq &mdash; Web Developer</p>
   </div>
   <div class="ct">
-    <p class="gr">Hey ${name}, glad to have you here!</p>
+    <p class="gr">Hey ${safeName}, glad to have you here!</p>
     <p class="bt">Thanks for signing up on my portfolio. Your account is now active and you can track your projects, view progress updates, and communicate directly through the portal.</p>
     <div class="hb">
       <h3>What you can do now:</h3>
@@ -132,7 +134,10 @@ function getProjectUpdateHTML(data: {
     'in-progress': '#3b82f6', 'review': '#f97316', 'delivered': '#10b981', 'cancelled': '#ef4444',
   }
   const sc = statusColors[data.status] || '#1a73e8'
-  const statusLabel = data.status.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+  const statusLabel = escapeHtml(data.status.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()))
+  const safeClientName = escapeHtml(data.clientName)
+  const safeProjectName = escapeHtml(data.projectName)
+  const safeMessage = escapeHtml(data.message)
 
   return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Project Update &mdash; Mohd Haziq</title></head>
 <body style="background-color:#f5f7fa;padding:20px;">
@@ -143,10 +148,10 @@ function getProjectUpdateHTML(data: {
     <p>Mohd Haziq &mdash; Web Developer</p>
   </div>
   <div class="ct">
-    <p class="gr">Hi ${data.clientName},</p>
+    <p class="gr">Hi ${safeClientName},</p>
     <p class="bt">Your project has been updated. Here are the latest details:</p>
     <div class="hb">
-      <h3>${data.projectName}</h3>
+      <h3>${safeProjectName}</h3>
       <ul>
         <li><strong>Status:</strong> <span style="color:${sc};font-weight:600;">${statusLabel}</span></li>
         <li><strong>Progress:</strong> ${data.progress}%</li>
@@ -155,7 +160,7 @@ function getProjectUpdateHTML(data: {
         <div style="background:linear-gradient(90deg,#1a73e8,#1557b0);height:100%;width:${data.progress}%;border-radius:8px;"></div>
       </div>
     </div>
-    ${data.message ? `<p class="bt">${data.message}</p>` : ''}
+    ${safeMessage ? `<p class="bt">${safeMessage}</p>` : ''}
     <div style="text-align:center;">
       <a href="${SITE_URL}" class="cb">View Your Project</a>
     </div>
@@ -174,6 +179,9 @@ function getProjectDeliveredHTML(data: {
   projectName: string
   projectUrl?: string
 }): string {
+  const safeClientName = escapeHtml(data.clientName)
+  const safeProjectName = escapeHtml(data.projectName)
+  const safeProjectUrl = escapeHtml(data.projectUrl || '')
   return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Your Website is Ready! &mdash; Mohd Haziq</title></head>
 <body style="background-color:#f5f7fa;padding:20px;">
 <div class="ew">
@@ -183,8 +191,8 @@ function getProjectDeliveredHTML(data: {
     <p>Mohd Haziq &mdash; Web Developer</p>
   </div>
   <div class="ct">
-    <p class="gr">Hey ${data.clientName}, great news!</p>
-    <p class="bt">Your website <strong>${data.projectName}</strong> has been delivered! It is live and ready to bring customers to your business.</p>
+    <p class="gr">Hey ${safeClientName}, great news!</p>
+    <p class="bt">Your website <strong>${safeProjectName}</strong> has been delivered! It is live and ready to bring customers to your business.</p>
     <div class="hb" style="border-left-color:#10b981;background:linear-gradient(135deg,#ecfdf5,#f0fdf4);">
       <h3 style="color:#10b981;">What is included:</h3>
       <ul>
@@ -194,7 +202,7 @@ function getProjectDeliveredHTML(data: {
         <li style="color:#4a4a6a;">Fully deployed and live on the internet</li>
       </ul>
     </div>
-    ${data.projectUrl ? `<div style="text-align:center;"><a href="${data.projectUrl}" class="cb" style="background:linear-gradient(135deg,#10b981,#059669);">Visit Your Website</a></div>` : ''}
+    ${safeProjectUrl ? `<div style="text-align:center;"><a href="${safeProjectUrl}" class="cb" style="background:linear-gradient(135deg,#10b981,#059669);">Visit Your Website</a></div>` : ''}
     <div class="dv"></div>
     <p class="bt" style="font-size:14px;">Need any changes or have questions? Just DM me on Instagram &mdash; I am always here to help.</p>
     <div style="text-align:center;margin-top:12px;">

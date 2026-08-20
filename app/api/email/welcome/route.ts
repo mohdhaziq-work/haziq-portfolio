@@ -1,12 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sendWelcomeEmail } from '@/lib/email/service'
+import { getBearerToken, requireAuth, isValidEmail } from '@/lib/auth/serverAuth'
 
 /**
  * POST /api/email/welcome
- * Sends a welcome email to a newly signed-up client
+ * Sends a welcome email to a newly signed-up client.
+ * Protected: caller must be signed in and emailing their own address.
  */
 export async function POST(request: NextRequest) {
   try {
+    // Auth guard — require a valid signed-in user
+    const token = getBearerToken(request)
+    const authError = await requireAuth(token)
+    if (authError) {
+      return NextResponse.json({ error: authError }, { status: 401 })
+    }
+
     const body = await request.json()
     const { email, name } = body
 
@@ -17,8 +26,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
+    if (!isValidEmail(email)) {
       return NextResponse.json(
         { error: 'Invalid email address' },
         { status: 400 }

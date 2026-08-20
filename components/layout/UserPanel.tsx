@@ -41,6 +41,7 @@ import ImageEnhancer from '@/components/admin/ImageEnhancer'
 import ImageStudio from '@/components/admin/ImageStudio'
 import ImageTextEditor from '@/components/admin/ImageTextEditor'
 import AdminAIChat from '@/components/admin/AdminAIChat'
+import { getAuthToken } from '@/lib/auth/clientAuth'
 
 /* ============================================================
    DESIGN SYSTEM — shared UI primitives for a consistent, clean UI
@@ -353,9 +354,14 @@ function AdminDashboard() {
     if (!file) return
     setUploading(true)
     try {
+      const token = await getAuthToken()
       const formData = new FormData()
       formData.append('image', file)
-      const res = await fetch('/api/upload', { method: 'POST', body: formData })
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      })
       const data = await res.json()
       if (data.error) throw new Error(data.error)
 
@@ -487,11 +493,12 @@ function AdminDashboard() {
     }
     if (editingProject === projectId) setEditingProject(null)
     try {
+      const token = await getAuthToken()
       const project = projects.find(p => p.id === projectId)
-      if (project?.clientEmail) {
+      if (project?.clientEmail && token) {
         await fetch('/api/email/update', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({
             email: project.clientEmail,
             clientName: project.clientName,
@@ -510,11 +517,12 @@ function AdminDashboard() {
   const handleSaveProjectDetails = async (projectId: string) => {
     await updateProjectDetails(projectId, editData)
     try {
+      const token = await getAuthToken()
       const project = projects.find(p => p.id === projectId)
-      if (project?.clientEmail) {
+      if (project?.clientEmail && token) {
         await fetch('/api/email/update', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({
             email: project.clientEmail,
             clientName: project.clientName,
@@ -1128,9 +1136,14 @@ function ClientPortal() {
     if (!file) return
     setUploadingFile(true)
     try {
+      const token = await getAuthToken()
       const formData = new FormData()
       formData.append('image', file)
-      const res = await fetch('/api/upload', { method: 'POST', body: formData })
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      })
       const data = await res.json()
       if (data.error) throw new Error(data.error)
       const result = await addClientUpload({

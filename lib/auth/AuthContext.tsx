@@ -93,11 +93,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    // Send welcome email via API
+    // Send welcome email via API (authenticated request)
     try {
+      const token = await firebaseUser.getIdToken()
       const response = await fetch('/api/email/welcome', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           email: firebaseUser.email,
           name: displayName,

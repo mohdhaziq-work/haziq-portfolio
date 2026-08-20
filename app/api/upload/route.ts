@@ -1,12 +1,36 @@
 /**
  * API Route: Upload Image
+ * Protected: any signed-in user can upload (clients + admin).
+ * Restricts allowed file types and size to prevent dangerous uploads.
  * Primary: ImgBB API (free image hosting)
  * Fallback: Returns base64 data URL if ImgBB is down
  */
 import { NextRequest, NextResponse } from 'next/server'
+import { getBearerToken, requireAuth } from '@/lib/auth/serverAuth'
+
+// Only allow common image types
+const ALLOWED_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/webp',
+  'image/svg+xml',
+  'image/avif',
+  'image/bmp',
+]
+
+// Max file size: 5 MB
+const MAX_SIZE = 5 * 1024 * 1024
 
 export async function POST(req: NextRequest) {
   try {
+    // Auth guard — must be a signed-in user
+    const token = getBearerToken(req)
+    const authError = await requireAuth(token)
+    if (authError) {
+      return NextResponse.json({ error: authError }, { status: 401 })
+    }
+
     const formData = await req.formData()
     const file = formData.get('image') as File | null
 
@@ -14,11 +38,26 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No image file provided' }, { status: 400 })
     }
 
-    // Try ImgBB first
+    // Restrict file type (prevent dangerous uploads)
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      return NextResponse.json(
+        { error: `File type not allowed: ${file.type || 'unknown'}` },
+        { status: 400 }
+      )
+    }
+
+    // Restrict file size
+    if (file.size > MAX_SIZE) {
+      return NextResponse.json(
+        { error: 'File is too large. Maximum size is 5 MB.' },
+        { status: 400 }
+      )
+    }
+
+    // Use server-side key ONLY (never accept a client-supplied apiKey)
     const imgbbApiKey =
       process.env.IMGBB_API_KEY ||
       process.env.NEXT_PUBLIC_IMGBB_API_KEY ||
-      (formData.get('apiKey') as string) ||
       ''
 
     if (imgbbApiKey) {
@@ -80,9 +119,9 @@ export async function POST(req: NextRequest) {
     })
   } catch (error) {
     console.error('Upload error:', error)
-    return NextResponse.json({
-      error: 'Upload failed',
-      details: String(error)
-    }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Upload failed' },
+      { status: 500 }
+    )
   }
 }
