@@ -218,3 +218,20 @@ body {
     @apply opacity-100;
   }
 }
+
+/* ===== Markdown (Admin Chat) ===== */
+.markdown-body p { margin: 0.5em 0; }
+.markdown-body code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.markdown-body pre code { background: transparent; padding: 0; }
+.markdown-body pre code .hljs { background: transparent; }
+.hljs { color: #d0d7de; }
+.hljs-comment, .hljs-quote { color: #8b949e; }
+.hljs-keyword, .hljs-selector-tag { color: #ff7b72; }
+.hljs-string, .hljs-attr { color: #a5d6ff; }
+.hljs-number, .hljs-literal { color: #79c0ff; }
+.hljs-title, .hljs-title.function_ { color: #d2a8ff; }
+.hljs-built_in, .hljs-type { color: #ffa657; }
+.hljs-variable, .hljs-template-variable { color: #ffa657; }
+.hljs-meta { color: #8b949e; }
+.hljs-regexp, .hljs-link { color: #a5d6ff; }
+.hljs-symbol, .hljs-bullet { color: #d2a8ff; }

@@ -71,5 +71,15 @@ service cloud.firestore {
       allow update, delete: if request.auth != null
         && request.auth.token.email == 'mohdhaziq1962@gmail.com';
     }
+
+    // Admin Chat: sessions + messages are admin-only
+    match /adminChats/{docId} {
+      allow read, create, update, delete: if request.auth != null
+        && request.auth.token.email == 'mohdhaziq1962@gmail.com';
+    }
+    match /adminMessages/{docId} {
+      allow read, create, update, delete: if request.auth != null
+        && request.auth.token.email == 'mohdhaziq1962@gmail.com';
+    }
   }
 }

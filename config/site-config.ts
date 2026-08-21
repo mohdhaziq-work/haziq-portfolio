@@ -201,6 +201,8 @@ export const DATABASE = {
     sshKeys: 'sshKeys',          // SSH keys for deployment
     clientUploads: 'clientUploads', // Files/images uploaded by clients (admin-only view + download)
     clientMockups: 'clientMockups', // Free mockup requests keyed by client_id
+    adminChats: 'adminChats',       // Admin AI chat sessions
+    adminMessages: 'adminMessages', // Admin AI chat messages per session
   },
 
   /** ImgBB API key for image uploads - get free at api.imgbb.com */
