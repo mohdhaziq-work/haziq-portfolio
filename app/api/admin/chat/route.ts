@@ -1,12 +1,35 @@
 import { NextResponse } from 'next/server'
 import { getBearerToken, requireAdmin } from '@/lib/auth/serverAuth'
-import { addChatMessage, createChatSession, getChatMessages } from '@/lib/firebase/adminChat'
+import {
+  addChatMessage,
+  createChatSession,
+  getChatMessages,
+  updateChatSession,
+} from '@/lib/firebase/adminChat'
+import { nimChat, nimChatStream } from '@/lib/ai/nim'
 
-const NIM_BASE = process.env.NVIDIA_BASE_URL || 'https://integrate.api.nvidia.com/v1'
-const NIM_API_KEY = process.env.NVIDIA_API_KEY || ''
-const MODEL = process.env.NVIDIA_MODEL || 'nvidia/nemotron-3-ultra-550b-a55b'
+const SYSTEM_BODY = `You are "HaziqBot", a powerful, professional AI assistant built for Mohd Haziq — a 16-year-old web developer in Lucknow, India who builds websites for local businesses (restaurants, gyms, coaching centres) starting at ₹2,500.
 
-const SYSTEM_BODY = `You are HaziqBot, private assistant for Mohd Haziq's web dev business. Help with client replies, content, coding, project management. Be practical and use markdown.`
+YOUR CAPABILITIES:
+- Write professional client replies, emails, and Instagram messages
+- Create content: captions, reels scripts, post ideas, hashtags
+- Help with web development, coding, debugging (Next.js, React, TypeScript, Tailwind, Firebase)
+- Project management, client onboarding, business strategy
+- Answer questions about Haziq's services, pricing, and portfolio
+
+RULES:
+- Use Markdown formatting: **bold**, headings, bullet lists, code blocks (with language), tables where useful
+- Be practical, specific, and ready-to-use (write emails/messages fully, ready to send)
+- Be honest if unsure
+- Keep answers well-organized and concise
+- Always sound professional and helpful
+
+If the user asks about portfolio details, refer to these facts:
+- Services: Starter ₹2,500 / Business ₹6,000 / Premium ₹12,000
+- Delivery: 3-14 days
+- Free mockup offered
+- Projects: Spice Garden (restaurant), Success Academy (education), Power Fitness (gym), SkeuoCraft, NeuraSoft
+- Instagram: @haziq.built`
 
 export async function POST(req: Request) {
   const token = getBearerToken(req)
@@ -17,7 +40,7 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json()
-    const { chatId, content } = body
+    const { chatId, content, stream = false } = body
 
     if (!content) {
       return NextResponse.json({ error: 'Message content is required' }, { status: 400 })
@@ -41,44 +64,51 @@ export async function POST(req: Request) {
       .slice(-20)
       .map((m) => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.content }))
 
-    if (!NIM_API_KEY) {
-      const msg = 'HaziqBot is not configured yet. Set NVIDIA_API_KEY in env to enable the AI.'
+    const messages = [{ role: 'system', content: SYSTEM_BODY }, ...aiHistory]
+
+    // ---- STREAMING MODE ----
+    if (stream) {
+      const stream = await nimChatStream(messages)
+      // Capture the streamed text to persist it (accumulate then save)
+      const reader = stream.getReader()
+      const encoder = new TextEncoder()
+      let full = ''
+
+      const transform = new TransformStream({
+        async transform(chunk, controller) {
+          full += new TextDecoder().decode(chunk)
+          controller.enqueue(chunk)
+        },
+        async flush(controller) {
+          if (full.trim()) {
+            await addChatMessage(sessionId, 'assistant', full.trim()).catch(() => {})
+          }
+          controller.terminate()
+        },
+      })
+
+      const output = stream.pipeThrough(transform)
+
+      return new Response(output, {
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'X-Chat-Id': sessionId,
+        },
+      })
+    }
+
+    // ---- NON-STREAMING MODE ----
+    const result = await nimChat(messages)
+    if (!result.ok) {
+      const msg = `Sorry, I hit an issue with the AI service: ${result.error || 'unknown error'}`
       await addChatMessage(sessionId, 'assistant', msg)
       return NextResponse.json({ chatId: sessionId, reply: msg })
     }
 
-    const payload = {
-      model: MODEL,
-      messages: [
-        { role: 'system', content: SYSTEM_BODY },
-        ...aiHistory,
-      ],
-      temperature: 0.7,
-      top_p: 0.9,
-      max_tokens: 1200,
-    }
-
-    const response = await fetch(`${NIM_BASE}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${NIM_API_KEY}`,
-      },
-      body: JSON.stringify(payload),
-    })
-
-    const data = await response.json()
-    if (!response.ok) {
-      console.error('NIM API error:', data)
-      const msg = 'Sorry, I hit an issue with the AI service. Please try again.'
-      await addChatMessage(sessionId, 'assistant', msg)
-      return NextResponse.json({ chatId: sessionId, reply: msg })
-    }
-
-    const reply = data?.choices?.[0]?.message?.content?.trim() || 'No response.'
+    const reply = result.content || 'No response generated.'
     await addChatMessage(sessionId, 'assistant', reply)
 
-    return NextResponse.json({ chatId: sessionId, reply })
+    return NextResponse.json({ chatId: sessionId, reply, reasoning: result.reasoning })
   } catch (err) {
     console.error('Admin chat error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

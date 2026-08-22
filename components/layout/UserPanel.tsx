@@ -40,7 +40,6 @@ import { openInstagramDM } from '@/lib/instagram'
 import ImageEnhancer from '@/components/admin/ImageEnhancer'
 import ImageStudio from '@/components/admin/ImageStudio'
 import ImageTextEditor from '@/components/admin/ImageTextEditor'
-import AdminAIChat from '@/components/admin/AdminAIChat'
 import EmailTest from '@/components/admin/EmailTest'
 import { getAuthToken } from '@/lib/auth/clientAuth'
 
@@ -275,7 +274,7 @@ function StudioWrapper() {
    ADMIN DASHBOARD
    ============================================================ */
 
-type AdminTab = 'overview' | 'contacts' | 'projects' | 'images' | 'reels' | 'clientfiles' | 'studio' | 'ssh' | 'assistant' | 'email'
+type AdminTab = 'overview' | 'contacts' | 'projects' | 'images' | 'reels' | 'clientfiles' | 'studio' | 'ssh' | 'email'
 
 function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<AdminTab>('overview')
@@ -577,7 +576,6 @@ function AdminDashboard() {
     clientfiles: 'Client Files',
     studio: 'Studio',
     ssh: 'SSH',
-    assistant: 'AI Assistant',
     email: 'Email',
   }
 
@@ -1083,14 +1081,6 @@ function AdminDashboard() {
               <div className="bg-blue-50 rounded-xl p-3">
                 <p className="text-[10px] text-blue-700">SSH keys are stored securely in Firestore (base64 encoded). Use them for deployment and git operations. Never share your private keys.</p>
               </div>
-            </div>
-          )}
-
-          {/* ===== AI ASSISTANT ===== */}
-          {activeTab === 'assistant' && (
-            <div className="space-y-2">
-              <SectionTitle title="AI Assistant" subtitle="Private chat for Haziq — replies, content, ideas, onboarding." />
-              <AdminAIChat />
             </div>
           )}
 
