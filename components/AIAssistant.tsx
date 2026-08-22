@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { useAuth } from '@/lib/auth/AuthContext'
+import { usePathname } from 'next/navigation'
 
 interface Msg {
   role: 'user' | 'assistant'
@@ -15,7 +17,13 @@ const SUGGESTIONS = [
 ]
 
 export default function AIAssistant() {
+  const { isAdmin } = useAuth()
+  const pathname = usePathname()
   const [open, setOpen] = useState(false)
+
+  // Hide the floating widget for the admin (they use the full-screen chat page)
+  // and on the full-screen chat route itself.
+  if (isAdmin || pathname === '/admin/chat') return null
   const [input, setInput] = useState('')
   const [messages, setMessages] = useState<Msg[]>([
     {

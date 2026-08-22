@@ -17,15 +17,17 @@ export interface NIMResponse {
 
 /**
  * Extract final content from a NIM chat completion.
- * Reasoning models put the answer in `reasoning_content`; instruct models use `content`.
+ * Reasoning models put thinking in `reasoning_content` and the actual
+ * answer in `content`. We should PREFER `content` (the real answer) and only
+ * fall back to reasoning if there is no final answer.
  */
 function extractReply(data: any): { content: string; reasoning?: string } {
   const choice = data?.choices?.[0]
   const msg = choice?.message
   const content = msg?.content || ''
   const reasoning = msg?.reasoning_content || ''
-  // Some models use `reasoning_content` for the actual answer
-  const finalContent = content.trim() || reasoning.trim() || ''
+  // Prefer the real answer (content). Only use reasoning if no answer came.
+  const finalContent = content.trim() || ''
   return { content: finalContent, reasoning: reasoning || undefined }
 }
 
@@ -135,10 +137,8 @@ export async function nimChatStream(
           if (payload === '[DONE]') return
           try {
             const json = JSON.parse(payload)
-            const delta =
-              json.choices?.[0]?.delta?.content ||
-              json.choices?.[0]?.delta?.reasoning_content ||
-              ''
+            // Only stream the final answer (content). Skip reasoning/thinking text.
+            const delta = json.choices?.[0]?.delta?.content || ''
             if (delta) {
               controller.enqueue(encoder.encode(delta))
             }
