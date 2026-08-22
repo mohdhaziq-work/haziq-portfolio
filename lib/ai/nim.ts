@@ -50,10 +50,8 @@ export async function nimChat(
     max_tokens: opts.maxTokens ?? 1200,
   }
 
-  // Enable thinking for reasoning models (nemotron-3-*)
-  if (MODEL.includes('nemotron')) {
-    payload.chat_template_kwargs = { enable_thinking: true }
-  }
+  // For chat, keep thinking OFF for smoother, faster responses
+  // (avoids long delay + choppy output from reasoning tokens)
 
   try {
     const response = await fetch(`${NIM_BASE}/chat/completions`, {
@@ -99,9 +97,6 @@ export async function nimChatStream(
     top_p: 0.9,
     max_tokens: opts.maxTokens ?? 1200,
     stream: true,
-  }
-  if (MODEL.includes('nemotron')) {
-    payload.chat_template_kwargs = { enable_thinking: true }
   }
 
   const response = await fetch(`${NIM_BASE}/chat/completions`, {
