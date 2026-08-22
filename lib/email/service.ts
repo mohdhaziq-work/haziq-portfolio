@@ -63,6 +63,13 @@ interface SendOpts {
 }
 
 async function dispatch(opts: SendOpts): Promise<{ success: boolean; error?: string }> {
+  // Standard headers that improve deliverability + compliance
+  const headers = {
+    'X-Entity-Ref-ID': Date.now().toString(),
+    'List-Unsubscribe': `<mailto:mohdhaziq1962@gmail.com?subject=unsubscribe>`,
+    'X-Mailer': 'HaziqPortfolio',
+  }
+
   // 1) Prefer Gmail SMTP (personal sender from own Gmail -> best free inbox delivery)
   if (process.env.SMTP_USER && process.env.SMTP_PASS) {
     try {
@@ -71,6 +78,7 @@ async function dispatch(opts: SendOpts): Promise<{ success: boolean; error?: str
         to: opts.to,
         subject: opts.subject,
         html: opts.html,
+        headers,
       })
       return { success: true }
     } catch (err) {
@@ -102,35 +110,35 @@ async function dispatch(opts: SendOpts): Promise<{ success: boolean; error?: str
 
 const BASE_STYLES = `
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f4f6fb; color: #1a1a2e; line-height: 1.6; }
-  .ew { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 18px; overflow: hidden; box-shadow: 0 8px 32px rgba(20,40,80,0.10); }
-  .hd { background: linear-gradient(135deg, #1a73e8, #0d47a1); padding: 30px 32px 26px; text-align: center; }
-  .hd .brand { display: inline-block; width: 64px; height: 64px; border-radius: 50%; background: #ffffff; padding: 6px; box-shadow: 0 4px 14px rgba(0,0,0,0.18); margin-bottom: 14px; }
-  .hd .brand img { width: 52px; height: 52px; border-radius: 50%; display: block; margin: 0 auto; }
-  .hd h1 { color: #ffffff; font-size: 22px; font-weight: 800; letter-spacing: -0.4px; }
-  .hd p { color: #b8d0f5; font-size: 13px; margin-top: 3px; }
-  .ct { padding: 30px 32px; }
-  .gr { font-size: 19px; font-weight: 800; color: #111827; margin-bottom: 10px; }
-  .bt { font-size: 15px; color: #4b5563; margin-bottom: 16px; line-height: 1.7; }
-  .card { background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 14px; padding: 20px 22px; margin: 18px 0; }
-  .card h3 { font-size: 15px; font-weight: 800; color: #1a73e8; margin-bottom: 10px; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f4f6fb; color: #111827; line-height: 1.6; }
+  .ew { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e5e7eb; }
+  .hd { background: linear-gradient(135deg, #1a73e8, #0d47a1); padding: 28px 32px 24px; text-align: center; }
+  .hd .brand { display: inline-block; width: 56px; height: 56px; border-radius: 50%; background: #ffffff; padding: 5px; margin-bottom: 12px; }
+  .hd .brand img { width: 46px; height: 46px; border-radius: 50%; display: block; margin: 0 auto; }
+  .hd h1 { color: #ffffff; font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+  .hd p { color: #c6daf8; font-size: 13px; margin-top: 3px; }
+  .ct { padding: 28px 32px; }
+  .gr { font-size: 18px; font-weight: 700; color: #111827; margin-bottom: 10px; }
+  .bt { font-size: 15px; color: #4b5563; margin-bottom: 14px; line-height: 1.65; }
+  .card { background: #f8fafc; border: 1px solid #eef2f7; border-radius: 12px; padding: 18px 20px; margin: 16px 0; }
+  .card h3 { font-size: 14px; font-weight: 700; color: #1a73e8; margin-bottom: 8px; }
   .card ul { list-style: none; padding: 0; }
-  .card li { font-size: 14px; color: #4b5563; padding: 5px 0; }
-  .status { display: inline-block; padding: 6px 16px; border-radius: 30px; font-size: 12px; font-weight: 800; color: #fff; margin: 6px 0; }
-  .row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px dashed #e5e7eb; font-size: 14px; }
+  .card li { font-size: 14px; color: #4b5563; padding: 4px 0; }
+  .status { display: inline-block; padding: 5px 14px; border-radius: 30px; font-size: 12px; font-weight: 700; color: #fff; margin: 4px 0; }
+  .row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
   .row:last-child { border-bottom: none; }
   .row span:first-child { color: #6b7280; }
-  .row span:last-child { color: #111827; font-weight: 700; }
-  .cb { display: inline-block; background: #1a73e8; color: #ffffff !important; text-decoration: none; padding: 14px 38px; border-radius: 10px; font-size: 15px; font-weight: 800; margin: 16px 0; }
-  .cb.green { background: #10b981; }
-  .dv { height: 1px; background: #e5e7eb; margin: 22px 0; }
-  .ft { background: #f8fafc; padding: 24px 32px; text-align: center; border-top: 1px solid #e5e7eb; }
-  .ft .f-logo { font-weight: 800; color: #111827; font-size: 15px; }
-  .ft p { font-size: 13px; color: #6b7280; margin: 4px 0; }
+  .row span:last-child { color: #111827; font-weight: 600; }
+  .cb { display: inline-block; background: #1a73e8; color: #ffffff !important; text-decoration: none; padding: 13px 34px; border-radius: 8px; font-size: 15px; font-weight: 600; margin: 14px 0; }
+  .cb.green { background: #059669; }
+  .dv { height: 1px; background: #f0f0f0; margin: 20px 0; }
+  .ft { background: #f8fafc; padding: 20px 32px; text-align: center; border-top: 1px solid #eef2f7; }
+  .ft .f-logo { font-weight: 700; color: #111827; font-size: 14px; }
+  .ft p { font-size: 12px; color: #6b7280; margin: 3px 0; }
   .ft a { color: #1a73e8; text-decoration: none; }
-  .sl { margin-top: 12px; }
-  .sl a { display: inline-block; margin: 0 8px; color: #1a73e8; font-size: 13px; text-decoration: none; font-weight: 700; }
-  .reply { font-size: 12px; color: #9ca3af; text-align: center; padding: 14px 32px; }
+  .sl { margin-top: 10px; }
+  .sl a { display: inline-block; margin: 0 8px; color: #1a73e8; font-size: 12px; text-decoration: none; font-weight: 600; }
+  .reply { font-size: 11px; color: #9ca3af; text-align: center; padding: 12px 32px; line-height: 1.5; }
 `
 
 const FOOTER_HTML = `
@@ -206,17 +214,17 @@ function getWelcomeEmailHTML(name: string): string {
     <div class="card">
       <h3>What you can do now:</h3>
       <ul>
-        <li>📦 Track your project progress in real time</li>
+        <li>Track your project progress in real time</li>
         <li>Submit new project requests directly</li>
-        <li>📅 See delivery dates and updates from me</li>
-        <li>🔔 Get notified when your project status changes</li>
+        <li>See delivery dates and updates from me</li>
+        <li>Get notified when your project status changes</li>
       </ul>
     </div>
     <p class="bt">Got a business idea? Whether it is a restaurant, gym, coaching centre, or any business — I build websites that bring customers to your door.</p>
     <div style="text-align:center;"><a href="${SITE_URL}" class="cb">Visit My Portfolio</a></div>
     <div class="dv"></div>
     <p class="bt" style="font-size:14px;">The fastest way to reach me is Instagram DM — I reply within 2 hours (9 AM - 10 PM IST).</p>
-    <div style="text-align:center;"><a href="${INSTAGRAM_URL}" style="display:inline-block;background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;text-decoration:none;padding:10px 24px;border-radius:10px;font-size:14px;font-weight:700;">DM on Instagram</a></div>
+    <div style="text-align:center;"><a href="${INSTAGRAM_URL}" style="display:inline-block;background:#111827;color:#fff;text-decoration:none;padding:10px 24px;border-radius:8px;font-size:14px;font-weight:600;">DM on Instagram</a></div>
   `
   return wrapper('Welcome to Mohd Haziq', 'Welcome, ' + n + '!', 'Mohd Haziq — Web Developer', body)
 }
@@ -230,16 +238,16 @@ function getWelcomeBackEmailHTML(name: string): string {
     <div class="card">
       <h3>Quick shortcuts:</h3>
       <ul>
-        <li>📦 Check your project status</li>
+        <li>Check your project status</li>
         <li>Start a new project</li>
-        <li>📤 Upload files for your project</li>
-        <li>💬 DM me directly for anything</li>
+        <li>Upload files for your project</li>
+        <li>DM me directly for anything</li>
       </ul>
     </div>
     <div style="text-align:center;"><a href="${SITE_URL}" class="cb">Go to My Portal</a></div>
     <div class="dv"></div>
     <p class="bt" style="font-size:14px;">Need help with anything? I am always one DM away — usually reply within 2 hours.</p>
-    <div style="text-align:center;"><a href="${INSTAGRAM_URL}" style="display:inline-block;background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;text-decoration:none;padding:10px 24px;border-radius:10px;font-size:14px;font-weight:700;">DM on Instagram</a></div>
+    <div style="text-align:center;"><a href="${INSTAGRAM_URL}" style="display:inline-block;background:#111827;color:#fff;text-decoration:none;padding:10px 24px;border-radius:8px;font-size:14px;font-weight:600;">DM on Instagram</a></div>
   `
   return wrapper('Welcome Back, ' + n, 'Welcome back, ' + n + '!', 'Your project portal is ready', body)
 }
@@ -331,7 +339,7 @@ function getProjectDeliveredEmailHTML(data: {
     ${url ? `<div style="text-align:center;"><a href="${url}" class="cb green">Visit Your Website</a></div>` : ''}
     <div class="dv"></div>
     <p class="bt" style="font-size:14px;">Need any changes or have questions? I am always here to help — just DM me on Instagram.</p>
-    <div style="text-align:center;"><a href="${INSTAGRAM_URL}" style="display:inline-block;background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;text-decoration:none;padding:10px 24px;border-radius:10px;font-size:14px;font-weight:700;">DM on Instagram</a></div>
+    <div style="text-align:center;"><a href="${INSTAGRAM_URL}" style="display:inline-block;background:#111827;color:#fff;text-decoration:none;padding:10px 24px;border-radius:8px;font-size:14px;font-weight:600;">DM on Instagram</a></div>
   `
   return wrapper('Your Website is Ready', 'Your Website is Live!', 'Mohd Haziq — Web Developer', body, 'linear-gradient(135deg,#10b981,#059669)')
 }
@@ -355,7 +363,7 @@ function getMockupRequestEmailHTML(data: {
     </div>
     <p class="bt">I am now designing a homepage mockup for your business. I will share it with you soon — no cost, no commitment.</p>
     <p class="bt" style="font-size:14px;">Want to speed things up? DM me on Instagram and mention your Client ID.</p>
-    <div style="text-align:center;"><a href="${INSTAGRAM_URL}" style="display:inline-block;background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;text-decoration:none;padding:10px 24px;border-radius:10px;font-size:14px;font-weight:700;">DM on Instagram</a></div>
+    <div style="text-align:center;"><a href="${INSTAGRAM_URL}" style="display:inline-block;background:#111827;color:#fff;text-decoration:none;padding:10px 24px;border-radius:8px;font-size:14px;font-weight:600;">DM on Instagram</a></div>
   `
   return wrapper('Free Mockup Request', 'Mockup Request Received!', 'Mohd Haziq — Web Developer', body, 'linear-gradient(135deg,#8b5cf6,#6d28d9)')
 }
