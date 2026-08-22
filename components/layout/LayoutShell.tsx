@@ -10,7 +10,7 @@ import { TutorialProvider } from '@/lib/tutorial/TutorialContext'
 import TourOverlay from '@/lib/tutorial/TourOverlay'
 
 // Demo sites that should NOT show portfolio header/footer
-const DEMO_ROUTES = ['/skeuomorphism', '/neomorphism']
+const DEMO_ROUTES = ['/skeuomorphism', '/neomorphism', '/admin/chat']
 
 function isDemoRoute(pathname: string) {
   return DEMO_ROUTES.some(route => pathname.startsWith(route))

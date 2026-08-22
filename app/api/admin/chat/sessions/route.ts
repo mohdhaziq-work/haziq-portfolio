@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server'
 import { getBearerToken, requireAdmin } from '@/lib/auth/serverAuth'
-import { getChatSessions, createChatSession } from '@/lib/firebase/adminChat'
+import { getSessions, createSession } from '@/lib/firebase/adminChatServer'
 
 export async function GET(req: Request) {
   const token = getBearerToken(req)
   const authError = await requireAdmin(token)
   if (authError) return NextResponse.json({ error: authError }, { status: 401 })
   try {
-    const sessions = await getChatSessions()
+    const sessions = await getSessions()
     return NextResponse.json({ sessions })
   } catch (e) {
     console.error('get sessions error:', e)
@@ -22,7 +22,7 @@ export async function POST(req: Request) {
   try {
     const body = await req.json()
     const title = body?.title || 'New Conversation'
-    const id = await createChatSession(title)
+    const id = await createSession(title)
     if (!id) return NextResponse.json({ error: 'Failed to create session' }, { status: 500 })
     return NextResponse.json({ id })
   } catch (e) {

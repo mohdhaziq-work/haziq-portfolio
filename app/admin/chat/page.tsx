@@ -10,11 +10,8 @@ export default function AdminChatPage() {
   const router = useRouter()
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.push('/')
-    } else if (!loading && user && !isAdmin) {
-      router.push('/')
-    }
+    if (!loading && !user) router.push('/')
+    else if (!loading && user && !isAdmin) router.push('/')
   }, [loading, user, isAdmin, router])
 
   if (loading || !user || !isAdmin) {
@@ -25,8 +22,9 @@ export default function AdminChatPage() {
     )
   }
 
+  // Full-screen, only AI (no footer/padding) - the admin/chat layout removes the shell
   return (
-    <div className="pt-16 px-4 md:px-8 pb-8 max-w-[1400px] mx-auto">
+    <div className="h-screen w-full overflow-hidden bg-white">
       <AdminChat />
     </div>
   )

@@ -1,11 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getBearerToken, requireAdmin } from '@/lib/auth/serverAuth'
-import {
-  addChatMessage,
-  createChatSession,
-  getChatMessages,
-  updateChatSession,
-} from '@/lib/firebase/adminChat'
+import { createSession, addMessage, getMessages } from '@/lib/firebase/adminChatServer'
 import { nimChat, nimChatStream } from '@/lib/ai/nim'
 
 const SYSTEM_BODY = `You are "HaziqBot", a powerful, professional AI assistant built for Mohd Haziq — a 16-year-old web developer in Lucknow, India who builds websites for local businesses (restaurants, gyms, coaching centres) starting at ₹2,500.
@@ -46,68 +41,53 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Message content is required' }, { status: 400 })
     }
 
-    // If no chatId, create a new session
     let sessionId = chatId
     if (!sessionId) {
-      sessionId = await createChatSession()
+      sessionId = await createSession()
       if (!sessionId) {
-        return NextResponse.json({ error: 'Failed to create session' }, { status: 500 })
+        return NextResponse.json({ error: 'Failed to create session. Check FIREBASE_SERVICE_ACCOUNT env.' }, { status: 500 })
       }
     }
 
-    // Save user message
-    await addChatMessage(sessionId, 'user', content)
+    await addMessage(sessionId, 'user', content)
 
-    // Load history for context
-    const history = await getChatMessages(sessionId)
+    const history = await getMessages(sessionId)
     const aiHistory = history
       .slice(-20)
       .map((m) => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.content }))
 
     const messages = [{ role: 'system', content: SYSTEM_BODY }, ...aiHistory]
 
-    // ---- STREAMING MODE ----
+    // ---- STREAMING ----
     if (stream) {
-      const stream = await nimChatStream(messages)
-      // Capture the streamed text to persist it (accumulate then save)
-      const reader = stream.getReader()
-      const encoder = new TextEncoder()
+      const streamable = await nimChatStream(messages)
       let full = ''
-
       const transform = new TransformStream({
         async transform(chunk, controller) {
           full += new TextDecoder().decode(chunk)
           controller.enqueue(chunk)
         },
         async flush(controller) {
-          if (full.trim()) {
-            await addChatMessage(sessionId, 'assistant', full.trim()).catch(() => {})
-          }
+          if (full.trim()) await addMessage(sessionId, 'assistant', full.trim()).catch(() => {})
           controller.terminate()
         },
       })
-
-      const output = stream.pipeThrough(transform)
-
+      const output = streamable.pipeThrough(transform)
       return new Response(output, {
-        headers: {
-          'Content-Type': 'text/plain; charset=utf-8',
-          'X-Chat-Id': sessionId,
-        },
+        headers: { 'Content-Type': 'text/plain; charset=utf-8', 'X-Chat-Id': sessionId },
       })
     }
 
-    // ---- NON-STREAMING MODE ----
+    // ---- NON-STREAMING ----
     const result = await nimChat(messages)
     if (!result.ok) {
       const msg = `Sorry, I hit an issue with the AI service: ${result.error || 'unknown error'}`
-      await addChatMessage(sessionId, 'assistant', msg)
+      await addMessage(sessionId, 'assistant', msg)
       return NextResponse.json({ chatId: sessionId, reply: msg })
     }
 
     const reply = result.content || 'No response generated.'
-    await addChatMessage(sessionId, 'assistant', reply)
-
+    await addMessage(sessionId, 'assistant', reply)
     return NextResponse.json({ chatId: sessionId, reply, reasoning: result.reasoning })
   } catch (err) {
     console.error('Admin chat error:', err)

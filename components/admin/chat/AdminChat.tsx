@@ -40,6 +40,7 @@ export default function AdminChat() {
   const [renameVal, setRenameVal] = useState('')
   const [showCommands, setShowCommands] = useState(false)
   const [customPrompt, setCustomPrompt] = useState<string | null>(null)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const api = useCallback(async (url: string, opts: RequestInit = {}) => {
@@ -211,9 +212,9 @@ export default function AdminChat() {
   if (!isAdmin) return null
 
   return (
-    <div className="flex h-[calc(100vh-120px)] min-h-[520px] rounded-2xl border border-border bg-white overflow-hidden shadow-sm">
-      {/* ===== Sidebar ===== */}
-      <aside className="w-64 border-r border-border flex flex-col bg-[#f9fafb]">
+    <div className="flex h-[100vh] w-full bg-white overflow-hidden">
+      {/* ===== Sidebar (toggle) ===== */}
+      <aside className={`${sidebarOpen ? 'w-64' : 'w-0'} border-r border-border flex flex-col bg-[#f9fafb] transition-all duration-200 overflow-hidden flex-shrink-0`}>
         <div className="p-3 border-b border-border">
           <button
             onClick={newChat}
@@ -266,6 +267,17 @@ export default function AdminChat() {
         {/* Header */}
         <div className="px-5 py-3 border-b border-border flex items-center justify-between bg-white">
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-text-secondary hover:bg-gray-100"
+              aria-label="Toggle sidebar"
+            >
+              {sidebarOpen ? (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="m15 18-6-6 6-6"/></svg>
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="m9 18 6-6-6-6"/></svg>
+              )}
+            </button>
             <div className="w-9 h-9 rounded-full bg-accent/10 flex items-center justify-center text-accent">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" /></svg>
             </div>
