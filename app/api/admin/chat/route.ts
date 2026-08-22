@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import { getBearerToken, requireAdmin } from '@/lib/auth/serverAuth'
-import { createSession, addMessage, getMessages } from '@/lib/firebase/adminChatServer'
+import { createSession, addMessage, getMessages, type ChatAttachment } from '@/lib/firebase/adminChatServer'
 import { nimChat, nimChatStream } from '@/lib/ai/nim'
+import { getRepoContext, getRepoFile, getRepoTree } from '@/lib/ai/githubTool'
 
 const SYSTEM_BODY = `You are "HaziqBot", a powerful, professional AI assistant for Mohd Haziq — a 16-year-old web developer in Lucknow, India who builds websites for local businesses (restaurants, gyms, coaching centres) starting at ₹2,500.
 
@@ -43,10 +44,10 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json()
-    const { chatId, content, stream = false } = body
+    const { chatId, content, stream = false, attachments = [] } = body
 
-    if (!content) {
-      return NextResponse.json({ error: 'Message content is required' }, { status: 400 })
+    if (!content && attachments.length === 0) {
+      return NextResponse.json({ error: 'Message content or attachment is required' }, { status: 400 })
     }
 
     let sessionId = chatId
@@ -57,7 +58,29 @@ export async function POST(req: Request) {
       }
     }
 
-    await addMessage(sessionId, 'user', content)
+    const safeAttachments: ChatAttachment[] = Array.isArray(attachments)
+      ? attachments.filter((a: any) => a && a.url && a.type).map((a: any) => ({ type: a.type, url: a.url, name: a.name || 'file', size: a.size, mime: a.mime }))
+      : []
+
+    await addMessage(sessionId, 'user', content || '', safeAttachments)
+
+    // ===== GITHUB TOOL (MCP-like) =====
+    const lower = (content || '').toLowerCase()
+    let toolResult: string | null = null
+    if (lower.startsWith('/repo') || lower.startsWith('/github') || lower.includes('github repo')) {
+      if (lower.includes('/repo tree') || lower.includes('structure')) {
+        toolResult = await getRepoTree()
+      } else if (lower.startsWith('/repo file ') || lower.includes('read ')) {
+        const path = lower.replace(/^.*?\/(repo file|file)\s+/i, '').trim() || 'README.md'
+        toolResult = await getRepoFile(path)
+      } else {
+        toolResult = await getRepoContext()
+      }
+    }
+    if (toolResult) {
+      await addMessage(sessionId, 'assistant', toolResult)
+      return NextResponse.json({ chatId: sessionId, reply: toolResult, isTool: true })
+    }
 
     const history = await getMessages(sessionId)
     const aiHistory = history

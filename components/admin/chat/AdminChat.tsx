@@ -16,6 +16,7 @@ interface Message {
   id?: string
   role: 'user' | 'assistant' | 'system'
   content: string
+  attachments?: { type: 'image' | 'file'; url: string; name: string; size?: number; mime?: string }[]
 }
 
 const COMMANDS = [
@@ -52,6 +53,11 @@ export default function AdminChat() {
   const [renameVal, setRenameVal] = useState('')
   const [showCommands, setShowCommands] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [pendingAttachments, setPendingAttachments] = useState<{ type: 'image' | 'file'; url: string; name: string; size?: number; mime?: string }[]>([])
+  const [uploading, setUploading] = useState(false)
+  const [editingMsgId, setEditingMsgId] = useState<string | null>(null)
+  const [editVal, setEditVal] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   // refs to avoid stale closures during streaming
@@ -134,6 +140,80 @@ export default function AdminChat() {
     setMessages([])
   }
 
+  // Copy message to clipboard
+  const copyMessage = (content: string) => {
+    navigator.clipboard.writeText(content).then(
+      () => {},
+      () => { /* clipboard may fail */ }
+    )
+  }
+
+  // Edit a user message then resend
+  const startEdit = (m: Message) => {
+    setEditingMsgId(m.id || null)
+    setEditVal(m.content)
+  }
+  const cancelEdit = () => { setEditingMsgId(null); setEditVal('') }
+  const submitEdit = async () => {
+    if (!editingMsgId) return
+    const newText = editVal.trim()
+    if (!newText) return
+    // Update locally
+    setMessages((m) => m.map((x) => (x.id === editingMsgId ? { ...x, content: newText } : x)))
+    setEditingMsgId(null)
+    // Send updated content as a fresh message to the model (regenerate)
+    setInput('')
+    await apiCall(newText, activeIdRef.current)
+  }
+
+  // Delete a user message
+  const deleteMsg = async (m: Message) => {
+    if (!confirm('Delete this message?')) return
+    setMessages((prev) => prev.filter((x) => x.id !== m.id))
+    if (m.id) {
+      try {
+        await api(`/api/admin/chat/messages/${m.id}`, { method: 'DELETE' })
+      } catch {}
+    }
+  }
+
+  // File/image upload
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    try {
+      const token = await getAuthToken()
+      const fd = new FormData()
+      fd.append('image', file)
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: fd,
+      })
+      const data = await res.json()
+      if (data.error) throw new Error(data.error)
+      const isImage = file.type.startsWith('image/')
+      setPendingAttachments((prev) => [...prev, { type: isImage ? 'image' : 'file', url: data.url, name: file.name, size: file.size, mime: file.type }])
+    } catch (err) {
+      alert('Upload failed: ' + String(err))
+    } finally {
+      setUploading(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
+
+  // Refactor send into reusable apiCall (used by edit + normal send)
+  const apiCall = async (text: string, currentId: string | null) => {
+    const token = await getAuthToken()
+    const res = await fetch('/api/admin/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: JSON.stringify({ chatId: currentId, content: text, stream: true, attachments: pendingAttachments }),
+    })
+    return res
+  }
+
   // Handle slash commands locally
   const handleCommand = (text: string): boolean => {
     const lower = text.toLowerCase().trim()
@@ -168,19 +248,16 @@ export default function AdminChat() {
     }
 
     const currentId = activeIdRef.current
-    // Optimistically add user message
-    const userMsg: Message = { role: 'user', content: text }
+    // Optimistically add user message (with attachments if any)
+    const atts = pendingAttachments.length ? pendingAttachments : undefined
+    const userMsg: Message = { role: 'user', content: text, attachments: atts }
     const withUser = [...messagesRef.current, userMsg]
     setMessages(withUser)
+    setPendingAttachments([])
 
     setStreaming(true)
     try {
-      const token = await getAuthToken()
-      const res = await fetch('/api/admin/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-        body: JSON.stringify({ chatId: currentId, content: text, stream: true }),
-      })
+      const res = await apiCall(text, currentId)
 
       if (!res.body) throw new Error('No stream')
 
@@ -342,17 +419,67 @@ export default function AdminChat() {
             </div>
           )}
           {messages.map((m, i) => (
-            <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[85%] px-4 py-3 rounded-2xl ${m.role === 'user' ? 'bg-accent text-white rounded-br-md' : 'bg-gray-50 border border-border rounded-bl-md text-text-primary'}`}>
-                {m.role === 'user' ? (
-                  <div className="text-sm whitespace-pre-wrap">{m.content}</div>
-                ) : m.content ? (
-                  <Markdown content={m.content} />
-                ) : (
-                  <div className="flex gap-1.5 py-1">
-                    <span className="w-2 h-2 rounded-full bg-accent animate-bounce" />
-                    <span className="w-2 h-2 rounded-full bg-accent animate-bounce" style={{ animationDelay: '0.15s' }} />
-                    <span className="w-2 h-2 rounded-full bg-accent animate-bounce" style={{ animationDelay: '0.3s' }} />
+            <div key={m.id || i} className={`group flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div className={`max-w-[85%] relative ${m.role === 'user' ? 'bg-accent text-white rounded-br-md' : 'bg-gray-50 border border-border rounded-bl-md text-text-primary'}`}>
+                {/* attachments */}
+                {m.attachments && m.attachments.length > 0 && (
+                  <div className={`px-4 pt-3 flex flex-wrap gap-2`}>
+                    {m.attachments.map((a, ai) => (
+                      a.type === 'image' ? (
+                        <a key={ai} href={a.url} target="_blank" rel="noopener noreferrer">
+                          <img src={a.url} alt={a.name} className="max-h-40 rounded-lg border border-border" />
+                        </a>
+                      ) : (
+                        <a key={ai} href={a.url} target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs ${m.role === 'user' ? 'bg-white/20 text-white' : 'bg-white border border-border text-text-primary'}`}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+                          {a.name}
+                        </a>
+                      )
+                    ))}
+                  </div>
+                )}
+
+                {/* message body */}
+                <div className="px-4 py-3">
+                  {m.role === 'user' ? (
+                    editingMsgId === m.id ? (
+                      <div>
+                        <textarea
+                          value={editVal}
+                          onChange={(e) => setEditVal(e.target.value)}
+                          rows={3}
+                          autoFocus
+                          className="w-full px-3 py-2 rounded-lg border border-white/40 bg-white text-text-primary text-sm resize-none"
+                        />
+                        <div className="flex gap-2 mt-2">
+                          <button onClick={submitEdit} className="px-3 py-1 rounded-lg bg-white text-accent text-xs font-semibold">Save & Regenerate</button>
+                          <button onClick={cancelEdit} className="px-3 py-1 rounded-lg text-white text-xs">Cancel</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-sm whitespace-pre-wrap">{m.content}</div>
+                    )
+                  ) : m.content ? (
+                    <Markdown content={m.content} />
+                  ) : (
+                    <div className="flex gap-1.5 py-1">
+                      <span className="w-2 h-2 rounded-full bg-accent animate-bounce" />
+                      <span className="w-2 h-2 rounded-full bg-accent animate-bounce" style={{ animationDelay: '0.15s' }} />
+                      <span className="w-2 h-2 rounded-full bg-accent animate-bounce" style={{ animationDelay: '0.3s' }} />
+                    </div>
+                  )}
+                </div>
+
+                {/* hover actions: copy / edit / delete */}
+                {m.content && !streaming && (
+                  <div className={`absolute top-1.5 ${m.role === 'user' ? 'left-1.5' : 'right-1.5'} hidden group-hover:flex gap-1 bg-white/90 border border-border rounded-lg px-1 py-0.5 shadow-sm`}>
+                    <button onClick={() => copyMessage(m.content)} title="Copy" className="p-1 hover:opacity-70 text-text-secondary"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                    {m.role === 'user' && (
+                      <>
+                        <button onClick={() => startEdit(m)} title="Edit" className="p-1 hover:opacity-70 text-text-secondary"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button>
+                        <button onClick={() => deleteMsg(m)} title="Delete" className="p-1 hover:opacity-70 text-red-500"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
@@ -362,7 +489,35 @@ export default function AdminChat() {
 
         {/* Input */}
         <div className="p-4 border-t border-border bg-white">
-          <div className="flex gap-2">
+          {/* pending attachments preview */}
+          {pendingAttachments.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-2">
+              {pendingAttachments.map((a, i) => (
+                <div key={i} className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-gray-50 border border-border text-xs">
+                  {a.type === 'image' ? <img src={a.url} alt={a.name} className="h-8 w-8 object-cover rounded" /> : <span className="text-lg">📄</span>}
+                  <span className="text-text-secondary max-w-[120px] truncate">{a.name}</span>
+                  <button onClick={() => setPendingAttachments((p) => p.filter((_, x) => x !== i))} className="text-text-tertiary hover:text-red-500">✕</button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="flex gap-2 items-end">
+            {/* upload button */}
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="w-10 h-10 rounded-xl border border-border bg-gray-50 flex items-center justify-center text-text-secondary hover:border-accent hover:text-accent disabled:opacity-50 flex-shrink-0"
+              title="Attach image/file"
+            >
+              {uploading ? (
+                <span className="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+              )}
+            </button>
+            <input ref={fileInputRef} type="file" className="hidden" onChange={handleFile} />
+
             <textarea
               value={input}
               onChange={(e) => { setInput(e.target.value); setShowCommands(e.target.value === '/') }}

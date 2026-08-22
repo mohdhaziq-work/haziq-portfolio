@@ -8,7 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getBearerToken, requireAuth } from '@/lib/auth/serverAuth'
 
-// Only allow common image types
+// Allow common image + document types
 const ALLOWED_TYPES = [
   'image/jpeg',
   'image/png',
@@ -17,10 +17,24 @@ const ALLOWED_TYPES = [
   'image/svg+xml',
   'image/avif',
   'image/bmp',
+  'application/pdf',
+  'text/plain',
+  'text/markdown',
+  'application/json',
+  'application/javascript',
+  'text/javascript',
+  'text/css',
+  'application/xml',
+  'text/html',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/zip',
 ]
 
-// Max file size: 5 MB
-const MAX_SIZE = 5 * 1024 * 1024
+// Max file size: 10 MB
+const MAX_SIZE = 10 * 1024 * 1024
 
 export async function POST(req: NextRequest) {
   try {

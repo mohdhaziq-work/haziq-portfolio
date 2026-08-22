@@ -4,11 +4,20 @@
  * and messages save reliably even before Firestore rules are published.
  */
 
+export interface ChatAttachment {
+  type: 'image' | 'file'
+  url: string
+  name: string
+  size?: number
+  mime?: string
+}
+
 export interface ChatMsg {
   id: string
   chatId: string
   role: 'user' | 'assistant' | 'system'
   content: string
+  attachments?: ChatAttachment[]
   createdAt: number
 }
 
@@ -136,30 +145,64 @@ export async function deleteSession(id: string): Promise<boolean> {
 export async function getMessages(chatId: string): Promise<ChatMsg[]> {
   const db = getFirestore()
   if (!db) return []
+  const map = (d: any): ChatMsg => ({
+    id: d.id,
+    chatId,
+    role: d.data().role,
+    content: d.data().content || '',
+    attachments: d.data().attachments || undefined,
+    createdAt: d.data().createdAt?.toMillis?.() || Date.now(),
+  })
   try {
     const snap = await db.collection('adminMessages').where('chatId', '==', chatId).orderBy('createdAt', 'asc').get()
-    return snap.docs.map((d: any) => ({ id: d.id, chatId, role: d.data().role, content: d.data().content, createdAt: d.data().createdAt?.toMillis?.() || Date.now() }))
+    return snap.docs.map(map)
   } catch (e) {
     console.error('getMessages error:', e)
     try {
       const snap = await db.collection('adminMessages').where('chatId', '==', chatId).get()
-      return snap.docs.map((d: any) => ({ id: d.id, chatId, role: d.data().role, content: d.data().content, createdAt: d.data().createdAt?.toMillis?.() || Date.now() }))
+      return snap.docs.map(map)
     } catch {
       return []
     }
   }
 }
 
-export async function addMessage(chatId: string, role: string, content: string): Promise<string | null> {
+export async function addMessage(chatId: string, role: string, content: string, attachments?: ChatAttachment[]): Promise<string | null> {
   const db = getFirestore()
   if (!db) return null
   try {
     const ref = db.collection('adminMessages').doc()
-    await ref.set({ chatId, role, content, createdAt: admin_ts() })
+    const data: any = { chatId, role, content, createdAt: admin_ts() }
+    if (attachments && attachments.length) data.attachments = attachments
+    await ref.set(data)
     await db.collection('adminChats').doc(chatId).update({ updatedAt: admin_ts() })
     return ref.id
   } catch (e) {
     console.error('addMessage error:', e)
     return null
+  }
+}
+
+export async function updateMessage(messageId: string, content: string): Promise<boolean> {
+  const db = getFirestore()
+  if (!db) return false
+  try {
+    await db.collection('adminMessages').doc(messageId).update({ content })
+    return true
+  } catch (e) {
+    console.error('updateMessage error:', e)
+    return false
+  }
+}
+
+export async function deleteMessage(messageId: string): Promise<boolean> {
+  const db = getFirestore()
+  if (!db) return false
+  try {
+    await db.collection('adminMessages').doc(messageId).delete()
+    return true
+  } catch (e) {
+    console.error('deleteMessage error:', e)
+    return false
   }
 }
