@@ -40,6 +40,110 @@ interface StorageStatsData {
   byFolder: Record<string, { count: number; size: number }>
 }
 
+// SVG Icon components (no emojis)
+const IconApk = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+    <line x1="12" y1="18" x2="12.01" y2="18" />
+  </svg>
+)
+
+const IconPdf = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+    <polyline points="14 2 14 8 20 8" />
+    <line x1="16" y1="13" x2="8" y2="13" />
+    <line x1="16" y1="17" x2="8" y2="17" />
+    <polyline points="10 9 9 9 8 9" />
+  </svg>
+)
+
+const IconImage = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+    <circle cx="8.5" cy="8.5" r="1.5" />
+    <polyline points="21 15 16 10 5 21" />
+  </svg>
+)
+
+const IconVideo = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polygon points="23 7 16 12 23 17 23 7" />
+    <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+  </svg>
+)
+
+const IconDocument = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+    <polyline points="14 2 14 8 20 8" />
+    <line x1="16" y1="13" x2="8" y2="13" />
+    <line x1="16" y1="17" x2="8" y2="17" />
+  </svg>
+)
+
+const IconArchive = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="21 8 21 21 3 21 3 8" />
+    <rect x="1" y="3" width="22" height="5" />
+    <line x1="10" y1="12" x2="14" y2="12" />
+  </svg>
+)
+
+const IconFolder = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+  </svg>
+)
+
+const IconStar = ({ filled }: { filled?: boolean }) => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+  </svg>
+)
+
+const IconGrid = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <rect x="3" y="3" width="7" height="7" />
+    <rect x="14" y="3" width="7" height="7" />
+    <rect x="3" y="14" width="7" height="7" />
+    <rect x="14" y="14" width="7" height="7" />
+  </svg>
+)
+
+const IconList = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <line x1="8" y1="6" x2="21" y2="6" />
+    <line x1="8" y1="12" x2="21" y2="12" />
+    <line x1="8" y1="18" x2="21" y2="18" />
+    <line x1="3" y1="6" x2="3.01" y2="6" />
+    <line x1="3" y1="12" x2="3.01" y2="12" />
+    <line x1="3" y1="18" x2="3.01" y2="18" />
+  </svg>
+)
+
+const IconUpload = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <polyline points="17 8 12 3 7 8" />
+    <line x1="12" y1="3" x2="12" y2="15" />
+  </svg>
+)
+
+const IconSearch = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="11" cy="11" r="8" />
+    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+  </svg>
+)
+
+const IconFile = () => (
+  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-300">
+    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
+    <polyline points="13 2 13 9 20 9" />
+  </svg>
+)
+
 export default function FileManager() {
   const { isAdmin } = useAuth()
   const [files, setFiles] = useState<AdminFile[]>([])
@@ -159,38 +263,43 @@ export default function FileManager() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
   }
 
-  const getFileIcon = (type: string): string => {
+  const getFileIcon = (type: string) => {
     switch (type) {
-      case 'apk': return '📱'
-      case 'pdf': return '📄'
-      case 'image': return '🖼️'
-      case 'video': return '🎥'
-      case 'document': return '📝'
-      case 'archive': return '📦'
-      default: return '📁'
+      case 'apk': return <IconApk />
+      case 'pdf': return <IconPdf />
+      case 'image': return <IconImage />
+      case 'video': return <IconVideo />
+      case 'document': return <IconDocument />
+      case 'archive': return <IconArchive />
+      default: return <IconFolder />
     }
   }
+
+  const typeFilters = [
+    { id: 'apk', label: 'APK' },
+    { id: 'pdf', label: 'PDF' },
+    { id: 'image', label: 'Image' },
+    { id: 'video', label: 'Video' },
+    { id: 'document', label: 'Doc' },
+    { id: 'archive', label: 'ZIP' },
+  ]
 
   if (!isAdmin) return null
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-text-primary">File Manager</h2>
           <p className="text-sm text-text-secondary">Upload and manage your files</p>
         </div>
         <button
           onClick={() => setShowUpload(true)}
-          className="px-4 py-2 bg-accent text-white rounded-lg font-semibold hover:bg-accent-dark transition-colors flex items-center gap-2"
+          className="px-4 py-2.5 bg-accent text-white rounded-lg font-semibold hover:bg-accent-dark transition-colors flex items-center gap-2 self-start sm:self-auto"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="17 8 12 3 7 8" />
-            <line x1="12" y1="3" x2="12" y2="15" />
-          </svg>
-          Upload File
+          <IconUpload />
+          <span>Upload File</span>
         </button>
       </div>
 
@@ -209,24 +318,25 @@ export default function FileManager() {
       />
 
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
         {/* Type filters */}
-        <div className="flex gap-2">
-          {['apk', 'pdf', 'image', 'video', 'document', 'archive'].map((type) => (
+        <div className="flex flex-wrap gap-2">
+          {typeFilters.map((filter) => (
             <button
-              key={type}
+              key={filter.id}
               onClick={() => {
-                setActiveType(activeType === type ? null : type)
+                setActiveType(activeType === filter.id ? null : filter.id)
                 setActiveFolder(null)
                 setShowStarred(false)
               }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                activeType === type
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 ${
+                activeType === filter.id
                   ? 'bg-accent text-white'
                   : 'bg-gray-100 text-text-secondary hover:bg-gray-200'
               }`}
             >
-              {getFileIcon(type)} {type.toUpperCase()}
+              <span className="w-4 h-4">{getFileIcon(filter.id)}</span>
+              <span>{filter.label}</span>
             </button>
           ))}
         </div>
@@ -238,51 +348,47 @@ export default function FileManager() {
             setActiveFolder(null)
             setActiveType(null)
           }}
-          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 ${
             showStarred
               ? 'bg-yellow-500 text-white'
               : 'bg-gray-100 text-text-secondary hover:bg-gray-200'
           }`}
         >
-          ⭐ Starred
+          <IconStar filled={showStarred} />
+          <span>Starred</span>
         </button>
 
         {/* Search */}
-        <div className="flex-1 max-w-xs">
-          <input
-            type="text"
-            placeholder="Search files..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-3 py-1.5 rounded-lg border border-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-accent/30"
-          />
+        <div className="flex-1 min-w-[200px]">
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary">
+              <IconSearch />
+            </span>
+            <input
+              type="text"
+              placeholder="Search files..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-3 py-2 rounded-lg border border-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-accent/30"
+            />
+          </div>
         </div>
 
         {/* View mode */}
-        <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+        <div className="flex gap-1 bg-gray-100 rounded-lg p-1 self-start">
           <button
             onClick={() => setViewMode('grid')}
             className={`p-1.5 rounded ${viewMode === 'grid' ? 'bg-white shadow-sm' : ''}`}
+            title="Grid view"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="3" y="3" width="7" height="7" />
-              <rect x="14" y="3" width="7" height="7" />
-              <rect x="3" y="14" width="7" height="7" />
-              <rect x="14" y="14" width="7" height="7" />
-            </svg>
+            <IconGrid />
           </button>
           <button
             onClick={() => setViewMode('list')}
             className={`p-1.5 rounded ${viewMode === 'list' ? 'bg-white shadow-sm' : ''}`}
+            title="List view"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="8" y1="6" x2="21" y2="6" />
-              <line x1="8" y1="12" x2="21" y2="12" />
-              <line x1="8" y1="18" x2="21" y2="18" />
-              <line x1="3" y1="6" x2="3.01" y2="6" />
-              <line x1="3" y1="12" x2="3.01" y2="12" />
-              <line x1="3" y1="18" x2="3.01" y2="18" />
-            </svg>
+            <IconList />
           </button>
         </div>
       </div>
@@ -294,7 +400,9 @@ export default function FileManager() {
         </div>
       ) : files.length === 0 ? (
         <div className="text-center py-12 bg-gray-50 rounded-xl">
-          <p className="text-4xl mb-3">📁</p>
+          <div className="flex justify-center mb-3">
+            <IconFile />
+          </div>
           <p className="text-text-secondary font-medium">No files found</p>
           <p className="text-sm text-text-tertiary mt-1">Upload your first file to get started</p>
         </div>
@@ -314,8 +422,8 @@ export default function FileManager() {
           ))}
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-border overflow-hidden">
-          <table className="w-full">
+        <div className="bg-white rounded-xl border border-border overflow-x-auto">
+          <table className="w-full min-w-[600px]">
             <thead className="bg-gray-50">
               <tr>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-text-secondary">Name</th>
@@ -330,7 +438,7 @@ export default function FileManager() {
                 <tr key={file.id} className="border-t border-border hover:bg-gray-50">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <span className="text-xl">{getFileIcon(file.type)}</span>
+                      <span className="text-text-secondary">{getFileIcon(file.type)}</span>
                       <div>
                         <p className="text-sm font-medium text-text-primary truncate max-w-[200px]">
                           {file.originalName}
@@ -382,7 +490,7 @@ export default function FileManager() {
                         className={`p-1.5 rounded-lg hover:bg-gray-100 ${file.isStarred ? 'text-yellow-500' : 'text-text-secondary'}`}
                         title="Star"
                       >
-                        {file.isStarred ? '★' : '☆'}
+                        <IconStar filled={file.isStarred} />
                       </button>
                       <button
                         onClick={() => handleDelete(file.id)}
