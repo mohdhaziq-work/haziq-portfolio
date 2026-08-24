@@ -19,279 +19,270 @@ export default function ChromeDownloadPage() {
               <path d="M16 24 L8 24 A16 16 0 0 1 24 8 L24 16 A8 8 0 0 0 16 24Z" fill="#FBBC05" />
             </svg>
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Chrome Install Karo</h1>
-          <p className="text-blue-200">Jio Set-Top Box ke liye - 3 Easy Methods</p>
+          <h1 className="text-3xl font-bold text-white mb-2">APK Install Karo</h1>
+          <p className="text-blue-200">Jio Set-Top Box - Complete Solution</p>
         </div>
 
-        {/* Method Selector */}
-        <div className="flex gap-2 mb-6">
-          {[1, 2, 3].map((num) => (
-            <button
-              key={num}
-              onClick={() => setActiveMethod(num)}
-              className={`flex-1 py-3 rounded-xl font-semibold transition-all ${
-                activeMethod === num
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-white/10 text-white/70 hover:bg-white/20'
-              }`}
-            >
-              Method {num}
-            </button>
-          ))}
+        {/* Problem Statement */}
+        <div className="mb-6 bg-red-500/20 rounded-xl p-4 border border-red-500/30">
+          <h3 className="text-red-200 font-bold mb-2">Problem:</h3>
+          <p className="text-red-100 text-sm">
+            "APK download ho gayi hai but JioSphere ke Downloads me click karne par install nahi ho raha"
+          </p>
         </div>
 
-        {/* Method 1: Direct APK Download */}
-        {activeMethod === 1 && (
-          <div className="bg-white/10 rounded-2xl p-6 border border-white/20">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-3xl">📱</span>
-              <div>
-                <h2 className="text-xl font-bold text-white">Method 1: Direct APK Download</h2>
-                <p className="text-blue-200 text-sm">Sabse easy - seedha APK download karo</p>
+        {/* Solution Steps */}
+        <div className="bg-white/10 rounded-2xl p-6 border border-white/20">
+          <h2 className="text-xl font-bold text-white mb-4">Solution: File Manager se Install Karo</h2>
+          
+          <div className="space-y-6">
+            {/* Step 1: Install File Manager */}
+            <div className="bg-green-500/20 rounded-xl p-4 border border-green-500/30">
+              <div className="flex items-center gap-3 mb-3">
+                <span className="bg-green-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg">1</span>
+                <h3 className="text-green-200 font-bold text-lg">Pehle File Manager Install Karo</h3>
+              </div>
+              
+              <p className="text-green-100 text-sm mb-4">
+                JioSphere browser APK files open nahi kar sakta. Isliye pehle ek File Manager app install karo.
+              </p>
+
+              <div className="space-y-3">
+                <a
+                  href="https://www.apkmirror.com/apk/google-inc/files-by-google/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block bg-white/10 rounded-xl p-4 hover:bg-white/20 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-3xl">📁</span>
+                    <div className="flex-1">
+                      <p className="text-white font-bold">Files by Google</p>
+                      <p className="text-green-200 text-xs">Best file manager - easy to use</p>
+                      <p className="text-yellow-300 text-xs mt-1">Click → Download APK → Install</p>
+                    </div>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="7 10 12 15 17 10" />
+                      <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                  </div>
+                </a>
+
+                <a
+                  href="https://www.apkmirror.com/apk/lonely-cat/x-plore-file-manager/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block bg-white/10 rounded-xl p-4 hover:bg-white/20 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-3xl">📂</span>
+                    <div className="flex-1">
+                      <p className="text-white font-bold">X-plore File Manager</p>
+                      <p className="text-green-200 text-xs">Works great on TV boxes</p>
+                      <p className="text-yellow-300 text-xs mt-1">Click → Download APK → Install</p>
+                    </div>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="7 10 12 15 17 10" />
+                      <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                  </div>
+                </a>
+              </div>
+
+              <div className="mt-3 bg-yellow-500/10 rounded-lg p-3 border border-yellow-500/30">
+                <p className="text-yellow-200 text-xs">
+                  <strong>Kaise install karo:</strong> Upar click karo → APKMirror pe "Download APK" click karo → JioSphere me download hone do → Settings → Downloads → File pe click karo
+                </p>
               </div>
             </div>
 
-            <div className="space-y-4">
-              <div className="bg-green-500/20 rounded-xl p-4 border border-green-500/30">
-                <p className="text-green-200 font-semibold mb-2">Step-by-Step:</p>
-                <ol className="text-green-100 text-sm space-y-3">
-                  <li className="flex items-start gap-3">
-                    <span className="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">1</span>
-                    <div>
-                      <p className="font-semibold">Neeche button click karo</p>
-                      <p className="text-green-200 text-xs">APKMirror website khulega</p>
-                    </div>
+            {/* Step 2: Enable Unknown Sources */}
+            <div className="bg-blue-500/20 rounded-xl p-4 border border-blue-500/30">
+              <div className="flex items-center gap-3 mb-3">
+                <span className="bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg">2</span>
+                <h3 className="text-blue-200 font-bold text-lg">"Unknown Sources" ON Karo</h3>
+              </div>
+              
+              <p className="text-blue-100 text-sm mb-3">
+                APK install karne ke liye ye setting ON karni padegi:
+              </p>
+
+              <div className="bg-white/10 rounded-lg p-4">
+                <ol className="text-blue-100 text-sm space-y-2">
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-300 font-bold">1.</span>
+                    <span>Jio box ki <strong>Settings</strong> me jao</span>
                   </li>
-                  <li className="flex items-start gap-3">
-                    <span className="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">2</span>
-                    <div>
-                      <p className="font-semibold">Page load hone do</p>
-                      <p className="text-green-200 text-xs">2-3 second wait karo</p>
-                    </div>
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-300 font-bold">2.</span>
+                    <span><strong>Security</strong> ya <strong>Privacy</strong> option dhundho</span>
                   </li>
-                  <li className="flex items-start gap-3">
-                    <span className="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">3</span>
-                    <div>
-                      <p className="font-semibold"><strong className="text-yellow-300">"Download APK"</strong> button dhundho</p>
-                      <p className="text-red-300 text-xs font-bold">⚠️ "Google Play" button MAT click karna!</p>
-                    </div>
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-300 font-bold">3.</span>
+                    <span><strong>"Unknown Sources"</strong> ya <strong>"Install Unknown Apps"</strong> ON karo</span>
                   </li>
-                  <li className="flex items-start gap-3">
-                    <span className="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">4</span>
-                    <div>
-                      <p className="font-semibold">"Download APK" click karo</p>
-                      <p className="text-green-200 text-xs">File download hogi (~100 MB)</p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">5</span>
-                    <div>
-                      <p className="font-semibold">Downloaded file open karo</p>
-                      <p className="text-green-200 text-xs">Install button click karo</p>
-                    </div>
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-300 font-bold">4.</span>
+                    <span>Agar puche to <strong>"Allow"</strong> click karo</span>
                   </li>
                 </ol>
               </div>
+            </div>
 
-              <a
-                href="https://www.apkmirror.com/apk/google-inc/chrome/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block w-full py-4 bg-blue-500 hover:bg-blue-600 text-white text-center rounded-xl font-bold text-lg transition-colors"
-              >
-                Download Chrome APK
-              </a>
+            {/* Step 3: Install APK using File Manager */}
+            <div className="bg-purple-500/20 rounded-xl p-4 border border-purple-500/30">
+              <div className="flex items-center gap-3 mb-3">
+                <span className="bg-purple-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg">3</span>
+                <h3 className="text-purple-200 font-bold text-lg">File Manager se APK Install Karo</h3>
+              </div>
+              
+              <p className="text-purple-100 text-sm mb-3">
+                Ab jo APK download hui hai (Firefox/Chrome), use File Manager se install karo:
+              </p>
 
-              <div className="bg-yellow-500/10 rounded-xl p-3 border border-yellow-500/30">
-                <p className="text-yellow-200 text-xs text-center">
-                  <strong>Yaad rakho:</strong> "Download APK" button click karna, "Google Play" nahi!
+              <div className="bg-white/10 rounded-lg p-4">
+                <ol className="text-purple-100 text-sm space-y-3">
+                  <li className="flex items-start gap-2">
+                    <span className="bg-purple-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold flex-shrink-0">1</span>
+                    <span><strong>Files by Google</strong> ya <strong>X-plore</strong> app kholo</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="bg-purple-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold flex-shrink-0">2</span>
+                    <span><strong>"Downloads"</strong> folder me jao</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="bg-purple-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold flex-shrink-0">3</span>
+                    <span>APK file dhundho (jaise <strong>org.mozilla.firefox...apk</strong>)</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="bg-purple-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold flex-shrink-0">4</span>
+                    <span>APK file pe <strong>click</strong> karo</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="bg-purple-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold flex-shrink-0">5</span>
+                    <span><strong>"Install"</strong> button click karo</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="bg-purple-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold flex-shrink-0">6</span>
+                    <span>Install hone do → <strong>"Open"</strong> click karo</span>
+                  </li>
+                </ol>
+              </div>
+            </div>
+
+            {/* Step 4: Download Browser */}
+            <div className="bg-orange-500/20 rounded-xl p-4 border border-orange-500/30">
+              <div className="flex items-center gap-3 mb-3">
+                <span className="bg-orange-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg">4</span>
+                <h3 className="text-orange-200 font-bold text-lg">Browser Download Karo</h3>
+              </div>
+              
+              <p className="text-orange-100 text-sm mb-4">
+                Ab browser download karo (Firefox/Chrome/Brave):
+              </p>
+
+              <div className="space-y-3">
+                <a
+                  href="https://www.apkmirror.com/apk/mozilla/firefox/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block bg-white/10 rounded-xl p-4 hover:bg-white/20 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-3xl">🦊</span>
+                    <div className="flex-1">
+                      <p className="text-white font-bold">Firefox Browser</p>
+                      <p className="text-orange-200 text-xs">Fast, private, ad-blocker</p>
+                    </div>
+                    <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full">Recommended</span>
+                  </div>
+                </a>
+
+                <a
+                  href="https://www.apkmirror.com/apk/brave-software/brave-browser/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block bg-white/10 rounded-xl p-4 hover:bg-white/20 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-3xl">🦁</span>
+                    <div className="flex-1">
+                      <p className="text-white font-bold">Brave Browser</p>
+                      <p className="text-orange-200 text-xs">Super fast, blocks all ads</p>
+                    </div>
+                  </div>
+                </a>
+
+                <a
+                  href="https://www.apkmirror.com/apk/google-inc/chrome/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block bg-white/10 rounded-xl p-4 hover:bg-white/20 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-3xl">🔵</span>
+                    <div className="flex-1">
+                      <p className="text-white font-bold">Chrome Browser</p>
+                      <p className="text-orange-200 text-xs">Google's official browser</p>
+                    </div>
+                  </div>
+                </a>
+              </div>
+
+              <div className="mt-3 bg-yellow-500/10 rounded-lg p-3 border border-yellow-500/30">
+                <p className="text-yellow-200 text-xs">
+                  <strong>Yaad rakho:</strong> APKMirror pe "Download APK" click karna, "Google Play" nahi!
                 </p>
               </div>
             </div>
           </div>
-        )}
+        </div>
 
-        {/* Method 2: USB se Install */}
-        {activeMethod === 2 && (
-          <div className="bg-white/10 rounded-2xl p-6 border border-white/20">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-3xl">💾</span>
-              <div>
-                <h2 className="text-xl font-bold text-white">Method 2: USB se Install</h2>
-                <p className="text-blue-200 text-sm">PC pe download karo, USB se transfer karo</p>
-              </div>
+        {/* Quick Summary */}
+        <div className="mt-6 bg-green-500/20 rounded-xl p-4 border border-green-500/30">
+          <h3 className="text-green-200 font-bold mb-3">Quick Summary (4 Steps):</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-white/10 rounded-lg p-3 text-center">
+              <span className="text-2xl mb-1 block">📁</span>
+              <p className="text-white text-xs font-bold">1. File Manager</p>
+              <p className="text-green-200 text-[10px]">Install karo</p>
             </div>
-
-            <div className="space-y-4">
-              <div className="bg-purple-500/20 rounded-xl p-4 border border-purple-500/30">
-                <p className="text-purple-200 font-semibold mb-3">PC pe kya karo:</p>
-                <ol className="text-purple-100 text-sm space-y-3">
-                  <li className="flex items-start gap-3">
-                    <span className="bg-purple-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">1</span>
-                    <div>
-                      <p className="font-semibold">PC ka browser kholo</p>
-                      <p className="text-purple-200 text-xs">Chrome, Firefox, Edge - koi bhi</p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="bg-purple-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">2</span>
-                    <div>
-                      <p className="font-semibold">APKMirror pe jao</p>
-                      <a href="https://www.apkmirror.com/apk/google-inc/chrome/" target="_blank" rel="noopener noreferrer" className="text-blue-300 underline text-xs">www.apkmirror.com/apk/google-inc/chrome/</a>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="bg-purple-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">3</span>
-                    <div>
-                      <p className="font-semibold">Chrome APK download karo</p>
-                      <p className="text-purple-200 text-xs">~100 MB file</p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="bg-purple-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">4</span>
-                    <div>
-                      <p className="font-semibold">USB drive me copy karo</p>
-                      <p className="text-purple-200 text-xs">APK file ko USB pe daalo</p>
-                    </div>
-                  </li>
-                </ol>
-              </div>
-
-              <div className="bg-blue-500/20 rounded-xl p-4 border border-blue-500/30">
-                <p className="text-blue-200 font-semibold mb-3">Jio Box pe kya karo:</p>
-                <ol className="text-blue-100 text-sm space-y-3">
-                  <li className="flex items-start gap-3">
-                    <span className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">5</span>
-                    <div>
-                      <p className="font-semibold">USB Jio box me lagao</p>
-                      <p className="text-blue-200 text-xs">USB port pe connect karo</p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">6</span>
-                    <div>
-                      <p className="font-semibold">File Manager app kholo</p>
-                      <p className="text-blue-200 text-xs">Agar nahi hai to "Files by Google" install karo</p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">7</span>
-                    <div>
-                      <p className="font-semibold">USB me jao → APK file dhundho</p>
-                      <p className="text-blue-200 text-xs">Chrome APK file click karo</p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">8</span>
-                    <div>
-                      <p className="font-semibold">Install button click karo</p>
-                      <p className="text-blue-200 text-xs">Chrome install ho jayega!</p>
-                    </div>
-                  </li>
-                </ol>
-              </div>
-
-              <a
-                href="https://www.apkmirror.com/apk/google-inc/chrome/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block w-full py-4 bg-purple-500 hover:bg-purple-600 text-white text-center rounded-xl font-bold text-lg transition-colors"
-              >
-                PC pe Download Karo
-              </a>
+            <div className="bg-white/10 rounded-lg p-3 text-center">
+              <span className="text-2xl mb-1 block">🔓</span>
+              <p className="text-white text-xs font-bold">2. Unknown Sources</p>
+              <p className="text-green-200 text-[10px]">ON karo</p>
+            </div>
+            <div className="bg-white/10 rounded-lg p-3 text-center">
+              <span className="text-2xl mb-1 block">🌐</span>
+              <p className="text-white text-xs font-bold">3. Browser APK</p>
+              <p className="text-green-200 text-[10px]">Download karo</p>
+            </div>
+            <div className="bg-white/10 rounded-lg p-3 text-center">
+              <span className="text-2xl mb-1 block">✅</span>
+              <p className="text-white text-xs font-bold">4. Install</p>
+              <p className="text-green-200 text-[10px]">File Manager se</p>
             </div>
           </div>
-        )}
+        </div>
 
-        {/* Method 3: Alternative Browser */}
-        {activeMethod === 3 && (
-          <div className="bg-white/10 rounded-2xl p-6 border border-white/20">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-3xl">🌐</span>
-              <div>
-                <h2 className="text-xl font-bold text-white">Method 3: Easy Browser Install</h2>
-                <p className="text-blue-200 text-sm">Chrome se bhi easy - direct install</p>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="bg-orange-500/20 rounded-xl p-4 border border-orange-500/30">
-                <p className="text-orange-200 font-semibold mb-3">Ye browsers Chrome se bhi better hain:</p>
-                
-                <div className="space-y-3">
-                  <a
-                    href="https://www.apkmirror.com/apk/mozilla/firefox/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block bg-white/10 rounded-xl p-4 hover:bg-white/20 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">🦊</span>
-                      <div>
-                        <p className="text-white font-bold">Firefox Browser</p>
-                        <p className="text-orange-200 text-xs">Fast, private, ad-blocker built-in</p>
-                      </div>
-                    </div>
-                  </a>
-
-                  <a
-                    href="https://www.apkmirror.com/apk/brave-software/brave-browser/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block bg-white/10 rounded-xl p-4 hover:bg-white/20 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">🦁</span>
-                      <div>
-                        <p className="text-white font-bold">Brave Browser</p>
-                        <p className="text-orange-200 text-xs">Super fast, blocks all ads automatically</p>
-                      </div>
-                    </div>
-                  </a>
-
-                  <a
-                    href="https://www.apkmirror.com/apk/operasoftware/opera/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block bg-white/10 rounded-xl p-4 hover:bg-white/20 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">🔴</span>
-                      <div>
-                        <p className="text-white font-bold">Opera Browser</p>
-                        <p className="text-orange-200 text-xs">Built-in VPN, data saver</p>
-                      </div>
-                    </div>
-                  </a>
-                </div>
-              </div>
-
-              <div className="bg-green-500/20 rounded-xl p-4 border border-green-500/30">
-                <p className="text-green-200 font-semibold mb-2">Kaise install karo:</p>
-                <ol className="text-green-100 text-sm space-y-2">
-                  <li>1. Upar koi bhi browser click karo</li>
-                  <li>2. APKMirror pe jao</li>
-                  <li>3. "Download APK" click karo</li>
-                  <li>4. File download hone do</li>
-                  <li>5. Open karo → Install karo</li>
-                </ol>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Common Help */}
+        {/* FAQ */}
         <div className="mt-6 bg-red-500/10 rounded-xl p-4 border border-red-500/30">
-          <h3 className="text-red-200 font-semibold mb-2">Problem aa rahi hai?</h3>
-          <div className="text-red-100 text-sm space-y-2">
-            <p><strong>Q: "Install nahi ho raha"</strong></p>
-            <p className="text-red-200">A: Settings → Security → "Unknown Sources" ON karo</p>
-            
-            <p className="mt-3"><strong>Q: "Download nahi ho raha"</strong></p>
-            <p className="text-red-200">A: Method 2 try karo (USB se install)</p>
-            
-            <p className="mt-3"><strong>Q: "Play Store open ho raha"</strong></p>
-            <p className="text-red-200">A: "Download APK" button click karo, "Google Play" nahi</p>
+          <h3 className="text-red-200 font-bold mb-3">FAQ:</h3>
+          <div className="space-y-3 text-sm">
+            <div>
+              <p className="text-red-200 font-bold">Q: File Manager bhi install nahi ho raha?</p>
+              <p className="text-red-100">A: Pehle "Unknown Sources" ON karo Settings me, phir try karo</p>
+            </div>
+            <div>
+              <p className="text-red-200 font-bold">Q: Downloads folder nahi mil raha?</p>
+              <p className="text-red-100">A: File Manager me "Internal Storage" → "Download" folder me jao</p>
+            </div>
+            <div>
+              <p className="text-red-200 font-bold">Q: "App not installed" aa raha?</p>
+              <p className="text-red-100">A: Purani file delete karo, naya download karo, phir install karo</p>
+            </div>
           </div>
         </div>
 
