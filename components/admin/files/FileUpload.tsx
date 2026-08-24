@@ -112,115 +112,50 @@ export default function FileUpload({ onClose, onUploadComplete }: FileUploadProp
       const fileType = getFileType(file.name)
       const fileFolder = folder || getFolder(fileType)
 
-      // For files > 4MB, upload directly to GitHub from browser
-      if (file.size > 4 * 1024 * 1024) {
-        setStatusText('Large file detected. Getting upload token...')
-        setProgress(5)
+      // For ALL files, use server upload (FormData)
+      // Vercel supports up to 4.5MB on hobby plan
+      // For larger files, we'll use a different approach
+      
+      setStatusText('Preparing file...')
+      setProgress(10)
 
-        // Get upload token from our server
-        const tokenRes = await fetch('/api/admin/files/token', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', ...headers },
-        })
+      const formData = new FormData()
+      formData.append('file', file)
+      if (folder) formData.append('folder', folder)
+      if (tags) formData.append('tags', tags)
 
-        if (!tokenRes.ok) {
-          const tokenData = await tokenRes.json()
-          throw new Error(tokenData.error || 'Failed to get upload token')
+      setProgress(30)
+      setStatusText('Uploading file...')
+
+      const res = await fetch('/api/admin/files/upload', {
+        method: 'POST',
+        headers,
+        body: formData,
+      })
+
+      setProgress(80)
+      setStatusText('Processing...')
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        // If file is too large, show helpful error
+        if (res.status === 413 || data.error?.includes('too large') || data.error?.includes('FILE_TOO_LARGE')) {
+          throw new Error(`File too large (${formatSize(file.size)}). Max size is 4 MB for server upload. For larger files, please use a smaller file or contact admin.`)
         }
-
-        const { token: githubToken, repoOwner, repoName, releaseId, uploadUrl } = await tokenRes.json()
-
-        setProgress(15)
-        setStatusText('Uploading directly to GitHub...')
-
-        // Generate unique filename
-        const timestamp = Date.now()
-        const randomId = Math.random().toString(36).slice(2, 8)
-        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
-        const uniqueName = `${timestamp}_${randomId}_${safeName}`
-
-        // Upload directly to GitHub Releases from browser
-        const uploadRes = await fetch(`${uploadUrl}?name=${encodeURIComponent(uniqueName)}`, {
-          method: 'POST',
-          headers: {
-            Authorization: `token ${githubToken}`,
-            'Content-Type': 'application/octet-stream',
-            Accept: 'application/vnd.github.v3+json',
-          },
-          body: file,
-        })
-
-        if (!uploadRes.ok) {
-          const errorText = await uploadRes.text()
-          throw new Error(`GitHub upload failed: ${errorText}`)
-        }
-
-        const assetData = await uploadRes.json()
-        const downloadUrl = assetData.browser_download_url
-
-        setProgress(90)
-        setStatusText('Saving metadata...')
-
-        // Save metadata to our server
-        const metaRes = await fetch('/api/admin/files/save-metadata', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', ...headers },
-          body: JSON.stringify({
-            fileName: uniqueName,
-            originalName: file.name,
-            fileType,
-            fileSize: file.size,
-            folder: fileFolder,
-            tags: tags || undefined,
-            downloadUrl,
-            githubPath: `releases/files/${uniqueName}`,
-          }),
-        })
-
-        if (!metaRes.ok) {
-          const metaData = await metaRes.json()
-          throw new Error(metaData.error || 'Failed to save metadata')
-        }
-
-        setProgress(100)
-        setStatusText('Upload complete!')
-      } else {
-        // For small files, use regular server upload
-        setStatusText('Uploading file...')
-        setProgress(20)
-
-        const formData = new FormData()
-        formData.append('file', file)
-        if (folder) formData.append('folder', folder)
-        if (tags) formData.append('tags', tags)
-
-        setProgress(50)
-
-        const res = await fetch('/api/admin/files/upload', {
-          method: 'POST',
-          headers,
-          body: formData,
-        })
-
-        setProgress(90)
-        setStatusText('Saving metadata...')
-
-        const data = await res.json()
-
-        if (!res.ok) {
-          throw new Error(data.error || 'Upload failed')
-        }
-
-        setProgress(100)
-        setStatusText('Upload complete!')
+        throw new Error(data.error || `Upload failed (${res.status})`)
       }
+
+      setProgress(100)
+      setStatusText('Upload complete!')
 
       // Success
       setTimeout(() => {
         onUploadComplete()
       }, 500)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Upload failed')
+      console.error('Upload error:', err)
+      setError(err instanceof Error ? err.message : 'Upload failed. Please try again.')
       setProgress(0)
       setStatusText('')
     } finally {
@@ -274,8 +209,8 @@ export default function FileUpload({ onClose, onUploadComplete }: FileUploadProp
                 <p className="font-medium text-text-primary">{file.name}</p>
                 <p className="text-sm text-text-secondary">{formatSize(file.size)}</p>
                 {file.size > 4 * 1024 * 1024 && (
-                  <p className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded inline-block">
-                    Large file — will upload directly to GitHub
+                  <p className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded inline-block">
+                    File too large — max 4 MB supported
                   </p>
                 )}
                 <button
@@ -297,7 +232,7 @@ export default function FileUpload({ onClose, onUploadComplete }: FileUploadProp
                   or click to browse
                 </p>
                 <p className="text-xs text-text-tertiary">
-                  Max file size: 2 GB (via GitHub Releases)
+                  Max file size: 4 MB
                 </p>
               </div>
             )}
@@ -371,7 +306,7 @@ export default function FileUpload({ onClose, onUploadComplete }: FileUploadProp
           </button>
           <button
             onClick={handleUpload}
-            disabled={!file || uploading}
+            disabled={!file || uploading || (file && file.size > 4 * 1024 * 1024)}
             className="px-6 py-2 text-sm font-medium bg-accent text-white rounded-lg hover:bg-accent-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {uploading ? 'Uploading...' : 'Upload'}
