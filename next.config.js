@@ -5,6 +5,11 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  // Increase body size limit for file uploads (up to 2GB for GitHub Releases)
+  api: {
+    bodyParser: false, // Disable default body parser for file uploads
+    responseLimit: false,
+  },
   async rewrites() {
     return [
       // Proxy Firebase Auth requests to firebaseapp.com
