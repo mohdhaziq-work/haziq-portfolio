@@ -118,7 +118,7 @@ export default function FileUpload({ onClose, onUploadComplete }: FileUploadProp
         setProgress(5)
 
         // Get upload token from our server
-        const tokenRes = await fetch('/api/admin/files/get-upload-token', {
+        const tokenRes = await fetch('/api/admin/files/token', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', ...headers },
         })
