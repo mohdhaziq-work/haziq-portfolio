@@ -26,6 +26,27 @@ function getFolder(type: string): string {
   }
 }
 
+// Lazy firebase-admin init for storage
+let _admin: any = null
+function getAdmin(): any {
+  if (_admin) return _admin
+  try {
+    const admin = require('firebase-admin')
+    const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT
+    if (!serviceAccount) return null
+    if (!admin.apps.length) {
+      admin.initializeApp({
+        credential: admin.credential.cert(JSON.parse(serviceAccount)),
+      })
+    }
+    _admin = admin
+    return _admin
+  } catch (e) {
+    console.error('[upload] Firebase Admin init failed:', e)
+    return null
+  }
+}
+
 export async function POST(req: Request) {
   const token = getBearerToken(req)
   const authError = await requireAdmin(token)
@@ -59,79 +80,36 @@ export async function POST(req: Request) {
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
     const fileName = `${timestamp}_${randomId}_${safeName}`
 
-    // GitHub path
-    const githubPath = `${fileFolder}/${fileName}`
+    // Firebase Storage path
+    const storagePath = `admin-files/${fileFolder}/${fileName}`
 
-    // Convert file to base64 for GitHub API
-    const arrayBuffer = await file.arrayBuffer()
-    const base64Content = Buffer.from(arrayBuffer).toString('base64')
-
-    // Upload to GitHub
-    const githubToken = process.env.GITHUB_TOKEN
-    const repoOwner = 'mohdhaziq-work'
-    const repoName = 'admin-files'
-
-    if (!githubToken) {
-      return NextResponse.json({ error: 'GitHub token not configured' }, { status: 500 })
+    // Get Firebase Storage bucket
+    const admin = getAdmin()
+    if (!admin) {
+      return NextResponse.json({ error: 'Firebase not configured' }, { status: 500 })
     }
 
-    // Create repo if it doesn't exist (first time)
-    const repoResponse = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}`, {
-      headers: {
-        Authorization: `token ${githubToken}`,
-        Accept: 'application/vnd.github.v3+json',
+    const bucket = admin.storage().bucket()
+    const fileBuffer = Buffer.from(await file.arrayBuffer())
+
+    // Upload to Firebase Storage
+    const fileRef = bucket.file(storagePath)
+    await fileRef.save(fileBuffer, {
+      metadata: {
+        contentType: file.type,
+        metadata: {
+          originalName: file.name,
+          uploadedBy: 'admin',
+          folder: fileFolder,
+        },
       },
     })
 
-    if (repoResponse.status === 404) {
-      // Create the repo
-      const createRepoResponse = await fetch('https://api.github.com/user/repos', {
-        method: 'POST',
-        headers: {
-          Authorization: `token ${githubToken}`,
-          Accept: 'application/vnd.github.v3+json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: repoName,
-          description: 'Admin File Storage for Haziq Portfolio',
-          private: true,
-          auto_init: true,
-        }),
-      })
+    // Make file publicly accessible
+    await fileRef.makePublic()
 
-      if (!createRepoResponse.ok) {
-        const error = await createRepoResponse.text()
-        console.error('Failed to create repo:', error)
-        return NextResponse.json({ error: 'Failed to create storage repo' }, { status: 500 })
-      }
-    }
-
-    // Upload file to GitHub
-    const uploadResponse = await fetch(
-      `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${githubPath}`,
-      {
-        method: 'PUT',
-        headers: {
-          Authorization: `token ${githubToken}`,
-          Accept: 'application/vnd.github.v3+json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: `Upload: ${file.name}`,
-          content: base64Content,
-        }),
-      }
-    )
-
-    if (!uploadResponse.ok) {
-      const error = await uploadResponse.text()
-      console.error('GitHub upload failed:', error)
-      return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 })
-    }
-
-    const uploadData = await uploadResponse.json()
-    const downloadUrl = `https://raw.githubusercontent.com/${repoOwner}/${repoName}/main/${githubPath}`
+    // Get public URL
+    const downloadUrl = `https://storage.googleapis.com/${bucket.name}/${storagePath}`
 
     // Parse tags
     const tagList = tags ? tags.split(',').map(t => t.trim()).filter(Boolean) : []
@@ -143,7 +121,7 @@ export async function POST(req: Request) {
       type: fileType as any,
       mimeType: file.type,
       size: file.size,
-      githubPath,
+      githubPath: storagePath,
       downloadUrl,
       folder: fileFolder,
       tags: tagList,
