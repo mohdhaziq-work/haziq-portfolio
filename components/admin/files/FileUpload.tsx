@@ -75,185 +75,6 @@ export default function FileUpload({ onClose, onUploadComplete }: FileUploadProp
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
   }
 
-  const getFileType = (name: string): string => {
-    const ext = name.split('.').pop()?.toLowerCase() || ''
-    if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].includes(ext)) return 'image'
-    if (['mp4', 'avi', 'mov', 'mkv', 'webm'].includes(ext)) return 'video'
-    if (ext === 'pdf') return 'pdf'
-    if (['zip', 'rar', 'tar', 'gz', '7z'].includes(ext)) return 'archive'
-    if (['apk', 'xapk', 'aab'].includes(ext)) return 'apk'
-    if (['md', 'markdown', 'txt', 'doc', 'docx', 'rtf'].includes(ext)) return 'document'
-    return 'other'
-  }
-
-  const getFolder = (type: string): string => {
-    switch (type) {
-      case 'apk': return 'apps'
-      case 'image': return 'images'
-      case 'video': return 'videos'
-      case 'pdf':
-      case 'document': return 'documents'
-      case 'archive': return 'archives'
-      default: return 'other'
-    }
-  }
-
-  // Call GitHub API through our proxy
-  const githubProxy = async (endpoint: string, method: string = 'GET', data?: any) => {
-    const token = await getAuthToken()
-    const res = await fetch('/api/admin/files/github-proxy', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-      body: JSON.stringify({ endpoint, method, data }),
-    })
-    return res.json()
-  }
-
-  // Upload directly to GitHub via proxy
-  const uploadToGitHub = async (file: File, fileType: string, fileFolder: string) => {
-    const repoOwner = 'mohdhaziq-work'
-    const repoName = 'admin-files'
-    const timestamp = Date.now()
-    const randomId = Math.random().toString(36).slice(2, 8)
-    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
-    const uniqueName = `${timestamp}_${randomId}_${safeName}`
-    const githubPath = `${fileFolder}/${uniqueName}`
-
-    // Step 1: Create repo if needed
-    setStatusText('Checking repository...')
-    setProgress(5)
-    
-    try {
-      await githubProxy(`/repos/${repoOwner}/${repoName}`)
-    } catch (e) {
-      // Repo doesn't exist, create it
-      await githubProxy('/user/repos', 'POST', {
-        name: repoName,
-        description: 'Admin File Storage',
-        private: false,
-        auto_init: true,
-      })
-    }
-
-    // Step 2: Read file as base64
-    setStatusText('Reading file...')
-    setProgress(10)
-
-    const arrayBuffer = await file.arrayBuffer()
-    const base64 = btoa(
-      new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
-    )
-
-    // Step 3: Create blob
-    setStatusText('Creating blob...')
-    setProgress(20)
-
-    const blobData = await githubProxy(
-      `/repos/${repoOwner}/${repoName}/git/blobs`,
-      'POST',
-      {
-        content: base64,
-        encoding: 'base64',
-      }
-    )
-
-    if (!blobData.sha) {
-      throw new Error('Failed to create blob')
-    }
-
-    const blobSha = blobData.sha
-
-    // Step 4: Get current commit
-    setStatusText('Getting current state...')
-    setProgress(40)
-
-    let commitSha = ''
-    let treeSha = ''
-
-    try {
-      const refData = await githubProxy(`/repos/${repoOwner}/${repoName}/git/refs/heads/main`)
-      if (refData.object?.sha) {
-        commitSha = refData.object.sha
-        const commitData = await githubProxy(`/repos/${repoOwner}/${repoName}/git/commits/${commitSha}`)
-        if (commitData.tree?.sha) {
-          treeSha = commitData.tree.sha
-        }
-      }
-    } catch (e) {
-      console.error('Error getting ref:', e)
-    }
-
-    // Step 5: Create tree
-    setStatusText('Creating tree...')
-    setProgress(50)
-
-    const treeData = await githubProxy(
-      `/repos/${repoOwner}/${repoName}/git/trees`,
-      'POST',
-      {
-        base_tree: treeSha,
-        tree: [
-          {
-            path: githubPath,
-            mode: '100644',
-            type: 'blob',
-            sha: blobSha,
-          },
-        ],
-      }
-    )
-
-    if (!treeData.sha) {
-      throw new Error('Failed to create tree')
-    }
-
-    const newTreeSha = treeData.sha
-
-    // Step 6: Create commit
-    setStatusText('Creating commit...')
-    setProgress(70)
-
-    const newCommitData = await githubProxy(
-      `/repos/${repoOwner}/${repoName}/git/commits`,
-      'POST',
-      {
-        message: `Upload: ${file.name}`,
-        tree: newTreeSha,
-        parents: commitSha ? [commitSha] : [],
-      }
-    )
-
-    if (!newCommitData.sha) {
-      throw new Error('Failed to create commit')
-    }
-
-    const newCommitSha = newCommitData.sha
-
-    // Step 7: Update reference
-    setStatusText('Updating reference...')
-    setProgress(85)
-
-    await githubProxy(
-      `/repos/${repoOwner}/${repoName}/git/refs/heads/main`,
-      'PATCH',
-      {
-        sha: newCommitSha,
-        force: true,
-      }
-    )
-
-    setProgress(95)
-
-    return {
-      downloadUrl: `https://raw.githubusercontent.com/${repoOwner}/${repoName}/main/${githubPath}`,
-      githubPath,
-      uniqueName,
-    }
-  }
-
   const handleUpload = async () => {
     if (!file) return
 
@@ -264,46 +85,41 @@ export default function FileUpload({ onClose, onUploadComplete }: FileUploadProp
 
     try {
       const token = await getAuthToken()
-      const fileType = getFileType(file.name)
-      const fileFolder = folder || getFolder(fileType)
+      const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {}
 
-      // For files > 4MB, upload directly to GitHub via proxy
+      // For files > 4MB, use GitHub Releases (binary upload, no base64)
       if (file.size > 4 * 1024 * 1024) {
-        setStatusText('Large file detected. Uploading to GitHub...')
-        
-        const result = await uploadToGitHub(file, fileType, fileFolder)
-        
-        setStatusText('Saving metadata...')
-        setProgress(97)
+        setStatusText('Large file detected. Uploading to GitHub Releases...')
+        setProgress(10)
 
-        // Save metadata to our server
-        const metaRes = await fetch('/api/admin/files/save-metadata', {
+        // Send file as FormData to our server
+        const formData = new FormData()
+        formData.append('file', file)
+        if (folder) formData.append('folder', folder)
+        if (tags) formData.append('tags', tags)
+
+        setProgress(30)
+        setStatusText('Uploading file...')
+
+        const res = await fetch('/api/admin/files/release-upload', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          body: JSON.stringify({
-            fileName: result.uniqueName,
-            originalName: file.name,
-            fileType,
-            fileSize: file.size,
-            folder: fileFolder,
-            tags: tags || undefined,
-            downloadUrl: result.downloadUrl,
-            githubPath: result.githubPath,
-          }),
+          headers,
+          body: formData,
         })
 
-        if (!metaRes.ok) {
-          const data = await metaRes.json()
-          throw new Error(data.error || 'Failed to save metadata')
+        setProgress(90)
+        setStatusText('Processing...')
+
+        const data = await res.json()
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Upload failed')
         }
 
         setProgress(100)
         setStatusText('Upload complete!')
       } else {
-        // For small files, use regular server upload
+        // For small files, use regular upload
         setStatusText('Uploading file...')
         setProgress(20)
 
@@ -316,7 +132,7 @@ export default function FileUpload({ onClose, onUploadComplete }: FileUploadProp
 
         const res = await fetch('/api/admin/files/upload', {
           method: 'POST',
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          headers,
           body: formData,
         })
 
@@ -393,7 +209,7 @@ export default function FileUpload({ onClose, onUploadComplete }: FileUploadProp
                 <p className="text-sm text-text-secondary">{formatSize(file.size)}</p>
                 {file.size > 4 * 1024 * 1024 && (
                   <p className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded inline-block">
-                    Large file — will upload via GitHub
+                    Large file — will upload via GitHub Releases
                   </p>
                 )}
                 <button
@@ -415,7 +231,7 @@ export default function FileUpload({ onClose, onUploadComplete }: FileUploadProp
                   or click to browse
                 </p>
                 <p className="text-xs text-text-tertiary">
-                  Max file size: 100 MB
+                  Max file size: 2 GB (via GitHub Releases)
                 </p>
               </div>
             )}

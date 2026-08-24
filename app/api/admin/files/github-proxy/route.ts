@@ -11,7 +11,7 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json()
-    const { endpoint, method = 'GET', data } = body
+    const { endpoint, method = 'GET', data, isUpload, contentType } = body
 
     const githubToken = process.env.GITHUB_TOKEN
     if (!githubToken) {
@@ -21,7 +21,13 @@ export async function POST(req: Request) {
     const headers: Record<string, string> = {
       Authorization: `token ${githubToken}`,
       Accept: 'application/vnd.github.v3+json',
-      'Content-Type': 'application/json',
+    }
+
+    // For uploads, use different content type
+    if (isUpload) {
+      headers['Content-Type'] = contentType || 'application/octet-stream'
+    } else {
+      headers['Content-Type'] = 'application/json'
     }
 
     const options: RequestInit = {
@@ -30,10 +36,22 @@ export async function POST(req: Request) {
     }
 
     if (data && method !== 'GET') {
-      options.body = JSON.stringify(data)
+      if (isUpload) {
+        // For uploads, data is already the body (binary or JSON string)
+        options.body = typeof data === 'string' ? data : JSON.stringify(data)
+      } else {
+        options.body = JSON.stringify(data)
+      }
     }
 
     const response = await fetch(`https://api.github.com${endpoint}`, options)
+    
+    // For uploads, GitHub returns the asset object
+    if (isUpload && response.ok) {
+      const responseData = await response.json()
+      return NextResponse.json(responseData)
+    }
+
     const responseData = await response.json()
 
     if (!response.ok) {
