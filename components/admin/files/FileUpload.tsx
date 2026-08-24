@@ -75,7 +75,7 @@ export default function FileUpload({ onClose, onUploadComplete }: FileUploadProp
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
   }
 
-  const getFileType = (name: string, mimeType: string): string => {
+  const getFileType = (name: string): string => {
     const ext = name.split('.').pop()?.toLowerCase() || ''
     if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].includes(ext)) return 'image'
     if (['mp4', 'avi', 'mov', 'mkv', 'webm'].includes(ext)) return 'video'
@@ -84,6 +84,21 @@ export default function FileUpload({ onClose, onUploadComplete }: FileUploadProp
     if (['apk', 'xapk', 'aab'].includes(ext)) return 'apk'
     if (['md', 'markdown', 'txt', 'doc', 'docx', 'rtf'].includes(ext)) return 'document'
     return 'other'
+  }
+
+  // Read file as base64 in chunks to avoid memory issues
+  const readFileAsBase64 = async (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => {
+        const result = reader.result as string
+        // Remove data URL prefix
+        const base64 = result.split(',')[1]
+        resolve(base64)
+      }
+      reader.onerror = reject
+      reader.readAsDataURL(file)
+    })
   }
 
   const handleUpload = async () => {
@@ -100,18 +115,12 @@ export default function FileUpload({ onClose, onUploadComplete }: FileUploadProp
 
       // For files > 4MB, use direct GitHub upload
       if (file.size > 4 * 1024 * 1024) {
-        setStatusText('Large file detected. Uploading to GitHub...')
-        setProgress(10)
+        setStatusText('Large file detected. Reading file...')
+        setProgress(5)
 
         // Read file as base64
-        const arrayBuffer = await file.arrayBuffer()
+        const base64 = await readFileAsBase64(file)
         setProgress(30)
-        setStatusText('Converting file...')
-
-        const base64 = btoa(
-          new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
-        )
-        setProgress(50)
         setStatusText('Uploading to GitHub...')
 
         // Upload via direct upload API
@@ -123,7 +132,7 @@ export default function FileUpload({ onClose, onUploadComplete }: FileUploadProp
           },
           body: JSON.stringify({
             fileName: file.name,
-            fileType: getFileType(file.name, file.type),
+            fileType: getFileType(file.name),
             fileSize: file.size,
             folder: folder || undefined,
             tags: tags || undefined,
@@ -166,39 +175,7 @@ export default function FileUpload({ onClose, onUploadComplete }: FileUploadProp
         const data = await res.json()
 
         if (!res.ok) {
-          if (data.useDirectUpload) {
-            // Retry with direct upload
-            setStatusText('Retrying with direct upload...')
-            setProgress(10)
-
-            const arrayBuffer = await file.arrayBuffer()
-            const base64 = btoa(
-              new Uint8Array(arrayBuffer).reduce((d, byte) => d + String.fromCharCode(byte), '')
-            )
-
-            const retryRes = await fetch('/api/admin/files/direct-upload', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                ...headers,
-              },
-              body: JSON.stringify({
-                fileName: file.name,
-                fileType: getFileType(file.name, file.type),
-                fileSize: file.size,
-                folder: folder || undefined,
-                tags: tags || undefined,
-                base64Content: base64,
-              }),
-            })
-
-            const retryData = await retryRes.json()
-            if (!retryRes.ok) {
-              throw new Error(retryData.error || 'Upload failed')
-            }
-          } else {
-            throw new Error(data.error || 'Upload failed')
-          }
+          throw new Error(data.error || 'Upload failed')
         }
 
         setProgress(100)
