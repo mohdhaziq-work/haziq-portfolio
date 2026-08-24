@@ -44,7 +44,7 @@ export async function POST(req: Request) {
     }
 
     // Validate file size (100 MB max)
-    const maxSize = 100 * 1024 * 1024 // 100 MB
+    const maxSize = 100 * 1024 * 1024
     if (file.size > maxSize) {
       return NextResponse.json({ error: 'File too large. Max 100 MB.' }, { status: 400 })
     }
@@ -61,57 +61,46 @@ export async function POST(req: Request) {
 
     let downloadUrl = ''
 
-    // For images: Use ImgBB (FREE, fast, CDN)
+    // Convert file to base64
+    const arrayBuffer = await file.arrayBuffer()
+    const base64 = Buffer.from(arrayBuffer).toString('base64')
+
+    // For images: Try ImgBB first, fallback to data URL
     if (fileType === 'image') {
       const imgbbKey = process.env.IMGBB_API_KEY
       
       if (imgbbKey) {
-        // Upload to ImgBB
-        const arrayBuffer = await file.arrayBuffer()
-        const base64 = Buffer.from(arrayBuffer).toString('base64')
-        
-        const imgbbForm = new FormData()
-        imgbbForm.append('key', imgbbKey)
-        imgbbForm.append('image', base64)
-        imgbbForm.append('name', fileName)
+        try {
+          const imgbbForm = new URLSearchParams()
+          imgbbForm.append('key', imgbbKey)
+          imgbbForm.append('image', base64)
 
-        const imgbbRes = await fetch('https://api.imgbb.com/1/upload', {
-          method: 'POST',
-          body: imgbbForm,
-        })
+          const imgbbRes = await fetch('https://api.imgbb.com/1/upload', {
+            method: 'POST',
+            body: imgbbForm,
+          })
 
-        const imgbbData = await imgbbRes.json()
-        
-        if (imgbbData.success) {
-          downloadUrl = imgbbData.data.url
-        } else {
-          console.error('ImgBB upload failed:', imgbbData)
-          // Fallback to data URL for small images
-          if (file.size < 5 * 1024 * 1024) { // < 5MB
-            const base64Data = `data:${file.type};base64,${base64}`
-            downloadUrl = base64Data
+          const imgbbData = await imgbbRes.json()
+          
+          if (imgbbData.success) {
+            downloadUrl = imgbbData.data.url
           } else {
-            return NextResponse.json({ error: 'Image upload failed. Add IMGBB_API_KEY to env.' }, { status: 500 })
+            console.error('ImgBB upload failed:', imgbbData)
+            // Fallback to data URL
+            downloadUrl = `data:${file.type};base64,${base64}`
           }
+        } catch (imgbbErr) {
+          console.error('ImgBB error:', imgbbErr)
+          downloadUrl = `data:${file.type};base64,${base64}`
         }
       } else {
-        // No ImgBB key - use data URL for small images (< 2MB)
-        if (file.size < 2 * 1024 * 1024) {
-          const arrayBuffer = await file.arrayBuffer()
-          const base64 = Buffer.from(arrayBuffer).toString('base64')
-          downloadUrl = `data:${file.type};base64,${base64}`
-        } else {
-          return NextResponse.json({ 
-            error: 'For image uploads, add IMGBB_API_KEY to Vercel env. Get free key at imgbb.com/api',
-            help: 'Go to https://api.imgbb.com/ → Get free API key → Add to Vercel as IMGBB_API_KEY'
-          }, { status: 500 })
-        }
+        // No ImgBB key - use data URL
+        downloadUrl = `data:${file.type};base64,${base64}`
       }
     } else {
-      // For non-images: Use data URL for small files, or GitHub for large files
-      if (file.size < 2 * 1024 * 1024) { // < 2MB
-        const arrayBuffer = await file.arrayBuffer()
-        const base64 = Buffer.from(arrayBuffer).toString('base64')
+      // For non-images: Use data URL for all sizes (works for < 10MB in Firestore)
+      // For very large files, we'd need external storage
+      if (file.size < 10 * 1024 * 1024) { // < 10MB
         downloadUrl = `data:${file.type};base64,${base64}`
       } else {
         // Try GitHub for larger files
@@ -120,61 +109,61 @@ export async function POST(req: Request) {
         const repoName = 'admin-files'
 
         if (githubToken) {
-          // Create repo if needed
-          const repoResponse = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}`, {
-            headers: {
-              Authorization: `token ${githubToken}`,
-              Accept: 'application/vnd.github.v3+json',
-            },
-          })
-
-          if (repoResponse.status === 404) {
-            await fetch('https://api.github.com/user/repos', {
-              method: 'POST',
+          try {
+            // Create repo if needed (public for direct URLs)
+            const repoResponse = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}`, {
               headers: {
                 Authorization: `token ${githubToken}`,
                 Accept: 'application/vnd.github.v3+json',
-                'Content-Type': 'application/json',
               },
-              body: JSON.stringify({
-                name: repoName,
-                description: 'Admin File Storage',
-                private: false, // Public for direct URLs
-                auto_init: true,
-              }),
             })
-          }
 
-          // Upload to GitHub
-          const arrayBuffer = await file.arrayBuffer()
-          const base64Content = Buffer.from(arrayBuffer).toString('base64')
-          const githubPath = `${fileFolder}/${fileName}`
-
-          const uploadResponse = await fetch(
-            `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${githubPath}`,
-            {
-              method: 'PUT',
-              headers: {
-                Authorization: `token ${githubToken}`,
-                Accept: 'application/vnd.github.v3+json',
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                message: `Upload: ${file.name}`,
-                content: base64Content,
-              }),
+            if (repoResponse.status === 404) {
+              await fetch('https://api.github.com/user/repos', {
+                method: 'POST',
+                headers: {
+                  Authorization: `token ${githubToken}`,
+                  Accept: 'application/vnd.github.v3+json',
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  name: repoName,
+                  description: 'Admin File Storage',
+                  private: false,
+                  auto_init: true,
+                }),
+              })
             }
-          )
 
-          if (uploadResponse.ok) {
-            downloadUrl = `https://raw.githubusercontent.com/${repoOwner}/${repoName}/main/${githubPath}`
-          } else {
-            return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 })
+            const githubPath = `${fileFolder}/${fileName}`
+            const uploadResponse = await fetch(
+              `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${githubPath}`,
+              {
+                method: 'PUT',
+                headers: {
+                  Authorization: `token ${githubToken}`,
+                  Accept: 'application/vnd.github.v3+json',
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  message: `Upload: ${file.name}`,
+                  content: base64,
+                }),
+              }
+            )
+
+            if (uploadResponse.ok) {
+              downloadUrl = `https://raw.githubusercontent.com/${repoOwner}/${repoName}/main/${githubPath}`
+            } else {
+              return NextResponse.json({ error: 'Failed to upload to GitHub' }, { status: 500 })
+            }
+          } catch (ghErr) {
+            console.error('GitHub error:', ghErr)
+            return NextResponse.json({ error: 'GitHub upload failed' }, { status: 500 })
           }
         } else {
           return NextResponse.json({ 
-            error: 'File too large for free storage. Add GITHUB_TOKEN to env.',
-            help: 'Go to https://github.com/settings/tokens → Generate token → Add to Vercel as GITHUB_TOKEN'
+            error: 'File too large for free storage. Add GITHUB_TOKEN to env for large files.',
           }, { status: 500 })
         }
       }

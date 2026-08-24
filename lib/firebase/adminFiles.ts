@@ -1,6 +1,6 @@
 /**
  * Admin File Manager — Server-side storage using Firebase Admin SDK
- * Stores file metadata in Firestore, actual files in GitHub repo
+ * Stores file metadata in Firestore, files in ImgBB/data URL/GitHub
  */
 
 export interface AdminFile {
@@ -10,8 +10,8 @@ export interface AdminFile {
   type: 'apk' | 'pdf' | 'image' | 'video' | 'document' | 'archive' | 'other'
   mimeType: string
   size: number
-  githubPath: string // Path in GitHub repo
-  downloadUrl: string // Raw GitHub URL
+  githubPath: string
+  downloadUrl: string
   folder: string
   tags: string[]
   isStarred: boolean
@@ -69,6 +69,15 @@ function admin_ts() {
   return admin ? admin.firestore.FieldValue.serverTimestamp() : Date.now()
 }
 
+// Helper to safely convert Firestore timestamp to number
+function toMillis(ts: any): number {
+  if (!ts) return Date.now()
+  if (typeof ts === 'number') return ts
+  if (ts.toMillis) return ts.toMillis()
+  if (ts._seconds) return ts._seconds * 1000
+  return Date.now()
+}
+
 // ===== FILE OPERATIONS =====
 
 export async function createFile(data: Omit<AdminFile, 'id' | 'uploadedAt' | 'updatedAt' | 'downloadCount' | 'isStarred' | 'isDeleted'>): Promise<string | null> {
@@ -76,13 +85,14 @@ export async function createFile(data: Omit<AdminFile, 'id' | 'uploadedAt' | 'up
   if (!db) return null
   try {
     const id = uid()
+    const now = Date.now()
     await db.collection('adminFiles').doc(id).set({
       ...data,
       downloadCount: 0,
       isStarred: false,
       isDeleted: false,
-      uploadedAt: admin_ts(),
-      updatedAt: admin_ts(),
+      uploadedAt: now,
+      updatedAt: now,
     })
     return id
   } catch (e) {
@@ -97,11 +107,11 @@ export async function getFiles(options: {
   starred?: boolean
   search?: string
   limit?: number
-  offset?: number
 } = {}): Promise<AdminFile[]> {
   const db = getFirestore()
   if (!db) return []
   try {
+    // Simple query - no orderBy (avoids composite index requirement)
     let query: any = db.collection('adminFiles').where('isDeleted', '==', false)
 
     if (options.folder) {
@@ -114,27 +124,42 @@ export async function getFiles(options: {
       query = query.where('isStarred', '==', true)
     }
 
-    query = query.orderBy('uploadedAt', 'desc')
-
     if (options.limit) {
       query = query.limit(options.limit)
     }
 
     const snap = await query.get()
-    let files = snap.docs.map((d: any) => ({
-      id: d.id,
-      ...d.data(),
-      uploadedAt: d.data().uploadedAt?.toMillis?.() || Date.now(),
-      updatedAt: d.data().updatedAt?.toMillis?.() || Date.now(),
-    })) as AdminFile[]
+    let files = snap.docs.map((d: any) => {
+      const data = d.data()
+      return {
+        id: d.id,
+        name: data.name || '',
+        originalName: data.originalName || '',
+        type: data.type || 'other',
+        mimeType: data.mimeType || '',
+        size: data.size || 0,
+        githubPath: data.githubPath || '',
+        downloadUrl: data.downloadUrl || '',
+        folder: data.folder || 'other',
+        tags: data.tags || [],
+        isStarred: data.isStarred || false,
+        isDeleted: data.isDeleted || false,
+        downloadCount: data.downloadCount || 0,
+        uploadedAt: toMillis(data.uploadedAt),
+        updatedAt: toMillis(data.updatedAt),
+      } as AdminFile
+    })
+
+    // Sort client-side by uploadedAt descending
+    files.sort((a: AdminFile, b: AdminFile) => b.uploadedAt - a.uploadedAt)
 
     // Client-side search filter
     if (options.search) {
       const searchLower = options.search.toLowerCase()
-      files = files.filter(f =>
+      files = files.filter((f: AdminFile) =>
         f.name.toLowerCase().includes(searchLower) ||
         f.originalName.toLowerCase().includes(searchLower) ||
-        f.tags.some(t => t.toLowerCase().includes(searchLower))
+        f.tags.some((t: string) => t.toLowerCase().includes(searchLower))
       )
     }
 
@@ -151,11 +176,23 @@ export async function getFile(id: string): Promise<AdminFile | null> {
   try {
     const doc = await db.collection('adminFiles').doc(id).get()
     if (!doc.exists) return null
+    const data = doc.data()
     return {
       id: doc.id,
-      ...doc.data(),
-      uploadedAt: doc.data().uploadedAt?.toMillis?.() || Date.now(),
-      updatedAt: doc.data().updatedAt?.toMillis?.() || Date.now(),
+      name: data.name || '',
+      originalName: data.originalName || '',
+      type: data.type || 'other',
+      mimeType: data.mimeType || '',
+      size: data.size || 0,
+      githubPath: data.githubPath || '',
+      downloadUrl: data.downloadUrl || '',
+      folder: data.folder || 'other',
+      tags: data.tags || [],
+      isStarred: data.isStarred || false,
+      isDeleted: data.isDeleted || false,
+      downloadCount: data.downloadCount || 0,
+      uploadedAt: toMillis(data.uploadedAt),
+      updatedAt: toMillis(data.updatedAt),
     } as AdminFile
   } catch (e) {
     console.error('getFile error:', e)
@@ -169,7 +206,7 @@ export async function updateFile(id: string, data: Partial<AdminFile>): Promise<
   try {
     await db.collection('adminFiles').doc(id).update({
       ...data,
-      updatedAt: admin_ts(),
+      updatedAt: Date.now(),
     })
     return true
   } catch (e) {
@@ -182,10 +219,9 @@ export async function deleteFile(id: string): Promise<boolean> {
   const db = getFirestore()
   if (!db) return false
   try {
-    // Soft delete
     await db.collection('adminFiles').doc(id).update({
       isDeleted: true,
-      updatedAt: admin_ts(),
+      updatedAt: Date.now(),
     })
     return true
   } catch (e) {
@@ -201,7 +237,7 @@ export async function incrementDownload(id: string): Promise<boolean> {
     const adminInstance = getAdmin()
     await db.collection('adminFiles').doc(id).update({
       downloadCount: adminInstance.firestore.FieldValue.increment(1),
-      updatedAt: admin_ts(),
+      updatedAt: Date.now(),
     })
     return true
   } catch (e) {
@@ -219,7 +255,7 @@ export async function toggleStar(id: string): Promise<boolean> {
     const current = doc.data().isStarred || false
     await db.collection('adminFiles').doc(id).update({
       isStarred: !current,
-      updatedAt: admin_ts(),
+      updatedAt: Date.now(),
     })
     return true
   } catch (e) {
@@ -235,11 +271,12 @@ export async function createFolder(data: Omit<AdminFolder, 'id' | 'createdAt' | 
   if (!db) return null
   try {
     const id = uid()
+    const now = Date.now()
     await db.collection('adminFolders').doc(id).set({
       ...data,
       fileCount: 0,
-      createdAt: admin_ts(),
-      updatedAt: admin_ts(),
+      createdAt: now,
+      updatedAt: now,
     })
     return id
   } catch (e) {
@@ -252,13 +289,23 @@ export async function getFolders(): Promise<AdminFolder[]> {
   const db = getFirestore()
   if (!db) return []
   try {
-    const snap = await db.collection('adminFolders').orderBy('createdAt', 'desc').get()
-    return snap.docs.map((d: any) => ({
-      id: d.id,
-      ...d.data(),
-      createdAt: d.data().createdAt?.toMillis?.() || Date.now(),
-      updatedAt: d.data().updatedAt?.toMillis?.() || Date.now(),
-    })) as AdminFolder[]
+    // Simple query - no orderBy
+    const snap = await db.collection('adminFolders').get()
+    const folders = snap.docs.map((d: any) => {
+      const data = d.data()
+      return {
+        id: d.id,
+        name: data.name || '',
+        icon: data.icon || 'other',
+        color: data.color || '#6b7280',
+        fileCount: data.fileCount || 0,
+        createdAt: toMillis(data.createdAt),
+        updatedAt: toMillis(data.updatedAt),
+      } as AdminFolder
+    })
+    // Sort client-side
+    folders.sort((a: AdminFolder, b: AdminFolder) => b.createdAt - a.createdAt)
+    return folders
   } catch (e) {
     console.error('getFolders error:', e)
     return []
@@ -271,7 +318,7 @@ export async function updateFolder(id: string, data: Partial<AdminFolder>): Prom
   try {
     await db.collection('adminFolders').doc(id).update({
       ...data,
-      updatedAt: admin_ts(),
+      updatedAt: Date.now(),
     })
     return true
   } catch (e) {
@@ -313,23 +360,16 @@ export async function getStorageStats(): Promise<{
     for (const file of files) {
       totalSize += file.size || 0
 
-      // By type
       if (!byType[file.type]) byType[file.type] = { count: 0, size: 0 }
       byType[file.type].count++
       byType[file.type].size += file.size || 0
 
-      // By folder
       if (!byFolder[file.folder]) byFolder[file.folder] = { count: 0, size: 0 }
       byFolder[file.folder].count++
       byFolder[file.folder].size += file.size || 0
     }
 
-    return {
-      totalFiles: files.length,
-      totalSize,
-      byType,
-      byFolder,
-    }
+    return { totalFiles: files.length, totalSize, byType, byFolder }
   } catch (e) {
     console.error('getStorageStats error:', e)
     return { totalFiles: 0, totalSize: 0, byType: {}, byFolder: {} }
