@@ -1,5 +1,7 @@
 'use client'
 
+import { useState, useEffect } from 'react'
+
 interface AdminFile {
   id: string
   name: string
@@ -38,45 +40,68 @@ const IconDownload = () => (
   </svg>
 )
 
-const IconFile = () => (
-  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-gray-300">
-    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
-    <polyline points="13 2 13 9 20 9" />
-  </svg>
-)
-
-const IconApk = () => (
-  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-gray-300">
-    <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
-    <line x1="12" y1="18" x2="12.01" y2="18" />
-  </svg>
-)
-
-const IconArchive = () => (
-  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-gray-300">
-    <polyline points="21 8 21 21 3 21 3 8" />
-    <rect x="1" y="3" width="22" height="5" />
-    <line x1="10" y1="12" x2="14" y2="12" />
+const IconExternalLink = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+    <polyline points="15 3 21 3 21 9" />
+    <line x1="10" y1="14" x2="21" y2="3" />
   </svg>
 )
 
 export default function FilePreview({ file, onClose, onDownload, formatSize }: FilePreviewProps) {
+  const [textContent, setTextContent] = useState<string>('')
+  const [loadingText, setLoadingText] = useState(false)
+
   const isImage = file.type === 'image'
   const isPdf = file.type === 'pdf'
   const isVideo = file.type === 'video'
+  const isMarkdown = file.originalName.endsWith('.md') || file.originalName.endsWith('.markdown')
+  const isText = file.type === 'document' || isMarkdown || 
+    file.originalName.endsWith('.txt') || file.originalName.endsWith('.json') || 
+    file.originalName.endsWith('.js') || file.originalName.endsWith('.ts') ||
+    file.originalName.endsWith('.css') || file.originalName.endsWith('.html')
+
+  // Fetch text content for text/markdown files
+  useEffect(() => {
+    if (isText && file.downloadUrl && !file.downloadUrl.startsWith('data:')) {
+      setLoadingText(true)
+      fetch(file.downloadUrl)
+        .then(res => res.text())
+        .then(text => {
+          setTextContent(text)
+          setLoadingText(false)
+        })
+        .catch(() => {
+          setTextContent('Failed to load file content')
+          setLoadingText(false)
+        })
+    } else if (isText && file.downloadUrl?.startsWith('data:')) {
+      // Decode data URL
+      try {
+        const base64 = file.downloadUrl.split(',')[1]
+        const decoded = atob(base64)
+        setTextContent(decoded)
+      } catch {
+        setTextContent('Failed to decode file content')
+      }
+    }
+  }, [isText, file.downloadUrl])
 
   const renderPreview = () => {
-    // If no download URL, show error
     if (!file.downloadUrl) {
       return (
         <div className="flex flex-col items-center justify-center bg-gray-50 rounded-lg p-12">
-          <IconFile />
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-gray-300">
+            <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
+            <polyline points="13 2 13 9 20 9" />
+          </svg>
           <p className="text-lg font-medium text-text-primary mt-4">{file.originalName}</p>
-          <p className="text-sm text-red-500 mt-2">Preview not available - no download URL</p>
+          <p className="text-sm text-red-500 mt-2">No preview available</p>
         </div>
       )
     }
 
+    // Image preview
     if (isImage) {
       return (
         <div className="flex items-center justify-center bg-gray-100 rounded-lg overflow-hidden min-h-[300px] max-h-[60vh]">
@@ -88,16 +113,11 @@ export default function FilePreview({ file, onClose, onDownload, formatSize }: F
               const target = e.target as HTMLImageElement
               target.style.display = 'none'
               const parent = target.parentElement
-              if (parent) {
+              if (parent && !parent.querySelector('.error-msg')) {
                 const errorDiv = document.createElement('div')
-                errorDiv.className = 'flex flex-col items-center justify-center p-8 text-center'
+                errorDiv.className = 'error-msg flex flex-col items-center justify-center p-8 text-center'
                 errorDiv.innerHTML = `
-                  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" class="text-gray-300">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                    <circle cx="8.5" cy="8.5" r="1.5"/>
-                    <polyline points="21 15 16 10 5 21"/>
-                  </svg>
-                  <p class="text-sm text-text-secondary mt-4">Image failed to load</p>
+                  <p class="text-sm text-text-secondary">Image failed to load</p>
                   <a href="${file.downloadUrl}" target="_blank" rel="noopener noreferrer" class="text-sm text-accent mt-2 hover:underline">Open in new tab</a>
                 `
                 parent.appendChild(errorDiv)
@@ -108,18 +128,37 @@ export default function FilePreview({ file, onClose, onDownload, formatSize }: F
       )
     }
 
+    // PDF preview - use object tag for better compatibility
     if (isPdf) {
       return (
         <div className="bg-gray-100 rounded-lg overflow-hidden" style={{ height: '60vh' }}>
-          <iframe
-            src={file.downloadUrl}
-            className="w-full h-full border-0"
-            title={file.originalName}
-          />
+          <object
+            data={file.downloadUrl}
+            type="application/pdf"
+            className="w-full h-full"
+          >
+            <div className="flex flex-col items-center justify-center h-full p-8 text-center">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-gray-300">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>
+              <p className="text-text-secondary mt-4">PDF preview not available in this browser</p>
+              <a
+                href={file.downloadUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 px-4 py-2 bg-accent text-white rounded-lg text-sm hover:bg-accent-dark transition-colors flex items-center gap-2"
+              >
+                <IconExternalLink />
+                Open PDF in new tab
+              </a>
+            </div>
+          </object>
         </div>
       )
     }
 
+    // Video preview
     if (isVideo) {
       return (
         <div className="bg-black rounded-lg overflow-hidden">
@@ -131,9 +170,9 @@ export default function FilePreview({ file, onClose, onDownload, formatSize }: F
               const target = e.target as HTMLVideoElement
               target.style.display = 'none'
               const parent = target.parentElement
-              if (parent) {
+              if (parent && !parent.querySelector('.error-msg')) {
                 const errorDiv = document.createElement('div')
-                errorDiv.className = 'flex flex-col items-center justify-center p-8 text-center bg-gray-900'
+                errorDiv.className = 'error-msg flex flex-col items-center justify-center p-8 text-center bg-gray-900'
                 errorDiv.innerHTML = `
                   <p class="text-white">Video failed to load</p>
                   <a href="${file.downloadUrl}" target="_blank" rel="noopener noreferrer" class="text-sm text-accent mt-2 hover:underline">Download instead</a>
@@ -141,9 +180,26 @@ export default function FilePreview({ file, onClose, onDownload, formatSize }: F
                 parent.appendChild(errorDiv)
               }
             }}
-          >
-            Your browser does not support the video tag.
-          </video>
+          />
+        </div>
+      )
+    }
+
+    // Text/Markdown preview
+    if (isText) {
+      if (loadingText) {
+        return (
+          <div className="flex items-center justify-center p-12">
+            <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+          </div>
+        )
+      }
+
+      return (
+        <div className="bg-gray-50 rounded-lg overflow-auto max-h-[60vh]">
+          <pre className="p-4 text-sm text-text-primary font-mono whitespace-pre-wrap break-words">
+            {textContent || 'No content to display'}
+          </pre>
         </div>
       )
     }
@@ -151,22 +207,26 @@ export default function FilePreview({ file, onClose, onDownload, formatSize }: F
     // Generic file
     return (
       <div className="flex flex-col items-center justify-center bg-gray-50 rounded-lg p-12">
-        <span className="text-text-secondary">
-          {file.type === 'apk' ? <IconApk /> : file.type === 'archive' ? <IconArchive /> : <IconFile />}
-        </span>
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-gray-300">
+          <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
+          <polyline points="13 2 13 9 20 9" />
+        </svg>
         <p className="text-lg font-medium text-text-primary mt-4">{file.originalName}</p>
         <p className="text-sm text-text-secondary mt-1">{formatSize(file.size)}</p>
         <p className="text-xs text-text-tertiary mt-2">
           Preview not available for this file type
         </p>
-        <a
-          href={file.downloadUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-4 px-4 py-2 bg-accent text-white rounded-lg text-sm hover:bg-accent-dark transition-colors"
-        >
-          Open File
-        </a>
+        <div className="flex gap-3 mt-4">
+          <a
+            href={file.downloadUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-4 py-2 bg-accent text-white rounded-lg text-sm hover:bg-accent-dark transition-colors flex items-center gap-2"
+          >
+            <IconExternalLink />
+            Open File
+          </a>
+        </div>
       </div>
     )
   }
@@ -178,30 +238,26 @@ export default function FilePreview({ file, onClose, onDownload, formatSize }: F
         <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-shrink-0">
           <div className="flex items-center gap-3 min-w-0">
             <span className="text-text-secondary flex-shrink-0">
-              {file.type === 'apk' ? (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
-                  <line x1="12" y1="18" x2="12.01" y2="18" />
-                </svg>
-              ) : file.type === 'pdf' ? (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                  <polyline points="14 2 14 8 20 8" />
-                </svg>
-              ) : file.type === 'image' ? (
+              {isImage ? (
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
                   <circle cx="8.5" cy="8.5" r="1.5" />
                   <polyline points="21 15 16 10 5 21" />
                 </svg>
-              ) : file.type === 'video' ? (
+              ) : isPdf ? (
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                </svg>
+              ) : isVideo ? (
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <polygon points="23 7 16 12 23 17 23 7" />
                   <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
                 </svg>
               ) : (
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                  <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
+                  <polyline points="13 2 13 9 20 9" />
                 </svg>
               )}
             </span>
@@ -244,7 +300,6 @@ export default function FilePreview({ file, onClose, onDownload, formatSize }: F
             </div>
           </div>
 
-          {/* Tags */}
           {file.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-3">
               {file.tags.map((tag) => (
@@ -267,6 +322,17 @@ export default function FilePreview({ file, onClose, onDownload, formatSize }: F
           >
             Close
           </button>
+          {file.downloadUrl && (
+            <a
+              href={file.downloadUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-4 py-2 text-sm font-medium bg-gray-100 text-text-secondary rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2"
+            >
+              <IconExternalLink />
+              Open
+            </a>
+          )}
           <button
             onClick={onDownload}
             className="px-6 py-2 text-sm font-medium bg-accent text-white rounded-lg hover:bg-accent-dark transition-colors flex items-center gap-2"

@@ -9,58 +9,6 @@ interface FileUploadProps {
 }
 
 // SVG Icons
-const IconApk = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
-    <line x1="12" y1="18" x2="12.01" y2="18" />
-  </svg>
-)
-
-const IconPdf = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-    <polyline points="14 2 14 8 20 8" />
-  </svg>
-)
-
-const IconImage = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-    <circle cx="8.5" cy="8.5" r="1.5" />
-    <polyline points="21 15 16 10 5 21" />
-  </svg>
-)
-
-const IconVideo = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <polygon points="23 7 16 12 23 17 23 7" />
-    <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
-  </svg>
-)
-
-const IconDocument = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-    <polyline points="14 2 14 8 20 8" />
-    <line x1="16" y1="13" x2="8" y2="13" />
-    <line x1="16" y1="17" x2="8" y2="17" />
-  </svg>
-)
-
-const IconArchive = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <polyline points="21 8 21 21 3 21 3 8" />
-    <rect x="1" y="3" width="22" height="5" />
-    <line x1="10" y1="12" x2="14" y2="12" />
-  </svg>
-)
-
-const IconFolder = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
-  </svg>
-)
-
 const IconUpload = () => (
   <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-gray-400">
     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -76,12 +24,20 @@ const IconClose = () => (
   </svg>
 )
 
+const IconFile = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
+    <polyline points="13 2 13 9 20 9" />
+  </svg>
+)
+
 export default function FileUpload({ onClose, onUploadComplete }: FileUploadProps) {
   const [file, setFile] = useState<File | null>(null)
   const [folder, setFolder] = useState('')
   const [tags, setTags] = useState('')
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress] = useState(0)
+  const [statusText, setStatusText] = useState('')
   const [error, setError] = useState('')
   const [dragActive, setDragActive] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -119,15 +75,15 @@ export default function FileUpload({ onClose, onUploadComplete }: FileUploadProp
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
   }
 
-  const getFileIcon = (name: string) => {
+  const getFileType = (name: string, mimeType: string): string => {
     const ext = name.split('.').pop()?.toLowerCase() || ''
-    if (['apk', 'xapk', 'aab'].includes(ext)) return <IconApk />
-    if (['pdf'].includes(ext)) return <IconPdf />
-    if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)) return <IconImage />
-    if (['mp4', 'avi', 'mov', 'mkv'].includes(ext)) return <IconVideo />
-    if (['doc', 'docx', 'txt', 'rtf'].includes(ext)) return <IconDocument />
-    if (['zip', 'rar', 'tar', 'gz', '7z'].includes(ext)) return <IconArchive />
-    return <IconFolder />
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].includes(ext)) return 'image'
+    if (['mp4', 'avi', 'mov', 'mkv', 'webm'].includes(ext)) return 'video'
+    if (ext === 'pdf') return 'pdf'
+    if (['zip', 'rar', 'tar', 'gz', '7z'].includes(ext)) return 'archive'
+    if (['apk', 'xapk', 'aab'].includes(ext)) return 'apk'
+    if (['md', 'markdown', 'txt', 'doc', 'docx', 'rtf'].includes(ext)) return 'document'
+    return 'other'
   }
 
   const handleUpload = async () => {
@@ -136,38 +92,117 @@ export default function FileUpload({ onClose, onUploadComplete }: FileUploadProp
     setUploading(true)
     setProgress(0)
     setError('')
+    setStatusText('Preparing upload...')
 
     try {
       const token = await getAuthToken()
-      const formData = new FormData()
-      formData.append('file', file)
-      if (folder) formData.append('folder', folder)
-      if (tags) formData.append('tags', tags)
+      const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {}
 
-      // Simulate progress
-      const progressInterval = setInterval(() => {
-        setProgress((prev) => {
-          if (prev >= 90) {
-            clearInterval(progressInterval)
-            return 90
-          }
-          return prev + 10
+      // For files > 4MB, use direct GitHub upload
+      if (file.size > 4 * 1024 * 1024) {
+        setStatusText('Large file detected. Uploading to GitHub...')
+        setProgress(10)
+
+        // Read file as base64
+        const arrayBuffer = await file.arrayBuffer()
+        setProgress(30)
+        setStatusText('Converting file...')
+
+        const base64 = btoa(
+          new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
+        )
+        setProgress(50)
+        setStatusText('Uploading to GitHub...')
+
+        // Upload via direct upload API
+        const res = await fetch('/api/admin/files/direct-upload', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...headers,
+          },
+          body: JSON.stringify({
+            fileName: file.name,
+            fileType: getFileType(file.name, file.type),
+            fileSize: file.size,
+            folder: folder || undefined,
+            tags: tags || undefined,
+            base64Content: base64,
+          }),
         })
-      }, 200)
 
-      const res = await fetch('/api/admin/files/upload', {
-        method: 'POST',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-        body: formData,
-      })
+        setProgress(90)
+        setStatusText('Saving metadata...')
 
-      clearInterval(progressInterval)
-      setProgress(100)
+        const data = await res.json()
 
-      const data = await res.json()
+        if (!res.ok) {
+          throw new Error(data.error || 'Upload failed')
+        }
 
-      if (!res.ok) {
-        throw new Error(data.error || 'Upload failed')
+        setProgress(100)
+        setStatusText('Upload complete!')
+      } else {
+        // For small files, use regular upload
+        setStatusText('Uploading file...')
+        setProgress(20)
+
+        const formData = new FormData()
+        formData.append('file', file)
+        if (folder) formData.append('folder', folder)
+        if (tags) formData.append('tags', tags)
+
+        setProgress(50)
+
+        const res = await fetch('/api/admin/files/upload', {
+          method: 'POST',
+          headers,
+          body: formData,
+        })
+
+        setProgress(90)
+        setStatusText('Saving metadata...')
+
+        const data = await res.json()
+
+        if (!res.ok) {
+          if (data.useDirectUpload) {
+            // Retry with direct upload
+            setStatusText('Retrying with direct upload...')
+            setProgress(10)
+
+            const arrayBuffer = await file.arrayBuffer()
+            const base64 = btoa(
+              new Uint8Array(arrayBuffer).reduce((d, byte) => d + String.fromCharCode(byte), '')
+            )
+
+            const retryRes = await fetch('/api/admin/files/direct-upload', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                ...headers,
+              },
+              body: JSON.stringify({
+                fileName: file.name,
+                fileType: getFileType(file.name, file.type),
+                fileSize: file.size,
+                folder: folder || undefined,
+                tags: tags || undefined,
+                base64Content: base64,
+              }),
+            })
+
+            const retryData = await retryRes.json()
+            if (!retryRes.ok) {
+              throw new Error(retryData.error || 'Upload failed')
+            }
+          } else {
+            throw new Error(data.error || 'Upload failed')
+          }
+        }
+
+        setProgress(100)
+        setStatusText('Upload complete!')
       }
 
       // Success
@@ -177,6 +212,7 @@ export default function FileUpload({ onClose, onUploadComplete }: FileUploadProp
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed')
       setProgress(0)
+      setStatusText('')
     } finally {
       setUploading(false)
     }
@@ -223,10 +259,15 @@ export default function FileUpload({ onClose, onUploadComplete }: FileUploadProp
             {file ? (
               <div className="space-y-2">
                 <div className="flex justify-center text-text-secondary">
-                  {getFileIcon(file.name)}
+                  <IconFile />
                 </div>
                 <p className="font-medium text-text-primary">{file.name}</p>
                 <p className="text-sm text-text-secondary">{formatSize(file.size)}</p>
+                {file.size > 4 * 1024 * 1024 && (
+                  <p className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded inline-block">
+                    Large file — will upload via GitHub
+                  </p>
+                )}
                 <button
                   onClick={(e) => { e.stopPropagation(); setFile(null) }}
                   className="text-sm text-red-500 hover:underline"
@@ -297,7 +338,7 @@ export default function FileUpload({ onClose, onUploadComplete }: FileUploadProp
           {uploading && (
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-text-secondary">Uploading...</span>
+                <span className="text-text-secondary">{statusText}</span>
                 <span className="text-accent font-medium">{progress}%</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">

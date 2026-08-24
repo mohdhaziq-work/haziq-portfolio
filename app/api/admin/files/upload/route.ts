@@ -9,6 +9,7 @@ function getFileType(mimeType: string, name: string): string {
   if (mimeType === 'application/pdf') return 'pdf'
   if (mimeType.includes('zip') || mimeType.includes('rar') || mimeType.includes('tar') || mimeType.includes('gz')) return 'archive'
   if (name.endsWith('.apk') || name.endsWith('.xapk') || name.endsWith('.aab')) return 'apk'
+  if (name.endsWith('.md') || name.endsWith('.markdown')) return 'document'
   if (mimeType.includes('document') || mimeType.includes('sheet') || mimeType.includes('presentation') || mimeType.includes('text')) return 'document'
   return 'other'
 }
@@ -49,6 +50,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'File too large. Max 100 MB.' }, { status: 400 })
     }
 
+    // For files > 4MB, use direct GitHub upload (bypass Vercel body limit)
+    if (file.size > 4 * 1024 * 1024) {
+      return NextResponse.json({ 
+        error: 'FILE_TOO_LARGE_FOR_SERVER',
+        message: 'File is too large for server upload. Use direct upload.',
+        size: file.size,
+        useDirectUpload: true
+      }, { status: 413 })
+    }
+
     // Detect file type
     const fileType = getFileType(file.type, file.name)
     const fileFolder = folder || getFolder(fileType)
@@ -65,7 +76,7 @@ export async function POST(req: Request) {
     const arrayBuffer = await file.arrayBuffer()
     const base64 = Buffer.from(arrayBuffer).toString('base64')
 
-    // For images: Try ImgBB first, fallback to data URL
+    // For images: Try ImgBB first
     if (fileType === 'image') {
       const imgbbKey = process.env.IMGBB_API_KEY
       
@@ -85,88 +96,17 @@ export async function POST(req: Request) {
           if (imgbbData.success) {
             downloadUrl = imgbbData.data.url
           } else {
-            console.error('ImgBB upload failed:', imgbbData)
-            // Fallback to data URL
             downloadUrl = `data:${file.type};base64,${base64}`
           }
-        } catch (imgbbErr) {
-          console.error('ImgBB error:', imgbbErr)
+        } catch {
           downloadUrl = `data:${file.type};base64,${base64}`
         }
       } else {
-        // No ImgBB key - use data URL
         downloadUrl = `data:${file.type};base64,${base64}`
       }
     } else {
-      // For non-images: Use data URL for all sizes (works for < 10MB in Firestore)
-      // For very large files, we'd need external storage
-      if (file.size < 10 * 1024 * 1024) { // < 10MB
-        downloadUrl = `data:${file.type};base64,${base64}`
-      } else {
-        // Try GitHub for larger files
-        const githubToken = process.env.GITHUB_TOKEN
-        const repoOwner = 'mohdhaziq-work'
-        const repoName = 'admin-files'
-
-        if (githubToken) {
-          try {
-            // Create repo if needed (public for direct URLs)
-            const repoResponse = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}`, {
-              headers: {
-                Authorization: `token ${githubToken}`,
-                Accept: 'application/vnd.github.v3+json',
-              },
-            })
-
-            if (repoResponse.status === 404) {
-              await fetch('https://api.github.com/user/repos', {
-                method: 'POST',
-                headers: {
-                  Authorization: `token ${githubToken}`,
-                  Accept: 'application/vnd.github.v3+json',
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  name: repoName,
-                  description: 'Admin File Storage',
-                  private: false,
-                  auto_init: true,
-                }),
-              })
-            }
-
-            const githubPath = `${fileFolder}/${fileName}`
-            const uploadResponse = await fetch(
-              `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${githubPath}`,
-              {
-                method: 'PUT',
-                headers: {
-                  Authorization: `token ${githubToken}`,
-                  Accept: 'application/vnd.github.v3+json',
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  message: `Upload: ${file.name}`,
-                  content: base64,
-                }),
-              }
-            )
-
-            if (uploadResponse.ok) {
-              downloadUrl = `https://raw.githubusercontent.com/${repoOwner}/${repoName}/main/${githubPath}`
-            } else {
-              return NextResponse.json({ error: 'Failed to upload to GitHub' }, { status: 500 })
-            }
-          } catch (ghErr) {
-            console.error('GitHub error:', ghErr)
-            return NextResponse.json({ error: 'GitHub upload failed' }, { status: 500 })
-          }
-        } else {
-          return NextResponse.json({ 
-            error: 'File too large for free storage. Add GITHUB_TOKEN to env for large files.',
-          }, { status: 500 })
-        }
-      }
+      // For non-images < 4MB: Use data URL
+      downloadUrl = `data:${file.type};base64,${base64}`
     }
 
     // Parse tags
