@@ -75,6 +75,29 @@ export default function FileUpload({ onClose, onUploadComplete }: FileUploadProp
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
   }
 
+  const getFileType = (name: string): string => {
+    const ext = name.split('.').pop()?.toLowerCase() || ''
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].includes(ext)) return 'image'
+    if (['mp4', 'avi', 'mov', 'mkv', 'webm'].includes(ext)) return 'video'
+    if (ext === 'pdf') return 'pdf'
+    if (['zip', 'rar', 'tar', 'gz', '7z'].includes(ext)) return 'archive'
+    if (['apk', 'xapk', 'aab'].includes(ext)) return 'apk'
+    if (['md', 'markdown', 'txt', 'doc', 'docx', 'rtf'].includes(ext)) return 'document'
+    return 'other'
+  }
+
+  const getFolder = (type: string): string => {
+    switch (type) {
+      case 'apk': return 'apps'
+      case 'image': return 'images'
+      case 'video': return 'videos'
+      case 'pdf':
+      case 'document': return 'documents'
+      case 'archive': return 'archives'
+      default: return 'other'
+    }
+  }
+
   const handleUpload = async () => {
     if (!file) return
 
@@ -86,40 +109,83 @@ export default function FileUpload({ onClose, onUploadComplete }: FileUploadProp
     try {
       const token = await getAuthToken()
       const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {}
+      const fileType = getFileType(file.name)
+      const fileFolder = folder || getFolder(fileType)
 
-      // For files > 4MB, use GitHub Releases (binary upload, no base64)
+      // For files > 4MB, upload directly to GitHub from browser
       if (file.size > 4 * 1024 * 1024) {
-        setStatusText('Large file detected. Uploading to GitHub Releases...')
-        setProgress(10)
+        setStatusText('Large file detected. Getting upload token...')
+        setProgress(5)
 
-        // Send file as FormData to our server
-        const formData = new FormData()
-        formData.append('file', file)
-        if (folder) formData.append('folder', folder)
-        if (tags) formData.append('tags', tags)
-
-        setProgress(30)
-        setStatusText('Uploading file...')
-
-        const res = await fetch('/api/admin/files/release-upload', {
+        // Get upload token from our server
+        const tokenRes = await fetch('/api/admin/files/get-upload-token', {
           method: 'POST',
-          headers,
-          body: formData,
+          headers: { 'Content-Type': 'application/json', ...headers },
         })
 
+        if (!tokenRes.ok) {
+          const tokenData = await tokenRes.json()
+          throw new Error(tokenData.error || 'Failed to get upload token')
+        }
+
+        const { token: githubToken, repoOwner, repoName, releaseId, uploadUrl } = await tokenRes.json()
+
+        setProgress(15)
+        setStatusText('Uploading directly to GitHub...')
+
+        // Generate unique filename
+        const timestamp = Date.now()
+        const randomId = Math.random().toString(36).slice(2, 8)
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+        const uniqueName = `${timestamp}_${randomId}_${safeName}`
+
+        // Upload directly to GitHub Releases from browser
+        const uploadRes = await fetch(`${uploadUrl}?name=${encodeURIComponent(uniqueName)}`, {
+          method: 'POST',
+          headers: {
+            Authorization: `token ${githubToken}`,
+            'Content-Type': 'application/octet-stream',
+            Accept: 'application/vnd.github.v3+json',
+          },
+          body: file,
+        })
+
+        if (!uploadRes.ok) {
+          const errorText = await uploadRes.text()
+          throw new Error(`GitHub upload failed: ${errorText}`)
+        }
+
+        const assetData = await uploadRes.json()
+        const downloadUrl = assetData.browser_download_url
+
         setProgress(90)
-        setStatusText('Processing...')
+        setStatusText('Saving metadata...')
 
-        const data = await res.json()
+        // Save metadata to our server
+        const metaRes = await fetch('/api/admin/files/save-metadata', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...headers },
+          body: JSON.stringify({
+            fileName: uniqueName,
+            originalName: file.name,
+            fileType,
+            fileSize: file.size,
+            folder: fileFolder,
+            tags: tags || undefined,
+            downloadUrl,
+            githubPath: `releases/files/${uniqueName}`,
+          }),
+        })
 
-        if (!res.ok) {
-          throw new Error(data.error || 'Upload failed')
+        if (!metaRes.ok) {
+          const metaData = await metaRes.json()
+          throw new Error(metaData.error || 'Failed to save metadata')
         }
 
         setProgress(100)
         setStatusText('Upload complete!')
       } else {
-        // For small files, use regular upload
+        // For small files, use regular server upload
         setStatusText('Uploading file...')
         setProgress(20)
 
@@ -209,7 +275,7 @@ export default function FileUpload({ onClose, onUploadComplete }: FileUploadProp
                 <p className="text-sm text-text-secondary">{formatSize(file.size)}</p>
                 {file.size > 4 * 1024 * 1024 && (
                   <p className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded inline-block">
-                    Large file — will upload via GitHub Releases
+                    Large file — will upload directly to GitHub
                   </p>
                 )}
                 <button
