@@ -86,19 +86,172 @@ export default function FileUpload({ onClose, onUploadComplete }: FileUploadProp
     return 'other'
   }
 
-  // Read file as base64 in chunks to avoid memory issues
-  const readFileAsBase64 = async (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onload = () => {
-        const result = reader.result as string
-        // Remove data URL prefix
-        const base64 = result.split(',')[1]
-        resolve(base64)
-      }
-      reader.onerror = reject
-      reader.readAsDataURL(file)
+  const getFolder = (type: string): string => {
+    switch (type) {
+      case 'apk': return 'apps'
+      case 'image': return 'images'
+      case 'video': return 'videos'
+      case 'pdf':
+      case 'document': return 'documents'
+      case 'archive': return 'archives'
+      default: return 'other'
+    }
+  }
+
+  // Call GitHub API through our proxy
+  const githubProxy = async (endpoint: string, method: string = 'GET', data?: any) => {
+    const token = await getAuthToken()
+    const res = await fetch('/api/admin/files/github-proxy', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ endpoint, method, data }),
     })
+    return res.json()
+  }
+
+  // Upload directly to GitHub via proxy
+  const uploadToGitHub = async (file: File, fileType: string, fileFolder: string) => {
+    const repoOwner = 'mohdhaziq-work'
+    const repoName = 'admin-files'
+    const timestamp = Date.now()
+    const randomId = Math.random().toString(36).slice(2, 8)
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+    const uniqueName = `${timestamp}_${randomId}_${safeName}`
+    const githubPath = `${fileFolder}/${uniqueName}`
+
+    // Step 1: Create repo if needed
+    setStatusText('Checking repository...')
+    setProgress(5)
+    
+    try {
+      await githubProxy(`/repos/${repoOwner}/${repoName}`)
+    } catch (e) {
+      // Repo doesn't exist, create it
+      await githubProxy('/user/repos', 'POST', {
+        name: repoName,
+        description: 'Admin File Storage',
+        private: false,
+        auto_init: true,
+      })
+    }
+
+    // Step 2: Read file as base64
+    setStatusText('Reading file...')
+    setProgress(10)
+
+    const arrayBuffer = await file.arrayBuffer()
+    const base64 = btoa(
+      new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
+    )
+
+    // Step 3: Create blob
+    setStatusText('Creating blob...')
+    setProgress(20)
+
+    const blobData = await githubProxy(
+      `/repos/${repoOwner}/${repoName}/git/blobs`,
+      'POST',
+      {
+        content: base64,
+        encoding: 'base64',
+      }
+    )
+
+    if (!blobData.sha) {
+      throw new Error('Failed to create blob')
+    }
+
+    const blobSha = blobData.sha
+
+    // Step 4: Get current commit
+    setStatusText('Getting current state...')
+    setProgress(40)
+
+    let commitSha = ''
+    let treeSha = ''
+
+    try {
+      const refData = await githubProxy(`/repos/${repoOwner}/${repoName}/git/refs/heads/main`)
+      if (refData.object?.sha) {
+        commitSha = refData.object.sha
+        const commitData = await githubProxy(`/repos/${repoOwner}/${repoName}/git/commits/${commitSha}`)
+        if (commitData.tree?.sha) {
+          treeSha = commitData.tree.sha
+        }
+      }
+    } catch (e) {
+      console.error('Error getting ref:', e)
+    }
+
+    // Step 5: Create tree
+    setStatusText('Creating tree...')
+    setProgress(50)
+
+    const treeData = await githubProxy(
+      `/repos/${repoOwner}/${repoName}/git/trees`,
+      'POST',
+      {
+        base_tree: treeSha,
+        tree: [
+          {
+            path: githubPath,
+            mode: '100644',
+            type: 'blob',
+            sha: blobSha,
+          },
+        ],
+      }
+    )
+
+    if (!treeData.sha) {
+      throw new Error('Failed to create tree')
+    }
+
+    const newTreeSha = treeData.sha
+
+    // Step 6: Create commit
+    setStatusText('Creating commit...')
+    setProgress(70)
+
+    const newCommitData = await githubProxy(
+      `/repos/${repoOwner}/${repoName}/git/commits`,
+      'POST',
+      {
+        message: `Upload: ${file.name}`,
+        tree: newTreeSha,
+        parents: commitSha ? [commitSha] : [],
+      }
+    )
+
+    if (!newCommitData.sha) {
+      throw new Error('Failed to create commit')
+    }
+
+    const newCommitSha = newCommitData.sha
+
+    // Step 7: Update reference
+    setStatusText('Updating reference...')
+    setProgress(85)
+
+    await githubProxy(
+      `/repos/${repoOwner}/${repoName}/git/refs/heads/main`,
+      'PATCH',
+      {
+        sha: newCommitSha,
+        force: true,
+      }
+    )
+
+    setProgress(95)
+
+    return {
+      downloadUrl: `https://raw.githubusercontent.com/${repoOwner}/${repoName}/main/${githubPath}`,
+      githubPath,
+      uniqueName,
+    }
   }
 
   const handleUpload = async () => {
@@ -107,52 +260,50 @@ export default function FileUpload({ onClose, onUploadComplete }: FileUploadProp
     setUploading(true)
     setProgress(0)
     setError('')
-    setStatusText('Preparing upload...')
+    setStatusText('Starting upload...')
 
     try {
       const token = await getAuthToken()
-      const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {}
+      const fileType = getFileType(file.name)
+      const fileFolder = folder || getFolder(fileType)
 
-      // For files > 4MB, use direct GitHub upload
+      // For files > 4MB, upload directly to GitHub via proxy
       if (file.size > 4 * 1024 * 1024) {
-        setStatusText('Large file detected. Reading file...')
-        setProgress(5)
+        setStatusText('Large file detected. Uploading to GitHub...')
+        
+        const result = await uploadToGitHub(file, fileType, fileFolder)
+        
+        setStatusText('Saving metadata...')
+        setProgress(97)
 
-        // Read file as base64
-        const base64 = await readFileAsBase64(file)
-        setProgress(30)
-        setStatusText('Uploading to GitHub...')
-
-        // Upload via direct upload API
-        const res = await fetch('/api/admin/files/direct-upload', {
+        // Save metadata to our server
+        const metaRes = await fetch('/api/admin/files/save-metadata', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            ...headers,
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
           body: JSON.stringify({
-            fileName: file.name,
-            fileType: getFileType(file.name),
+            fileName: result.uniqueName,
+            originalName: file.name,
+            fileType,
             fileSize: file.size,
-            folder: folder || undefined,
+            folder: fileFolder,
             tags: tags || undefined,
-            base64Content: base64,
+            downloadUrl: result.downloadUrl,
+            githubPath: result.githubPath,
           }),
         })
 
-        setProgress(90)
-        setStatusText('Saving metadata...')
-
-        const data = await res.json()
-
-        if (!res.ok) {
-          throw new Error(data.error || 'Upload failed')
+        if (!metaRes.ok) {
+          const data = await metaRes.json()
+          throw new Error(data.error || 'Failed to save metadata')
         }
 
         setProgress(100)
         setStatusText('Upload complete!')
       } else {
-        // For small files, use regular upload
+        // For small files, use regular server upload
         setStatusText('Uploading file...')
         setProgress(20)
 
@@ -165,7 +316,7 @@ export default function FileUpload({ onClose, onUploadComplete }: FileUploadProp
 
         const res = await fetch('/api/admin/files/upload', {
           method: 'POST',
-          headers,
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
           body: formData,
         })
 
