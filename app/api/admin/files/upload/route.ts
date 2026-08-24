@@ -26,27 +26,6 @@ function getFolder(type: string): string {
   }
 }
 
-// Lazy firebase-admin init for storage
-let _admin: any = null
-function getAdmin(): any {
-  if (_admin) return _admin
-  try {
-    const admin = require('firebase-admin')
-    const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT
-    if (!serviceAccount) return null
-    if (!admin.apps.length) {
-      admin.initializeApp({
-        credential: admin.credential.cert(JSON.parse(serviceAccount)),
-      })
-    }
-    _admin = admin
-    return _admin
-  } catch (e) {
-    console.error('[upload] Firebase Admin init failed:', e)
-    return null
-  }
-}
-
 export async function POST(req: Request) {
   const token = getBearerToken(req)
   const authError = await requireAdmin(token)
@@ -80,36 +59,126 @@ export async function POST(req: Request) {
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
     const fileName = `${timestamp}_${randomId}_${safeName}`
 
-    // Firebase Storage path
-    const storagePath = `admin-files/${fileFolder}/${fileName}`
+    let downloadUrl = ''
 
-    // Get Firebase Storage bucket
-    const admin = getAdmin()
-    if (!admin) {
-      return NextResponse.json({ error: 'Firebase not configured' }, { status: 500 })
+    // For images: Use ImgBB (FREE, fast, CDN)
+    if (fileType === 'image') {
+      const imgbbKey = process.env.IMGBB_API_KEY
+      
+      if (imgbbKey) {
+        // Upload to ImgBB
+        const arrayBuffer = await file.arrayBuffer()
+        const base64 = Buffer.from(arrayBuffer).toString('base64')
+        
+        const imgbbForm = new FormData()
+        imgbbForm.append('key', imgbbKey)
+        imgbbForm.append('image', base64)
+        imgbbForm.append('name', fileName)
+
+        const imgbbRes = await fetch('https://api.imgbb.com/1/upload', {
+          method: 'POST',
+          body: imgbbForm,
+        })
+
+        const imgbbData = await imgbbRes.json()
+        
+        if (imgbbData.success) {
+          downloadUrl = imgbbData.data.url
+        } else {
+          console.error('ImgBB upload failed:', imgbbData)
+          // Fallback to data URL for small images
+          if (file.size < 5 * 1024 * 1024) { // < 5MB
+            const base64Data = `data:${file.type};base64,${base64}`
+            downloadUrl = base64Data
+          } else {
+            return NextResponse.json({ error: 'Image upload failed. Add IMGBB_API_KEY to env.' }, { status: 500 })
+          }
+        }
+      } else {
+        // No ImgBB key - use data URL for small images (< 2MB)
+        if (file.size < 2 * 1024 * 1024) {
+          const arrayBuffer = await file.arrayBuffer()
+          const base64 = Buffer.from(arrayBuffer).toString('base64')
+          downloadUrl = `data:${file.type};base64,${base64}`
+        } else {
+          return NextResponse.json({ 
+            error: 'For image uploads, add IMGBB_API_KEY to Vercel env. Get free key at imgbb.com/api',
+            help: 'Go to https://api.imgbb.com/ → Get free API key → Add to Vercel as IMGBB_API_KEY'
+          }, { status: 500 })
+        }
+      }
+    } else {
+      // For non-images: Use data URL for small files, or GitHub for large files
+      if (file.size < 2 * 1024 * 1024) { // < 2MB
+        const arrayBuffer = await file.arrayBuffer()
+        const base64 = Buffer.from(arrayBuffer).toString('base64')
+        downloadUrl = `data:${file.type};base64,${base64}`
+      } else {
+        // Try GitHub for larger files
+        const githubToken = process.env.GITHUB_TOKEN
+        const repoOwner = 'mohdhaziq-work'
+        const repoName = 'admin-files'
+
+        if (githubToken) {
+          // Create repo if needed
+          const repoResponse = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}`, {
+            headers: {
+              Authorization: `token ${githubToken}`,
+              Accept: 'application/vnd.github.v3+json',
+            },
+          })
+
+          if (repoResponse.status === 404) {
+            await fetch('https://api.github.com/user/repos', {
+              method: 'POST',
+              headers: {
+                Authorization: `token ${githubToken}`,
+                Accept: 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                name: repoName,
+                description: 'Admin File Storage',
+                private: false, // Public for direct URLs
+                auto_init: true,
+              }),
+            })
+          }
+
+          // Upload to GitHub
+          const arrayBuffer = await file.arrayBuffer()
+          const base64Content = Buffer.from(arrayBuffer).toString('base64')
+          const githubPath = `${fileFolder}/${fileName}`
+
+          const uploadResponse = await fetch(
+            `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${githubPath}`,
+            {
+              method: 'PUT',
+              headers: {
+                Authorization: `token ${githubToken}`,
+                Accept: 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                message: `Upload: ${file.name}`,
+                content: base64Content,
+              }),
+            }
+          )
+
+          if (uploadResponse.ok) {
+            downloadUrl = `https://raw.githubusercontent.com/${repoOwner}/${repoName}/main/${githubPath}`
+          } else {
+            return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 })
+          }
+        } else {
+          return NextResponse.json({ 
+            error: 'File too large for free storage. Add GITHUB_TOKEN to env.',
+            help: 'Go to https://github.com/settings/tokens → Generate token → Add to Vercel as GITHUB_TOKEN'
+          }, { status: 500 })
+        }
+      }
     }
-
-    const bucket = admin.storage().bucket()
-    const fileBuffer = Buffer.from(await file.arrayBuffer())
-
-    // Upload to Firebase Storage
-    const fileRef = bucket.file(storagePath)
-    await fileRef.save(fileBuffer, {
-      metadata: {
-        contentType: file.type,
-        metadata: {
-          originalName: file.name,
-          uploadedBy: 'admin',
-          folder: fileFolder,
-        },
-      },
-    })
-
-    // Make file publicly accessible
-    await fileRef.makePublic()
-
-    // Get public URL
-    const downloadUrl = `https://storage.googleapis.com/${bucket.name}/${storagePath}`
 
     // Parse tags
     const tagList = tags ? tags.split(',').map(t => t.trim()).filter(Boolean) : []
@@ -121,7 +190,7 @@ export async function POST(req: Request) {
       type: fileType as any,
       mimeType: file.type,
       size: file.size,
-      githubPath: storagePath,
+      githubPath: `admin-files/${fileFolder}/${fileName}`,
       downloadUrl,
       folder: fileFolder,
       tags: tagList,
