@@ -363,6 +363,23 @@ export default function Header() {
                     </span>
                     <span>AI Chat</span>
                   </Link>
+
+                  {/* File Manager - admin only */}
+                  <Link
+                    href="/admin/files"
+                    onClick={closeSidebar}
+                    className={cn(
+                      'sidebar-nav-item sidebar-nav-item--visible w-full',
+                      pathname === '/admin/files' && 'sidebar-nav-item--active'
+                    )}
+                  >
+                    <span className="sidebar-nav-icon">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                      </svg>
+                    </span>
+                    <span>File Manager</span>
+                  </Link>
                 </>
               )}
 
