@@ -92,9 +92,6 @@ export default function PixelArtLayout({ children }: { children: React.ReactNode
                 )
               })}
             </div>
-            <div style={{ position: 'absolute', bottom: '16px', left: '16px', right: '16px', padding: '12px', background: '#0a0a1a', border: `1px solid ${accent}30`, textAlign: 'center' }}>
-              <p style={{ color: '#8892b0', fontSize: '6px' }}>Built by Mohd Haziq</p>
-            </div>
           </nav>
         </div>
       )}

@@ -146,18 +146,6 @@ export default function SkeuomorphismLayout({
                 })}
               </div>
             </div>
-
-            <div className="absolute bottom-4 left-4 right-4">
-              <div className="p-3 rounded-xl text-center" style={{
-                background: 'linear-gradient(145deg, #f5f0ea, #e0d8d0)',
-                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.5), 0 1px 2px rgba(0,0,0,0.1)',
-                border: '1px solid #c4bbb2',
-              }}>
-                <p className="text-[10px]" style={{ color: '#8a7f75', textShadow: '0 1px 0 rgba(255,255,255,0.3)' }}>
-                  Built by Mohd Haziq
-                </p>
-              </div>
-            </div>
           </nav>
         </div>
       )}

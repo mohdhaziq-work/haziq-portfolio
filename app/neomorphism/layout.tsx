@@ -125,15 +125,6 @@ export default function NeomorphismLayout({ children }: { children: React.ReactN
                 })}
               </div>
             </div>
-
-            <div className="absolute bottom-4 left-4 right-4">
-              <div className="p-3 rounded-xl text-center" style={{
-                background: bg,
-                boxShadow: `3px 3px 6px ${shadowDark}, -3px -3px 6px ${shadowLight}`,
-              }}>
-                <p className="text-[10px]" style={{ color: '#a0aec0' }}>Built by Mohd Haziq</p>
-              </div>
-            </div>
           </nav>
         </div>
       )}

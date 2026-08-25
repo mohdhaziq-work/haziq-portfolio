@@ -106,9 +106,6 @@ export default function GlassmorphismLayout({ children }: { children: React.Reac
                 )
               })}
             </div>
-            <div style={{ position: 'absolute', bottom: '20px', left: '20px', right: '20px', padding: '14px', background: 'rgba(255,255,255,0.1)', borderRadius: '14px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.15)' }}>
-              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '11px' }}>Built by Mohd Haziq</p>
-            </div>
           </nav>
         </div>
       )}
