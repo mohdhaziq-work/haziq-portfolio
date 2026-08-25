@@ -96,27 +96,45 @@ export default function DesignsPage() {
         </div>
 
         {/* Design Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredDesigns.map((design) => (
             <Link
               key={design.id}
               href={design.href}
-              className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100"
+              className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:-translate-y-1"
             >
-              {/* Color Preview */}
+              {/* Color Preview — design name is the hero */}
               <div
-                className="h-32 relative overflow-hidden flex items-center justify-center"
-                style={{ backgroundColor: design.color + '20' }}
+                className="h-40 relative overflow-hidden flex items-center justify-center"
+                style={{ backgroundColor: design.color + '18' }}
               >
-                <div className="text-center">
-                  <div className="w-16 h-16 mx-auto mb-2 rounded-lg flex items-center justify-center" style={{ background: design.color + '30', border: `2px solid ${design.color}50` }}>
-                    <span className="text-xs font-bold text-center px-1 leading-tight" style={{ color: design.color }}>
-                      {design.name.split(' ').slice(0, 2).join(' ')}
-                    </span>
-                  </div>
+                {/* Large faded name as background texture */}
+                <span
+                  className="absolute text-7xl font-black uppercase tracking-tight select-none pointer-events-none"
+                  style={{ color: design.color + '10', whiteSpace: 'nowrap' }}
+                >
+                  {design.name.split('/')[0].split(' ')[0]}
+                </span>
+
+                {/* Foreground name */}
+                <div className="relative z-10 text-center px-4">
+                  <h3
+                    className="text-2xl font-extrabold leading-tight"
+                    style={{ color: design.color }}
+                  >
+                    {design.name}
+                  </h3>
                 </div>
+
+                {/* Category badge */}
                 <div className="absolute top-3 right-3">
-                  <span className="px-2 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-medium text-gray-700">
+                  <span
+                    className="px-3 py-1 rounded-full text-xs font-semibold"
+                    style={{
+                      background: design.color + '20',
+                      color: design.color,
+                    }}
+                  >
                     {design.category}
                   </span>
                 </div>
@@ -124,11 +142,10 @@ export default function DesignsPage() {
 
               {/* Content */}
               <div className="p-5">
-                <h3 className="text-lg font-bold text-gray-900 mb-2">{design.name}</h3>
-                <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                <p className="text-base text-gray-600 mb-4 leading-relaxed">
                   {design.description}
                 </p>
-                <div className="w-full py-2.5 bg-gray-100 group-hover:bg-accent group-hover:text-white text-gray-700 rounded-lg text-sm font-medium transition-all text-center">
+                <div className="w-full py-3 bg-gray-100 group-hover:bg-accent group-hover:text-white text-gray-700 rounded-xl text-base font-semibold transition-all text-center">
                   View Demo
                 </div>
               </div>
