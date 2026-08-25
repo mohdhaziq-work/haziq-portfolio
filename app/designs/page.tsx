@@ -1,38 +1,38 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 
-// 29 Design Styles
 const DESIGN_STYLES = [
-  { id: 1, name: 'Pixel Art', category: 'Retro', description: '8-bit retro gaming aesthetic with pixel-perfect designs', color: '#ff6b6b', icon: '🎮' },
-  { id: 2, name: 'Glassmorphism', category: 'Modern', description: 'Frosted glass effect with blur and transparency', color: '#4ecdc4', icon: '💎' },
-  { id: 3, name: 'Neumorphism', category: 'Modern', description: 'Soft UI with subtle shadows and extruded elements', color: '#a8e6cf', icon: '🔘' },
-  { id: 4, name: 'Brutalism', category: 'Bold', description: 'Raw, unpolished, bold typography and layouts', color: '#ffd93d', icon: '⬛' },
-  { id: 5, name: 'Cyberpunk', category: 'Futuristic', description: 'Neon lights, dark backgrounds, futuristic vibes', color: '#ff00ff', icon: '🌆' },
-  { id: 6, name: 'Minimalism', category: 'Clean', description: 'Less is more - clean, simple, focused', color: '#ffffff', icon: '◻️' },
-  { id: 7, name: 'Retro/Vintage', category: 'Retro', description: 'Old-school nostalgic design with vintage colors', color: '#d4a574', icon: '📻' },
-  { id: 8, name: 'Gradient Mesh', category: 'Colorful', description: 'Flowing colorful gradients and mesh backgrounds', color: '#667eea', icon: '🌈' },
-  { id: 9, name: 'Dark Mode', category: 'Modern', description: 'Dark backgrounds with light text - easy on eyes', color: '#1a1a2e', icon: '🌙' },
-  { id: 10, name: 'Skeuomorphism', category: 'Realistic', description: 'Realistic textures mimicking real-world objects', color: '#8b7355', icon: '🎨' },
-  { id: 11, name: 'Flat Design', category: 'Clean', description: 'Simple, no shadows, bold colors, clean shapes', color: '#3498db', icon: '📐' },
-  { id: 12, name: 'Material Design', category: 'Modern', description: 'Google design language with elevation and motion', color: '#4285f4', icon: '📦' },
-  { id: 13, name: 'Aurora', category: 'Nature', description: 'Northern lights effect with flowing colors', color: '#00ff88', icon: '🌌' },
-  { id: 14, name: 'Isometric', category: '3D', description: '3D-like 2D design with isometric perspective', color: '#e74c3c', icon: '🧊' },
-  { id: 15, name: 'Typography-Led', category: 'Text', description: 'Typography as the main visual element', color: '#2c3e50', icon: '🔤' },
-  { id: 16, name: 'Illustration-Heavy', category: 'Art', description: 'Custom illustrations as primary design element', color: '#e91e63', icon: '🖌️' },
-  { id: 17, name: 'Parallax', category: 'Interactive', description: 'Scroll-based animations and depth effects', color: '#9b59b6', icon: '📜' },
-  { id: 18, name: 'Split Screen', category: 'Layout', description: 'Half-half layout with contrasting sections', color: '#1abc9c', icon: '⬜' },
-  { id: 19, name: 'Monochrome', category: 'Minimal', description: 'Single color palette with varying shades', color: '#333333', icon: '⬛' },
-  { id: 20, name: 'Organic', category: 'Nature', description: 'Natural, flowing shapes and soft curves', color: '#27ae60', icon: '🍃' },
-  { id: 21, name: 'Futuristic', category: 'Sci-Fi', description: 'Sci-fi inspired with tech elements', color: '#00d4ff', icon: '🚀' },
-  { id: 22, name: 'Handwritten', category: 'Personal', description: 'Script fonts and personal touch', color: '#8b4513', icon: '✍️' },
-  { id: 23, name: 'Geometric', category: 'Pattern', description: 'Bold shapes and geometric patterns', color: '#ff6348', icon: '🔷' },
-  { id: 24, name: 'Cinematic', category: 'Visual', description: 'Movie-like visuals with dramatic lighting', color: '#2c3e50', icon: '🎬' },
-  { id: 25, name: 'Watercolor', category: 'Art', description: 'Soft, painted watercolor effect', color: '#87ceeb', icon: '🎨' },
-  { id: 26, name: 'Neon Glow', category: 'Bold', description: 'Glowing neon elements on dark backgrounds', color: '#ff00ff', icon: '💡' },
-  { id: 27, name: 'Abstract', category: 'Art', description: 'Non-representational artistic expression', color: '#ff6b6b', icon: '🎭' },
-  { id: 28, name: 'Wabi Sabi', category: 'Japanese', description: 'Japanese imperfect beauty - rustic and natural', color: '#8b7355', icon: '🍵' },
-  { id: 29, name: 'Conceptual Sketch', category: 'Creative', description: 'Hand-drawn wireframe aesthetic', color: '#666666', icon: '✏️' },
+  { id: 1, name: 'Skeuomorphism', category: 'Realistic', description: 'Realistic textures mimicking real-world objects', color: '#8b7355', href: '/skeuomorphism' },
+  { id: 2, name: 'Neumorphism', category: 'Modern', description: 'Soft UI with subtle shadows and extruded elements', color: '#6c63ff', href: '/neomorphism' },
+  { id: 3, name: 'Pixel Art', category: 'Retro', description: '8-bit retro gaming aesthetic with pixel-perfect designs', color: '#e94560', href: '/pixel-art' },
+  { id: 4, name: 'Glassmorphism', category: 'Modern', description: 'Frosted glass effect with blur and transparency', color: '#4ecdc4', href: '/glassmorphism' },
+  { id: 5, name: 'Brutalism', category: 'Bold', description: 'Raw, unpolished, bold typography and layouts', color: '#ff3e3e', href: '/brutalism' },
+  { id: 6, name: 'Cyberpunk', category: 'Futuristic', description: 'Neon lights, dark backgrounds, futuristic vibes', color: '#ff00ff', href: '/cyberpunk' },
+  { id: 7, name: 'Minimalism', category: 'Clean', description: 'Less is more - clean, simple, focused', color: '#111111', href: '/minimalism' },
+  { id: 8, name: 'Retro/Vintage', category: 'Retro', description: 'Old-school nostalgic design with vintage colors', color: '#8b7355', href: '/retro' },
+  { id: 9, name: 'Gradient Mesh', category: 'Colorful', description: 'Flowing colorful gradients and mesh backgrounds', color: '#667eea', href: '/gradient-mesh' },
+  { id: 10, name: 'Dark Mode', category: 'Modern', description: 'Dark backgrounds with light text - easy on eyes', color: '#58a6ff', href: '/dark-mode' },
+  { id: 11, name: 'Flat Design', category: 'Clean', description: 'Simple, no shadows, bold colors, clean shapes', color: '#3498db', href: '/flat-design' },
+  { id: 12, name: 'Material Design', category: 'Modern', description: 'Google design language with elevation and motion', color: '#4285f4', href: '/material-design' },
+  { id: 13, name: 'Aurora', category: 'Nature', description: 'Northern lights effect with flowing colors', color: '#00ff88', href: '/aurora' },
+  { id: 14, name: 'Isometric', category: '3D', description: '3D-like 2D design with isometric perspective', color: '#e74c3c', href: '/isometric' },
+  { id: 15, name: 'Typography-Led', category: 'Text', description: 'Typography as the main visual element', color: '#2c3e50', href: '/typography' },
+  { id: 16, name: 'Illustration-Heavy', category: 'Art', description: 'Custom illustrations as primary design element', color: '#f59e0b', href: '/illustration' },
+  { id: 17, name: 'Parallax', category: 'Interactive', description: 'Scroll-based animations and depth effects', color: '#667eea', href: '/parallax' },
+  { id: 18, name: 'Split Screen', category: 'Layout', description: 'Half-half layout with contrasting sections', color: '#1a1a2e', href: '/split-screen' },
+  { id: 19, name: 'Monochrome', category: 'Minimal', description: 'Single color palette with varying shades', color: '#333333', href: '/monochrome' },
+  { id: 20, name: 'Organic', category: 'Nature', description: 'Natural, flowing shapes and soft curves', color: '#27ae60', href: '/organic' },
+  { id: 21, name: 'Futuristic', category: 'Sci-Fi', description: 'Sci-fi inspired with tech elements', color: '#00d4ff', href: '/futuristic' },
+  { id: 22, name: 'Handwritten', category: 'Personal', description: 'Script fonts and personal touch', color: '#5d4037', href: '/handwritten' },
+  { id: 23, name: 'Geometric', category: 'Pattern', description: 'Bold shapes and geometric patterns', color: '#ff6348', href: '/geometric' },
+  { id: 24, name: 'Cinematic', category: 'Visual', description: 'Movie-like visuals with dramatic lighting', color: '#ffd700', href: '/cinematic' },
+  { id: 25, name: 'Watercolor', category: 'Art', description: 'Soft, painted watercolor effect', color: '#87ceeb', href: '/watercolor' },
+  { id: 26, name: 'Neon Glow', category: 'Bold', description: 'Glowing neon elements on dark backgrounds', color: '#ff00ff', href: '/neon-glow' },
+  { id: 27, name: 'Abstract', category: 'Art', description: 'Non-representational artistic expression', color: '#e94560', href: '/abstract' },
+  { id: 28, name: 'Wabi Sabi', category: 'Japanese', description: 'Japanese imperfect beauty - rustic and natural', color: '#8b7355', href: '/wabi-sabi' },
+  { id: 29, name: 'Conceptual Sketch', category: 'Creative', description: 'Hand-drawn wireframe aesthetic', color: '#666666', href: '/conceptual-sketch' },
 ]
 
 const CATEGORIES = ['All', 'Modern', 'Retro', 'Bold', 'Clean', 'Futuristic', 'Art', 'Nature', 'Layout', 'Other']
@@ -57,7 +57,7 @@ export default function DesignsPage() {
             Design <span className="text-accent">Styles</span>
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            29 unique design styles for your next project. Choose a style and let's build something amazing.
+            29 unique design styles — each with a full interactive demo. Click any card to explore.
           </p>
         </div>
 
@@ -98,8 +98,9 @@ export default function DesignsPage() {
         {/* Design Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredDesigns.map((design) => (
-            <div
+            <Link
               key={design.id}
+              href={design.href}
               className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100"
             >
               {/* Color Preview */}
@@ -108,9 +109,7 @@ export default function DesignsPage() {
                 style={{ backgroundColor: design.color + '20' }}
               >
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-6xl opacity-30 group-hover:opacity-50 transition-opacity">
-                    {design.icon}
-                  </span>
+                  <div className="w-16 h-16 rounded-lg" style={{ background: design.color + '40', border: `2px solid ${design.color}60` }} />
                 </div>
                 <div className="absolute top-3 right-3">
                   <span className="px-2 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-medium text-gray-700">
@@ -121,18 +120,15 @@ export default function DesignsPage() {
 
               {/* Content */}
               <div className="p-5">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-2xl">{design.icon}</span>
-                  <h3 className="text-lg font-bold text-gray-900">{design.name}</h3>
-                </div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">{design.name}</h3>
                 <p className="text-sm text-gray-600 mb-4 line-clamp-2">
                   {design.description}
                 </p>
-                <button className="w-full py-2.5 bg-gray-100 hover:bg-accent hover:text-white text-gray-700 rounded-lg text-sm font-medium transition-all">
-                  Request This Style
-                </button>
+                <div className="w-full py-2.5 bg-gray-100 group-hover:bg-accent group-hover:text-white text-gray-700 rounded-lg text-sm font-medium transition-all text-center">
+                  View Demo
+                </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
 
