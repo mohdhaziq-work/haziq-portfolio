@@ -3,163 +3,217 @@
 import { useState } from 'react'
 import Link from 'next/link'
 
-const DESIGN_STYLES = [
-  { id: 1, name: 'Skeuomorphism', category: 'Realistic', description: 'Realistic textures mimicking real-world objects', color: '#8b7355', href: '/skeuomorphism' },
-  { id: 2, name: 'Neumorphism', category: 'Modern', description: 'Soft UI with subtle shadows and extruded elements', color: '#6c63ff', href: '/neomorphism' },
-  { id: 3, name: 'Pixel Art', category: 'Retro', description: '8-bit retro gaming aesthetic with pixel-perfect designs', color: '#e94560', href: '/pixel-art' },
-  { id: 4, name: 'Glassmorphism', category: 'Modern', description: 'Frosted glass effect with blur and transparency', color: '#4ecdc4', href: '/glassmorphism' },
-  { id: 5, name: 'Brutalism', category: 'Bold', description: 'Raw, unpolished, bold typography and layouts', color: '#ff3e3e', href: '/brutalism' },
-  { id: 6, name: 'Cyberpunk', category: 'Futuristic', description: 'Neon lights, dark backgrounds, futuristic vibes', color: '#ff00ff', href: '/cyberpunk' },
-  { id: 7, name: 'Minimalism', category: 'Clean', description: 'Less is more - clean, simple, focused', color: '#111111', href: '/minimalism' },
-  { id: 8, name: 'Retro/Vintage', category: 'Retro', description: 'Old-school nostalgic design with vintage colors', color: '#8b7355', href: '/retro' },
-  { id: 9, name: 'Gradient Mesh', category: 'Colorful', description: 'Flowing colorful gradients and mesh backgrounds', color: '#667eea', href: '/gradient-mesh' },
-  { id: 10, name: 'Dark Mode', category: 'Modern', description: 'Dark backgrounds with light text - easy on eyes', color: '#58a6ff', href: '/dark-mode' },
-  { id: 11, name: 'Flat Design', category: 'Clean', description: 'Simple, no shadows, bold colors, clean shapes', color: '#3498db', href: '/flat-design' },
-  { id: 12, name: 'Material Design', category: 'Modern', description: 'Google design language with elevation and motion', color: '#4285f4', href: '/material-design' },
-  { id: 13, name: 'Aurora', category: 'Nature', description: 'Northern lights effect with flowing colors', color: '#00ff88', href: '/aurora' },
-  { id: 14, name: 'Isometric', category: '3D', description: '3D-like 2D design with isometric perspective', color: '#e74c3c', href: '/isometric' },
-  { id: 15, name: 'Typography-Led', category: 'Text', description: 'Typography as the main visual element', color: '#2c3e50', href: '/typography' },
-  { id: 16, name: 'Illustration-Heavy', category: 'Art', description: 'Custom illustrations as primary design element', color: '#f59e0b', href: '/illustration' },
-  { id: 17, name: 'Parallax', category: 'Interactive', description: 'Scroll-based animations and depth effects', color: '#667eea', href: '/parallax' },
-  { id: 18, name: 'Split Screen', category: 'Layout', description: 'Half-half layout with contrasting sections', color: '#1a1a2e', href: '/split-screen' },
-  { id: 19, name: 'Monochrome', category: 'Minimal', description: 'Single color palette with varying shades', color: '#333333', href: '/monochrome' },
-  { id: 20, name: 'Organic', category: 'Nature', description: 'Natural, flowing shapes and soft curves', color: '#27ae60', href: '/organic' },
-  { id: 21, name: 'Futuristic', category: 'Sci-Fi', description: 'Sci-fi inspired with tech elements', color: '#00d4ff', href: '/futuristic' },
-  { id: 22, name: 'Handwritten', category: 'Personal', description: 'Script fonts and personal touch', color: '#5d4037', href: '/handwritten' },
-  { id: 23, name: 'Geometric', category: 'Pattern', description: 'Bold shapes and geometric patterns', color: '#ff6348', href: '/geometric' },
-  { id: 24, name: 'Cinematic', category: 'Visual', description: 'Movie-like visuals with dramatic lighting', color: '#ffd700', href: '/cinematic' },
-  { id: 25, name: 'Watercolor', category: 'Art', description: 'Soft, painted watercolor effect', color: '#87ceeb', href: '/watercolor' },
-  { id: 26, name: 'Neon Glow', category: 'Bold', description: 'Glowing neon elements on dark backgrounds', color: '#ff00ff', href: '/neon-glow' },
-  { id: 27, name: 'Abstract', category: 'Art', description: 'Non-representational artistic expression', color: '#e94560', href: '/abstract' },
-  { id: 28, name: 'Wabi Sabi', category: 'Japanese', description: 'Japanese imperfect beauty - rustic and natural', color: '#8b7355', href: '/wabi-sabi' },
-  { id: 29, name: 'Conceptual Sketch', category: 'Creative', description: 'Hand-drawn wireframe aesthetic', color: '#666666', href: '/conceptual-sketch' },
+const DESIGNS = [
+  { id: 1, name: 'Skeuomorphism', cat: 'Realistic', desc: 'Realistic textures, leather, wood grain, and physical metaphors.', color: '#8b7355', bg: '#f5f0ea', href: '/skeuomorphism' },
+  { id: 2, name: 'Neumorphism', cat: 'Soft UI', desc: 'Soft extruded elements with gentle dual shadows.', color: '#6c63ff', bg: '#e8e5f0', href: '/neomorphism' },
+  { id: 3, name: 'Pixel Art', cat: 'Retro', desc: '8-bit retro gaming aesthetic with pixel grids.', color: '#e94560', bg: '#1a1a2e', href: '/pixel-art', light: true },
+  { id: 4, name: 'Glassmorphism', cat: 'Modern', desc: 'Frosted glass panels with blur and transparency.', color: '#4ecdc4', bg: '#e8faf8', href: '/glassmorphism' },
+  { id: 5, name: 'Brutalism', cat: 'Bold', desc: 'Raw, unpolished design with stark contrast.', color: '#ff3e3e', bg: '#fff5f5', href: '/brutalism' },
+  { id: 6, name: 'Cyberpunk', cat: 'Futuristic', desc: 'Neon glow, glitch effects, and dark sci-fi vibes.', color: '#ff00ff', bg: '#1a0a2e', href: '/cyberpunk', light: true },
+  { id: 7, name: 'Minimalism', cat: 'Clean', desc: 'Less is more. White space, one font, pure focus.', color: '#111111', bg: '#f8f8f8', href: '/minimalism' },
+  { id: 8, name: 'Retro Vintage', cat: 'Retro', desc: 'Warm sepia tones, classic serif fonts, nostalgia.', color: '#8b7355', bg: '#f4e8d1', href: '/retro' },
+  { id: 9, name: 'Gradient Mesh', cat: 'Colorful', desc: 'Flowing multi-color gradients and mesh blends.', color: '#667eea', bg: '#eef0fb', href: '/gradient-mesh' },
+  { id: 10, name: 'Dark Mode', cat: 'Modern', desc: 'Dark backgrounds, light text, easy on the eyes.', color: '#58a6ff', bg: '#0d1117', href: '/dark-mode', light: true },
+  { id: 11, name: 'Flat Design', cat: 'Clean', desc: 'Bold colors, zero shadows, clean geometry.', color: '#3498db', bg: '#eaf4fc', href: '/flat-design' },
+  { id: 12, name: 'Material Design', cat: 'Modern', desc: 'Google design language with elevation and motion.', color: '#4285f4', bg: '#e8f0fe', href: '/material-design' },
+  { id: 13, name: 'Aurora', cat: 'Nature', desc: 'Northern lights — living, flowing color gradients.', color: '#00cc88', bg: '#e6faf2', href: '/aurora' },
+  { id: 14, name: 'Isometric', cat: '3D', desc: '3D-like 2D perspective with depth illusion.', color: '#e74c3c', bg: '#fdf0ef', href: '/isometric' },
+  { id: 15, name: 'Typography Led', cat: 'Text', desc: 'Typography IS the design. Letters as visuals.', color: '#2c3e50', bg: '#f0f2f5', href: '/typography' },
+  { id: 16, name: 'Illustration', cat: 'Art', desc: 'Custom hand-drawn illustrations as hero elements.', color: '#f59e0b', bg: '#fef9ec', href: '/illustration' },
+  { id: 17, name: 'Parallax', cat: 'Interactive', desc: 'Scroll-based depth layers and motion effects.', color: '#667eea', bg: '#eef0fb', href: '/parallax' },
+  { id: 18, name: 'Split Screen', cat: 'Layout', desc: 'Half-half contrasting layout with drag divider.', color: '#1a1a2e', bg: '#f0f1f5', href: '/split-screen' },
+  { id: 19, name: 'Monochrome', cat: 'Minimal', desc: 'Single color family, infinite shades of gray.', color: '#333333', bg: '#f5f5f5', href: '/monochrome' },
+  { id: 20, name: 'Organic', cat: 'Nature', desc: 'Natural curves, soft blobs, earthy feel.', color: '#27ae60', bg: '#eafaf1', href: '/organic' },
+  { id: 21, name: 'Futuristic', cat: 'Sci-Fi', desc: 'HUD elements, grid systems, sci-fi interfaces.', color: '#00d4ff', bg: '#e6f9ff', href: '/futuristic' },
+  { id: 22, name: 'Handwritten', cat: 'Personal', desc: 'Pen-on-paper feel, sticky notes, notebook lines.', color: '#5d4037', bg: '#fdf6e3', href: '/handwritten' },
+  { id: 23, name: 'Geometric', cat: 'Pattern', desc: 'Bold shapes, rotating patterns, visual rhythm.', color: '#ff6348', bg: '#fff2ef', href: '/geometric' },
+  { id: 24, name: 'Cinematic', cat: 'Visual', desc: 'Letterbox frames, dramatic lighting, film grain.', color: '#ffd700', bg: '#1a1a1a', href: '/cinematic', light: true },
+  { id: 25, name: 'Watercolor', cat: 'Art', desc: 'Soft painted blobs, pastel palettes, artistic.', color: '#87ceeb', bg: '#f0f8ff', href: '/watercolor' },
+  { id: 26, name: 'Neon Glow', cat: 'Bold', desc: 'Pulsing neon borders and glowing text effects.', color: '#ff00ff', bg: '#0a0a0a', href: '/neon-glow', light: true },
+  { id: 27, name: 'Abstract', cat: 'Art', desc: 'Non-representational shapes, colors, and forms.', color: '#e94560', bg: '#16213e', href: '/abstract', light: true },
+  { id: 28, name: 'Wabi Sabi', cat: 'Japanese', desc: 'Imperfect beauty — rustic, worn, authentic.', color: '#8b7355', bg: '#f5f0eb', href: '/wabi-sabi' },
+  { id: 29, name: 'Conceptual Sketch', cat: 'Creative', desc: 'Wireframe, blueprint, pencil-on-paper aesthetic.', color: '#666666', bg: '#fafafa', href: '/conceptual-sketch' },
 ]
 
-const CATEGORIES = ['All', 'Modern', 'Retro', 'Bold', 'Clean', 'Futuristic', 'Art', 'Nature', 'Layout', 'Other']
+const CATS = ['All', 'Modern', 'Retro', 'Bold', 'Clean', 'Futuristic', 'Art', 'Nature', 'Layout', 'Other']
 
 export default function DesignsPage() {
-  const [activeCategory, setActiveCategory] = useState('All')
-  const [searchQuery, setSearchQuery] = useState('')
+  const [cat, setCat] = useState('All')
+  const [q, setQ] = useState('')
 
-  const filteredDesigns = DESIGN_STYLES.filter(design => {
-    const matchesCategory = activeCategory === 'All' || design.category === activeCategory
-    const matchesSearch = design.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         design.description.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesCategory && matchesSearch
+  const list = DESIGNS.filter(d => {
+    const okCat = cat === 'All' || d.cat === cat
+    const okQ = d.name.toLowerCase().includes(q.toLowerCase()) || d.desc.toLowerCase().includes(q.toLowerCase())
+    return okCat && okQ
   })
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-24 pb-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Design <span className="text-accent">Styles</span>
+    <div style={{ minHeight: '100vh', background: '#fafafa', paddingTop: '80px', paddingBottom: '64px' }}>
+      {/* Header */}
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+          <p style={{ fontSize: '13px', fontWeight: 600, letterSpacing: '3px', textTransform: 'uppercase', color: '#999', marginBottom: '12px' }}>
+            Portfolio Showcase
+          </p>
+          <h1 style={{ fontSize: '44px', fontWeight: 800, color: '#111', marginBottom: '16px', lineHeight: 1.1 }}>
+            29 Design Styles
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            29 unique design styles — each with a full interactive demo. Click any card to explore.
+          <p style={{ fontSize: '17px', color: '#777', maxWidth: '520px', margin: '0 auto', lineHeight: 1.6 }}>
+            Each style has a full interactive demo page. Click any card to explore the design in action.
           </p>
         </div>
 
         {/* Search */}
-        <div className="max-w-md mx-auto mb-8">
-          <div className="relative">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-            <input
-              type="text"
-              placeholder="Search design styles..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent"
-            />
-          </div>
+        <div style={{ maxWidth: '400px', margin: '0 auto 32px' }}>
+          <input
+            type="text"
+            placeholder="Search styles..."
+            value={q}
+            onChange={e => setQ(e.target.value)}
+            style={{
+              width: '100%', padding: '14px 20px', fontSize: '15px',
+              border: '1px solid #e0e0e0', borderRadius: '12px',
+              background: '#fff', outline: 'none',
+              color: '#333',
+            }}
+          />
         </div>
 
-        {/* Category Filters */}
-        <div className="flex flex-wrap justify-center gap-2 mb-10">
-          {CATEGORIES.map((category) => (
+        {/* Category pills */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '8px', marginBottom: '40px' }}>
+          {CATS.map(c => (
             <button
-              key={category}
-              onClick={() => setActiveCategory(category)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                activeCategory === category
-                  ? 'bg-accent text-white shadow-md'
-                  : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
-              }`}
+              key={c}
+              onClick={() => setCat(c)}
+              style={{
+                padding: '8px 20px', fontSize: '13px', fontWeight: 600,
+                borderRadius: '999px', border: 'none', cursor: 'pointer',
+                background: cat === c ? '#111' : '#fff',
+                color: cat === c ? '#fff' : '#666',
+                boxShadow: cat === c ? '0 2px 8px rgba(0,0,0,0.15)' : '0 1px 3px rgba(0,0,0,0.06)',
+                transition: 'all 0.2s',
+              }}
             >
-              {category}
+              {c}
             </button>
           ))}
         </div>
 
-        {/* Design Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredDesigns.map((design) => (
+        {/* Grid */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+          gap: '24px',
+        }}>
+          {list.map(d => (
             <Link
-              key={design.id}
-              href={design.href}
-              className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:-translate-y-1"
+              key={d.id}
+              href={d.href}
+              style={{
+                display: 'block', textDecoration: 'none',
+                background: '#fff', borderRadius: '16px',
+                overflow: 'hidden',
+                border: '1px solid #eee',
+                transition: 'transform 0.2s, box-shadow 0.2s',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.transform = 'translateY(-4px)'
+                e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,0,0,0.1)'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = 'none'
+              }}
             >
-              {/* Color Preview — design name is the hero */}
-              <div
-                className="h-40 relative overflow-hidden flex items-center justify-center"
-                style={{ backgroundColor: design.color + '18' }}
-              >
-                {/* Large faded name as background texture */}
-                <span
-                  className="absolute text-7xl font-black uppercase tracking-tight select-none pointer-events-none"
-                  style={{ color: design.color + '10', whiteSpace: 'nowrap' }}
-                >
-                  {design.name.split('/')[0].split(' ')[0]}
+              {/* Preview bar */}
+              <div style={{
+                height: '140px',
+                background: d.bg,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: 'relative',
+                overflow: 'hidden',
+              }}>
+                {/* Big faded word behind */}
+                <span style={{
+                  position: 'absolute',
+                  fontSize: '80px',
+                  fontWeight: 900,
+                  color: d.light ? 'rgba(255,255,255,0.06)' : (d.color + '0a'),
+                  whiteSpace: 'nowrap',
+                  userSelect: 'none',
+                  pointerEvents: 'none',
+                }}>
+                  {d.name.split(' ')[0].toUpperCase()}
                 </span>
 
-                {/* Foreground name */}
-                <div className="relative z-10 text-center px-4">
-                  <h3
-                    className="text-2xl font-extrabold leading-tight"
-                    style={{ color: design.color }}
-                  >
-                    {design.name}
-                  </h3>
-                </div>
+                {/* Name */}
+                <span style={{
+                  position: 'relative',
+                  zIndex: 1,
+                  fontSize: '22px',
+                  fontWeight: 800,
+                  color: d.light ? '#fff' : d.color,
+                  textAlign: 'center',
+                  padding: '0 16px',
+                }}>
+                  {d.name}
+                </span>
 
-                {/* Category badge */}
-                <div className="absolute top-3 right-3">
-                  <span
-                    className="px-3 py-1 rounded-full text-xs font-semibold"
-                    style={{
-                      background: design.color + '20',
-                      color: design.color,
-                    }}
-                  >
-                    {design.category}
-                  </span>
-                </div>
+                {/* Category pill */}
+                <span style={{
+                  position: 'absolute',
+                  top: '12px',
+                  right: '12px',
+                  padding: '4px 12px',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  borderRadius: '999px',
+                  background: d.light ? 'rgba(255,255,255,0.2)' : (d.color + '15'),
+                  color: d.light ? 'rgba(255,255,255,0.9)' : d.color,
+                }}>
+                  {d.cat}
+                </span>
               </div>
 
-              {/* Content */}
-              <div className="p-5">
-                <p className="text-base text-gray-600 mb-4 leading-relaxed">
-                  {design.description}
+              {/* Text content */}
+              <div style={{ padding: '20px 24px 24px' }}>
+                <p style={{
+                  fontSize: '15px',
+                  lineHeight: 1.6,
+                  color: '#555',
+                  marginBottom: '16px',
+                }}>
+                  {d.desc}
                 </p>
-                <div className="w-full py-3 bg-gray-100 group-hover:bg-accent group-hover:text-white text-gray-700 rounded-xl text-base font-semibold transition-all text-center">
+                <span style={{
+                  display: 'inline-block',
+                  padding: '10px 24px',
+                  fontSize: '14px',
+                  fontWeight: 700,
+                  borderRadius: '10px',
+                  background: '#f5f5f5',
+                  color: '#333',
+                }}>
                   View Demo
-                </div>
+                </span>
               </div>
             </Link>
           ))}
         </div>
 
-        {/* Empty State */}
-        {filteredDesigns.length === 0 && (
-          <div className="text-center py-16">
-            <p className="text-gray-400 text-lg">No design styles found</p>
+        {/* Empty */}
+        {list.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '64px 0' }}>
+            <p style={{ fontSize: '18px', color: '#bbb', marginBottom: '16px' }}>No styles found</p>
             <button
-              onClick={() => { setSearchQuery(''); setActiveCategory('All') }}
-              className="mt-4 text-accent hover:underline"
+              onClick={() => { setQ(''); setCat('All') }}
+              style={{
+                padding: '10px 24px', fontSize: '14px', fontWeight: 600,
+                border: '1px solid #ddd', borderRadius: '8px',
+                background: '#fff', color: '#666', cursor: 'pointer',
+              }}
             >
               Clear filters
             </button>
@@ -167,21 +221,34 @@ export default function DesignsPage() {
         )}
 
         {/* CTA */}
-        <div className="mt-16 text-center bg-gradient-to-r from-accent/10 to-purple-500/10 rounded-2xl p-8 border border-accent/20">
-          <h2 className="text-2xl font-bold text-gray-900 mb-3">
+        <div style={{
+          marginTop: '64px',
+          textAlign: 'center',
+          padding: '48px 32px',
+          background: '#fff',
+          borderRadius: '20px',
+          border: '1px solid #eee',
+        }}>
+          <h2 style={{ fontSize: '28px', fontWeight: 800, color: '#111', marginBottom: '12px' }}>
             Like a style? Let's build it!
           </h2>
-          <p className="text-gray-600 mb-6 max-w-lg mx-auto">
-            Choose any design style and I'll create a custom website for your business. Starting at ₹2,500.
+          <p style={{ fontSize: '16px', color: '#777', marginBottom: '28px', maxWidth: '440px', margin: '0 auto 28px', lineHeight: 1.6 }}>
+            Pick any design and I will create a custom website for your business. Starting at Rs 2,500.
           </p>
           <a
             href="/contact"
-            className="inline-flex items-center gap-2 px-8 py-3 bg-accent text-white rounded-xl font-semibold hover:bg-accent-dark transition-colors"
+            style={{
+              display: 'inline-block',
+              padding: '14px 36px',
+              fontSize: '15px',
+              fontWeight: 700,
+              background: '#111',
+              color: '#fff',
+              borderRadius: '12px',
+              textDecoration: 'none',
+            }}
           >
             Start a Project
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="m9 18 6-6-6-6" />
-            </svg>
           </a>
         </div>
       </div>
