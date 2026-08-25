@@ -105,11 +105,15 @@ export default function DesignsPage() {
             >
               {/* Color Preview */}
               <div
-                className="h-32 relative overflow-hidden"
+                className="h-32 relative overflow-hidden flex items-center justify-center"
                 style={{ backgroundColor: design.color + '20' }}
               >
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-16 h-16 rounded-lg" style={{ background: design.color + '40', border: `2px solid ${design.color}60` }} />
+                <div className="text-center">
+                  <div className="w-16 h-16 mx-auto mb-2 rounded-lg flex items-center justify-center" style={{ background: design.color + '30', border: `2px solid ${design.color}50` }}>
+                    <span className="text-xs font-bold text-center px-1 leading-tight" style={{ color: design.color }}>
+                      {design.name.split(' ').slice(0, 2).join(' ')}
+                    </span>
+                  </div>
                 </div>
                 <div className="absolute top-3 right-3">
                   <span className="px-2 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-medium text-gray-700">
