@@ -3,61 +3,59 @@
 import { useState } from 'react'
 import Link from 'next/link'
 
-export default function Contact() {
+export default function WabiSabiContact() {
   const [sent, setSent] = useState(false)
 
   return (
-    <div style={{ padding: '32px 20px', maxWidth: '900px', margin: '0 auto' }}>
-      <div style={{ background: '#ede8e0', borderRadius: '16px', border: '1px solid #8b735520', padding: '24px', marginBottom: '24px', textAlign: 'center', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
-        <h1 style={{ color: '#4a3f35', fontSize: '32px', fontWeight: 700 }}>Contact</h1>
+    <div style={{ padding: '48px 20px', maxWidth: '800px', margin: '0 auto' }}>
+      <div style={{ marginBottom: '40px' }}>
+        <p style={{ color: '#b8a090', fontSize: '12px', letterSpacing: '4px', marginBottom: '16px' }}>Contact</p>
+        <h1 style={{ color: '#8b7355', fontSize: '48px', fontWeight: 300 }}>Get in touch</h1>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
-        <div style={{ background: '#ede8e0', borderRadius: '16px', border: '1px solid #8b735515', padding: '24px' }}>
-          <h2 style={{ color: '#4a3f35', fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Send Message</h2>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '48px', marginBottom: '48px' }}>
+        <div>
+          <h2 style={{ color: '#8b7355', fontSize: '16px', fontWeight: 400, marginBottom: '20px' }}>Send Message</h2>
           {!sent ? (
             <div>
               {['Your Name', 'Email', 'Subject'].map((label, i) => (
-                <div key={i} style={{ marginBottom: '12px' }}>
-                  <label style={{ display: 'block', color: '#4a3f3588', fontSize: '12px', marginBottom: '4px' }}>{label}</label>
-                  <input style={{ width: '100%', padding: '10px 12px', background: '#f5f0eb', border: '1px solid #8b735520', borderRadius: '8px', color: '#4a3f35', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
+                <div key={i} style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', color: '#b8a090', fontSize: '11px', marginBottom: '6px', fontWeight: 300, letterSpacing: '2px' }}>{label}</label>
+                  <input style={{ width: '100%', padding: '12px 0', background: 'transparent', border: 'none', borderBottom: '1px solid rgba(180,160,140,0.3)', color: '#8b7355', fontSize: '14px', fontWeight: 300, outline: 'none', boxSizing: 'border-box' }} />
                 </div>
               ))}
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'block', color: '#4a3f3588', fontSize: '12px', marginBottom: '4px' }}>Message</label>
-                <textarea rows={3} style={{ width: '100%', padding: '10px 12px', background: '#f5f0eb', border: '1px solid #8b735520', borderRadius: '8px', color: '#4a3f35', fontSize: '14px', outline: 'none', resize: 'vertical', boxSizing: 'border-box' }} />
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', color: '#b8a090', fontSize: '11px', marginBottom: '6px', fontWeight: 300, letterSpacing: '2px' }}>Message</label>
+                <textarea rows={3} style={{ width: '100%', padding: '12px 0', background: 'transparent', border: 'none', borderBottom: '1px solid rgba(180,160,140,0.3)', color: '#8b7355', fontSize: '14px', fontWeight: 300, outline: 'none', resize: 'none', boxSizing: 'border-box' }} />
               </div>
-              <button onClick={() => setSent(true)} style={{ width: '100%', padding: '12px', background: '#8b7355', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Send Message</button>
+              <button onClick={() => setSent(true)} style={{ padding: '14px 40px', background: '#8b7355', color: '#f5f0e8', border: 'none', fontSize: '14px', fontWeight: 400, cursor: 'pointer', marginTop: '8px' }}>Send</button>
             </div>
           ) : (
-            <div style={{ textAlign: 'center', padding: '32px 0' }}>
-              <div style={{ width: '48px', height: '48px', background: '#8b735515', borderRadius: '12px', margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8b7355" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
-              </div>
-              <p style={{ color: '#8b7355', fontSize: '16px', fontWeight: 600 }}>Message Sent!</p>
-              <p style={{ color: '#4a3f3566', fontSize: '13px', marginTop: '6px' }}>We will reply within 24 hours</p>
+            <div style={{ textAlign: 'center', padding: '40px 0' }}>
+              <p style={{ color: '#8b7355', fontSize: '24px', fontWeight: 300, marginBottom: '8px' }}>Sent.</p>
+              <p style={{ color: '#b8a090', fontSize: '13px', fontWeight: 300 }}>We will reply within24 hours</p>
             </div>
           )}
         </div>
 
-        <div style={{ background: '#ede8e0', borderRadius: '16px', border: '1px solid #8b735515', padding: '24px' }}>
-          <h2 style={{ color: '#4a3f35', fontSize: '18px', fontWeight: 600, marginBottom: '20px' }}>Info</h2>
+        <div>
+          <h2 style={{ color: '#8b7355', fontSize: '16px', fontWeight: 400, marginBottom: '24px' }}>Info</h2>
           {[
-            { label: 'EMAIL', value: 'hello@studio.design' },
-            { label: 'PHONE', value: '+91 98765 43210' },
-            { label: 'LOCATION', value: 'India' },
-            { label: 'HOURS', value: 'Mon-Fri 10AM-6PM' },
+            { label: 'Email', value: 'hello@wabisabi.studio' },
+            { label: 'Phone', value: '+91 98765 43210' },
+            { label: 'Location', value: 'India' },
+            { label: 'Hours', value: 'Mon-Fri 10AM-6PM' },
           ].map((item, i) => (
-            <div key={i} style={{ marginBottom: '16px' }}>
-              <p style={{ color: '#4a3f3544', fontSize: '10px', letterSpacing: '2px', marginBottom: '4px' }}>{item.label}</p>
-              <p style={{ color: '#4a3f35', fontSize: '14px', fontWeight: 500 }}>{item.value}</p>
+            <div key={i} style={{ marginBottom: '20px' }}>
+              <p style={{ color: '#b8a090', fontSize: '10px', letterSpacing: '3px', marginBottom: '4px', fontWeight: 300 }}>{item.label}</p>
+              <p style={{ color: '#8b7355', fontSize: '15px', fontWeight: 400 }}>{item.value}</p>
             </div>
           ))}
         </div>
       </div>
 
       <div style={{ textAlign: 'center' }}>
-        <Link href="/wabi-sabi" style={{ padding: '12px 28px', background: '#8b735515', color: '#8b7355', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>Back Home</Link>
+        <Link href="/wabi-sabi" style={{ color: '#b8a090', fontSize: '14px', fontWeight: 300, textDecoration: 'none' }}>Back Home</Link>
       </div>
     </div>
   )

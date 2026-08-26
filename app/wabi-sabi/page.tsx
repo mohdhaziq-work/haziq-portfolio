@@ -3,54 +3,69 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
-export default function Home() {
+export default function WabiSabiHome() {
   const [mounted, setMounted] = useState(false)
+  const [activeElement, setActiveElement] = useState(0)
   useEffect(() => { setMounted(true) }, [])
   if (!mounted) return null
 
+  const elements = [
+    { name: 'Earth', color: '#8b7355' },
+    { name: 'Stone', color: '#6b6b6b' },
+    { name: 'Wood', color: '#a0522d' },
+    { name: 'Clay', color: '#b87333' },
+  ]
+
   return (
-    <div style={{ padding: '32px 20px', maxWidth: '900px', margin: '0 auto' }}>
-      <div style={{ background: '#ede8e0', borderRadius: '16px', border: '1px solid #8b735520', padding: '32px 24px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
-        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-          <p style={{ color: '#8b7355', fontSize: '12px', fontWeight: 600, letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '12px' }}>WABI SABI DESIGN</p>
-          <h1 style={{ color: '#4a3f35', fontSize: '40px', fontWeight: 700, marginBottom: '16px', lineHeight: 1.1 }}>Wabi Sabi</h1>
-          <p style={{ color: '#4a3f3588', fontSize: '15px', maxWidth: '480px', margin: '0 auto', lineHeight: 1.7 }}>A complete wabi sabi design showcase with interactive elements and professional aesthetics.</p>
-        </div>
+    <div style={{ padding: '48px 20px', maxWidth: '800px', margin: '0 auto' }}>
+      <div style={{ marginBottom: '48px', textAlign: 'center' }}>
+        <p style={{ color: '#b8a090', fontSize: '12px', letterSpacing: '4px', marginBottom: '16px' }}>侘寂</p>
+        <h1 style={{ color: '#8b7355', fontSize: '56px', fontWeight: 300, marginBottom: '20px' }}>Wabi Sabi</h1>
+        <p style={{ color: '#b8a090', fontSize: '16px', maxWidth: '400px', margin: '0 auto', lineHeight: 1.8, fontWeight: 300 }}>Finding beauty in imperfection. Embracing the incomplete, the impermanent, and the humble.</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginTop: '24px', marginBottom: '24px' }}>
+      {/* Element Selector */}
+      <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', marginBottom: '48px' }}>
+        {elements.map((e, i) => (
+          <button key={i} onClick={() => setActiveElement(i)} style={{
+            padding: '12px 20px', fontSize: '13px', fontWeight: 300, cursor: 'pointer',
+            background: activeElement === i ? e.color : 'transparent',
+            color: activeElement === i ? '#f5f0e8' : '#b8a090',
+            border: activeElement === i ? 'none' : '1px solid rgba(180,160,140,0.3)',
+            borderRadius: '0',
+          }}>{e.name}</button>
+        ))}
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '48px' }}>
         {[
-          { title: 'Principle One', desc: 'Core design philosophy that drives every decision.' },
-          { title: 'Principle Two', desc: 'Attention to detail for cohesive visual experience.' },
-          { title: 'Principle Three', desc: 'User-first approach ensuring accessibility.' },
+          { title: 'Imperfect', desc: 'Beauty in the flawed and weathered.' },
+          { title: 'Impermanent', desc: 'Embracing change and transience.' },
+          { title: 'Incomplete', desc: 'Finding wholeness in the partial.' },
         ].map((f, i) => (
-          <div key={i} style={{ background: '#ede8e0', borderRadius: '12px', border: '1px solid #8b735515', padding: '20px' }}>
-            <div style={{ width: '32px', height: '32px', background: '#8b735515', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
-              <span style={{ color: '#8b7355', fontSize: '14px', fontWeight: 700 }}>{i + 1}</span>
-            </div>
-            <h3 style={{ color: '#4a3f35', fontSize: '15px', fontWeight: 600, marginBottom: '6px' }}>{f.title}</h3>
-            <p style={{ color: '#4a3f3588', fontSize: '13px', lineHeight: 1.6 }}>{f.desc}</p>
+          <div key={i} style={{ padding: '24px', borderBottom: `1px solid ${elements[activeElement].color}30` }}>
+            <h3 style={{ color: '#8b7355', fontSize: '16px', fontWeight: 400, marginBottom: '8px' }}>{f.title}</h3>
+            <p style={{ color: '#b8a090', fontSize: '13px', lineHeight: 1.6, fontWeight: 300 }}>{f.desc}</p>
           </div>
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '48px' }}>
         {[
           { value: '100+', label: 'Projects' },
-          { value: '100%', label: 'Quality' },
-          { value: '24/7', label: 'Support' },
-          { value: '5.0', label: 'Rating' },
+          { value: '5+', label: 'Years' },
+          { value: '50+', label: 'Clients' },
         ].map((s, i) => (
-          <div key={i} style={{ background: '#ede8e0', borderRadius: '12px', border: '1px solid #8b735515', padding: '16px', textAlign: 'center' }}>
-            <p style={{ color: '#8b7355', fontSize: '22px', fontWeight: 700 }}>{s.value}</p>
-            <p style={{ color: '#4a3f3566', fontSize: '11px', marginTop: '4px' }}>{s.label}</p>
+          <div key={i} style={{ textAlign: 'center' }}>
+            <p style={{ color: elements[activeElement].color, fontSize: '32px', fontWeight: 300 }}>{s.value}</p>
+            <p style={{ color: '#b8a090', fontSize: '10px', letterSpacing: '3px', marginTop: '8px' }}>{s.label}</p>
           </div>
         ))}
       </div>
 
-      <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-        <Link href="/wabi-sabi/gallery" style={{ padding: '12px 28px', background: '#8b7355', color: '#fff', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>View Gallery</Link>
-        <Link href="/wabi-sabi/about" style={{ padding: '12px 28px', background: '#8b735515', color: '#8b7355', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>Learn More</Link>
+      <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
+        <Link href="/wabi-sabi/gallery" style={{ padding: '14px 32px', background: elements[activeElement].color, color: '#f5f0e8', fontSize: '14px', fontWeight: 400, textDecoration: 'none' }}>View Gallery</Link>
+        <Link href="/wabi-sabi/about" style={{ padding: '14px 32px', color: '#b8a090', fontSize: '14px', fontWeight: 300, textDecoration: 'none', border: '1px solid rgba(180,160,140,0.3)' }}>Learn More</Link>
       </div>
     </div>
   )
