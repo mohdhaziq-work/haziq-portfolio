@@ -2,6 +2,14 @@ User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /admin
+Disallow: /*.md$
+Disallow: /EMAIL-SETUP-GUIDE.md
+Disallow: /IMAGE-UPLOADER-SSH-GUIDE.md
+Disallow: /INSTAGRAM-SETUP-GUIDE.md
+Disallow: /INSTAGRAM-VIRAL-STRATEGY.md
+Disallow: /instagram-captions-5photos.md
+Disallow: /instagram-captions-post-reel.md
+Disallow: /README.md
 
 # Explicitly allow AI & search bots
 User-agent: GPTbot

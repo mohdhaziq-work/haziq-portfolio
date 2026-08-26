@@ -13,3 +13,12 @@ npm-debug.log*
 .vercel
 *.tsbuildinfo
 next-env.d.ts
+
+# Sensitive internal files — NOT for public
+EMAIL-SETUP-GUIDE.md
+IMAGE-UPLOADER-SSH-GUIDE.md
+INSTAGRAM-SETUP-GUIDE.md
+INSTAGRAM-VIRAL-STRATEGY.md
+instagram-captions-5photos.md
+instagram-captions-post-reel.md
+README.md
