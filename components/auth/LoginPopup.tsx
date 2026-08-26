@@ -87,7 +87,11 @@ export default function LoginPopup() {
 
         {/* Footer */}
         <p className="text-center text-[11px] text-text-tertiary mt-4 leading-relaxed">
-          By signing in, you agree to our terms. We only use your email to track your project.
+          By signing in, you agree to our{' '}
+          <a href="/terms-of-service" className="text-accent hover:underline">Terms of Service</a>
+          {' '}and{' '}
+          <a href="/privacy-policy" className="text-accent hover:underline">Privacy Policy</a>.
+          We only use your email to track your project.
         </p>
       </div>
 
