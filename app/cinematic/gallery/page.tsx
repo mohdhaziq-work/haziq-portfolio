@@ -3,53 +3,55 @@
 import { useState } from 'react'
 import Link from 'next/link'
 
-export default function Gallery() {
+export default function CinematicGallery() {
   const [active, setActive] = useState('All')
 
   const works = [
-    { title: 'Cinematic Dashboard', cat: 'Web' },
-    { title: 'Cinematic Landing', cat: 'Web' },
-    { title: 'Cinematic Portfolio', cat: 'Web' },
-    { title: 'Cinematic UI Kit', cat: 'UI' },
-    { title: 'Cinematic App', cat: 'App' },
-    { title: 'Cinematic E-Commerce', cat: 'Web' },
-    { title: 'Cinematic Forms', cat: 'UI' },
-    { title: 'Cinematic Blog', cat: 'Web' },
-    { title: 'Cinematic Analytics', cat: 'App' },
+    { title: 'Film Noir', cat: 'Web' },
+    { title: 'Golden Hour', cat: 'Web' },
+    { title: 'Midnight', cat: 'App' },
+    { title: 'Silent Film', cat: 'Web' },
+    { title: 'Technicolor', cat: 'Web' },
+    { title: 'Documentary', cat: 'App' },
+    { title: 'Indie Film', cat: 'UI' },
+    { title: 'Blockbuster', cat: 'UI' },
+    { title: 'Short Film', cat: 'Web' },
   ]
 
-  const cats = ['All', 'Web', 'UI', 'App']
+  const cats = ['All', 'Web', 'App', 'UI']
   const filtered = active === 'All' ? works : works.filter(w => w.cat === active)
 
   return (
-    <div style={{ padding: '32px 20px', maxWidth: '900px', margin: '0 auto' }}>
-      <div style={{ background: '#111', borderRadius: '16px', border: '1px solid #ffd70020', padding: '24px', marginBottom: '24px', textAlign: 'center', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
-        <h1 style={{ color: '#fff', fontSize: '32px', fontWeight: 700 }}>Gallery</h1>
-        <p style={{ color: '#fff66', fontSize: '14px', marginTop: '8px' }}>Our cinematic creations</p>
+    <div style={{ padding: '60px 20px', maxWidth: '800px', margin: '0 auto' }}>
+      <div style={{ marginBottom: '40px', textAlign: 'center' }}>
+        <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '6px', marginBottom: '16px' }}>GALLERY</p>
+        <h1 style={{ color: '#fff', fontSize: '48px', fontWeight: 400, letterSpacing: '8px' }}>Filmography</h1>
       </div>
 
-      <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '24px' }}>
+      <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', marginBottom: '40px' }}>
         {cats.map(c => (
-          <button key={c} onClick={() => setActive(c)} style={{ padding: '8px 20px', borderRadius: '999px', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 600, background: active === c ? '#ffd700' : '#111', color: active === c ? '#fff' : '#fff88', transition: 'all 0.2s' }}>{c}</button>
+          <button key={c} onClick={() => setActive(c)} style={{
+            background: 'none', border: 'none', cursor: 'pointer', fontSize: '11px',
+            color: active === c ? '#fff' : 'rgba(255,255,255,0.3)', fontWeight: active === c ? 500 : 300,
+            letterSpacing: '3px', fontFamily: '"Barlow", sans-serif',
+            borderBottom: active === c ? '1px solid rgba(255,255,255,0.5)' : '1px solid transparent',
+            paddingBottom: '4px',
+          }}>{c}</button>
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '60px' }}>
         {filtered.map((w, i) => (
-          <div key={i} style={{ background: '#111', borderRadius: '12px', border: '1px solid #ffd70015', overflow: 'hidden' }}>
-            <div style={{ height: '100px', background: '#ffd70010', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#ffd70025' }} />
-            </div>
-            <div style={{ padding: '12px' }}>
-              <h3 style={{ color: '#fff', fontSize: '14px', fontWeight: 600, marginBottom: '4px' }}>{w.title}</h3>
-              <p style={{ color: '#fff66', fontSize: '12px' }}>{w.cat}</p>
-            </div>
+          <div key={i}>
+            <div style={{ height: '120px', background: `linear-gradient(135deg, rgba(${i * 20},${i * 15},${i * 25},0.3), rgba(${i * 15},${i * 20},${i * 10},0.2))`, marginBottom: '12px' }} />
+            <h3 style={{ color: '#fff', fontSize: '14px', fontWeight: 400, letterSpacing: '2px', marginBottom: '4px' }}>{w.title}</h3>
+            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', fontFamily: '"Barlow", sans-serif', fontWeight: 300 }}>{w.cat}</p>
           </div>
         ))}
       </div>
 
       <div style={{ textAlign: 'center' }}>
-        <Link href="/cinematic" style={{ padding: '12px 28px', background: '#ffd70015', color: '#ffd700', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>Back Home</Link>
+        <Link href="/cinematic" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', fontWeight: 300, textDecoration: 'none', letterSpacing: '4px', fontFamily: '"Barlow", sans-serif' }}>Back Home</Link>
       </div>
     </div>
   )

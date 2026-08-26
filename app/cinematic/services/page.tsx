@@ -3,42 +3,49 @@
 import { useState } from 'react'
 import Link from 'next/link'
 
-export default function Services() {
+export default function CinematicServices() {
   const [selected, setSelected] = useState<number | null>(null)
 
   const services = [
-    { title: 'Cinematic Websites', price: 'Rs 5,000', desc: 'Full cinematic themed websites.', features: ['Custom design', 'Responsive', 'Animations', 'SEO'] },
-    { title: 'Cinematic UI Kits', price: 'Rs 3,000', desc: 'Component libraries with cinematic aesthetics.', features: ['50+ components', 'Figma', 'Dark mode', 'Docs'] },
-    { title: 'Cinematic Branding', price: 'Rs 2,500', desc: 'Brand identities with cinematic design.', features: ['Logo', 'Colors', 'Guide', 'Assets'] },
+    { title: 'Cinematic Websites', price: 'Rs 5,000', desc: 'Websites with film-like storytelling and drama.', features: ['Cinematic scroll', 'Dramatic lighting', 'Responsive', 'Story-driven'] },
+    { title: 'Cinematic Video', price: 'Rs 8,000', desc: 'Video content with cinematic quality.', features: ['4K quality', 'Color grading', 'Sound design', 'Editing'] },
+    { title: 'Cinematic Branding', price: 'Rs 3,000', desc: 'Brand identities with cinematic flair.', features: ['Logo', 'Colors', 'Guide', 'Assets'] },
   ]
 
   return (
-    <div style={{ padding: '32px 20px', maxWidth: '900px', margin: '0 auto' }}>
-      <div style={{ background: '#111', borderRadius: '16px', border: '1px solid #ffd70020', padding: '24px', marginBottom: '24px', textAlign: 'center', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
-        <h1 style={{ color: '#fff', fontSize: '32px', fontWeight: 700 }}>Services</h1>
+    <div style={{ padding: '60px 20px', maxWidth: '800px', margin: '0 auto' }}>
+      <div style={{ marginBottom: '40px', textAlign: 'center' }}>
+        <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '6px', marginBottom: '16px' }}>SERVICES</p>
+        <h1 style={{ color: '#fff', fontSize: '48px', fontWeight: 400, letterSpacing: '8px' }}>Production</h1>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '60px' }}>
         {services.map((s, i) => (
-          <div key={i} onClick={() => setSelected(i)} style={{ background: selected === i ? '#ffd70010' : '#111', borderRadius: '16px', border: '1px solid ' + (selected === i ? '#ffd700' : '#ffd70015'), padding: '24px', cursor: 'pointer', display: 'flex', flexDirection: 'column', transition: 'all 0.2s' }}>
-            <h3 style={{ color: '#fff', fontSize: '16px', fontWeight: 600, marginBottom: '8px' }}>{s.title}</h3>
-            <p style={{ color: '#ffd700', fontSize: '28px', fontWeight: 700, marginBottom: '12px' }}>{s.price}</p>
-            <p style={{ color: '#fff88', fontSize: '13px', lineHeight: 1.6, marginBottom: '12px', flex: 1 }}>{s.desc}</p>
-            <div style={{ marginBottom: '12px' }}>
+          <div key={i} onClick={() => setSelected(i)} style={{
+            padding: '24px', cursor: 'pointer', transition: 'all 0.3s',
+            border: selected === i ? '1px solid rgba(255,255,255,0.3)' : '1px solid rgba(255,255,255,0.1)',
+            background: selected === i ? 'rgba(255,255,255,0.05)' : 'transparent',
+          }}>
+            <h3 style={{ color: '#fff', fontSize: '16px', fontWeight: 400, letterSpacing: '3px', marginBottom: '8px' }}>{s.title}</h3>
+            <p style={{ color: '#fff', fontSize: '32px', fontWeight: 400, letterSpacing: '4px', marginBottom: '12px' }}>{s.price}</p>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', fontFamily: '"Barlow", sans-serif', fontWeight: 300, lineHeight: 1.6, marginBottom: '12px' }}>{s.desc}</p>
+            <div style={{ marginBottom: '16px' }}>
               {s.features.map((f, j) => (
-                <div key={j} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                  <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#ffd700' }} />
-                  <span style={{ color: '#fff88', fontSize: '12px' }}>{f}</span>
-                </div>
+                <p key={j} style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', fontFamily: '"Barlow", sans-serif', fontWeight: 300, marginBottom: '4px' }}>{f}</p>
               ))}
             </div>
-            <Link href="/cinematic/contact" style={{ display: 'block', textAlign: 'center', padding: '10px', background: '#ffd700', color: '#fff', borderRadius: '8px', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}>Get Started</Link>
+            <Link href="/cinematic/contact" style={{
+              display: 'block', textAlign: 'center', padding: '12px',
+              background: 'rgba(255,255,255,0.1)', color: '#fff',
+              fontSize: '11px', fontWeight: 400, textDecoration: 'none', letterSpacing: '3px',
+              border: '1px solid rgba(255,255,255,0.2)', fontFamily: '"Barlow", sans-serif',
+            }}>Get Started</Link>
           </div>
         ))}
       </div>
 
       <div style={{ textAlign: 'center' }}>
-        <Link href="/cinematic" style={{ padding: '12px 28px', background: '#ffd70015', color: '#ffd700', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>Back Home</Link>
+        <Link href="/cinematic" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', fontWeight: 300, textDecoration: 'none', letterSpacing: '4px', fontFamily: '"Barlow", sans-serif' }}>Back Home</Link>
       </div>
     </div>
   )

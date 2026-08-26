@@ -3,54 +3,76 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
-export default function Home() {
+export default function CinematicHome() {
   const [mounted, setMounted] = useState(false)
+  const [activeScene, setActiveScene] = useState(0)
   useEffect(() => { setMounted(true) }, [])
   if (!mounted) return null
 
+  const scenes = [
+    { name: 'Dawn', color: '#ff6b35' },
+    { name: 'Dusk', color: '#8b5cf6' },
+    { name: 'Night', color: '#0ea5e9' },
+  ]
+
   return (
-    <div style={{ padding: '32px 20px', maxWidth: '900px', margin: '0 auto' }}>
-      <div style={{ background: '#111', borderRadius: '16px', border: '1px solid #ffd70020', padding: '32px 24px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
-        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-          <p style={{ color: '#ffd700', fontSize: '12px', fontWeight: 600, letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '12px' }}>CINEMATIC DESIGN</p>
-          <h1 style={{ color: '#fff', fontSize: '40px', fontWeight: 700, marginBottom: '16px', lineHeight: 1.1 }}>Cinematic</h1>
-          <p style={{ color: '#fff88', fontSize: '15px', maxWidth: '480px', margin: '0 auto', lineHeight: 1.7 }}>A complete cinematic design showcase with interactive elements and professional aesthetics.</p>
+    <div>
+      {/* Cinematic Hero */}
+      <div style={{ height: 'calc(100vh - 120px)', background: `linear-gradient(135deg, #0a0a0a, ${scenes[activeScene].color}20, #0a0a0a)`, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+        <div style={{ position: 'absolute', top: '20%', left: '10%', width: '200px', height: '1px', background: `linear-gradient(90deg, transparent, ${scenes[activeScene].color}40, transparent)` }} />
+        <div style={{ position: 'absolute', bottom: '30%', right: '10%', width: '150px', height: '1px', background: `linear-gradient(90deg, transparent, ${scenes[activeScene].color}30, transparent)` }} />
+        <div style={{ textAlign: 'center', padding: '20px' }}>
+          <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '6px', marginBottom: '16px' }}>A FILM BY</p>
+          <h1 style={{ color: '#fff', fontSize: '72px', fontWeight: 400, letterSpacing: '12px', marginBottom: '16px' }}>CINEMATIC</h1>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '14px', fontFamily: '"Barlow", sans-serif', fontWeight: 300, letterSpacing: '2px' }}>Design that tells a story</p>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginTop: '24px', marginBottom: '24px' }}>
-        {[
-          { title: 'Principle One', desc: 'Core design philosophy that drives every decision.' },
-          { title: 'Principle Two', desc: 'Attention to detail for cohesive visual experience.' },
-          { title: 'Principle Three', desc: 'User-first approach ensuring accessibility.' },
-        ].map((f, i) => (
-          <div key={i} style={{ background: '#111', borderRadius: '12px', border: '1px solid #ffd70015', padding: '20px' }}>
-            <div style={{ width: '32px', height: '32px', background: '#ffd70015', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
-              <span style={{ color: '#ffd700', fontSize: '14px', fontWeight: 700 }}>{i + 1}</span>
+      {/* Scene Selector */}
+      <div style={{ display: 'flex', gap: '0', marginBottom: '0' }}>
+        {scenes.map((s, i) => (
+          <button key={i} onClick={() => setActiveScene(i)} style={{
+            flex: 1, padding: '16px', fontSize: '11px', fontWeight: 400, cursor: 'pointer', letterSpacing: '4px',
+            background: activeScene === i ? s.color : 'transparent',
+            color: activeScene === i ? '#fff' : 'rgba(255,255,255,0.3)',
+            border: 'none', fontFamily: '"Barlow", sans-serif',
+          }}>{s.name}</button>
+        ))}
+      </div>
+
+      {/* Features */}
+      <div style={{ padding: '60px 20px', maxWidth: '800px', margin: '0 auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '32px', marginBottom: '60px' }}>
+          {[
+            { title: 'Drama', desc: 'High contrast and bold compositions.' },
+            { title: 'Story', desc: 'Every scroll reveals a new chapter.' },
+            { title: 'Mood', desc: 'Lighting that sets the atmosphere.' },
+          ].map((f, i) => (
+            <div key={i} style={{ textAlign: 'center' }}>
+              <div style={{ width: '48px', height: '1px', background: scenes[activeScene].color, margin: '0 auto 16px' }} />
+              <h3 style={{ color: '#fff', fontSize: '18px', fontWeight: 400, letterSpacing: '4px', marginBottom: '8px' }}>{f.title}</h3>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', fontFamily: '"Barlow", sans-serif', fontWeight: 300, lineHeight: 1.6 }}>{f.desc}</p>
             </div>
-            <h3 style={{ color: '#fff', fontSize: '15px', fontWeight: 600, marginBottom: '6px' }}>{f.title}</h3>
-            <p style={{ color: '#fff88', fontSize: '13px', lineHeight: 1.6 }}>{f.desc}</p>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '24px' }}>
-        {[
-          { value: '100+', label: 'Projects' },
-          { value: '100%', label: 'Quality' },
-          { value: '24/7', label: 'Support' },
-          { value: '5.0', label: 'Rating' },
-        ].map((s, i) => (
-          <div key={i} style={{ background: '#111', borderRadius: '12px', border: '1px solid #ffd70015', padding: '16px', textAlign: 'center' }}>
-            <p style={{ color: '#ffd700', fontSize: '22px', fontWeight: 700 }}>{s.value}</p>
-            <p style={{ color: '#fff66', fontSize: '11px', marginTop: '4px' }}>{s.label}</p>
-          </div>
-        ))}
-      </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '32px', marginBottom: '60px' }}>
+          {[
+            { value: '100+', label: 'Projects' },
+            { value: '5+', label: 'Years' },
+            { value: '50+', label: 'Clients' },
+          ].map((s, i) => (
+            <div key={i} style={{ textAlign: 'center' }}>
+              <p style={{ color: '#fff', fontSize: '36px', fontWeight: 400, letterSpacing: '4px' }}>{s.value}</p>
+              <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '10px', letterSpacing: '4px', marginTop: '8px' }}>{s.label}</p>
+            </div>
+          ))}
+        </div>
 
-      <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-        <Link href="/cinematic/gallery" style={{ padding: '12px 28px', background: '#ffd700', color: '#fff', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>View Gallery</Link>
-        <Link href="/cinematic/about" style={{ padding: '12px 28px', background: '#ffd70015', color: '#ffd700', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>Learn More</Link>
+        <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
+          <Link href="/cinematic/gallery" style={{ padding: '14px 32px', background: scenes[activeScene].color, color: '#fff', fontSize: '12px', fontWeight: 400, textDecoration: 'none', letterSpacing: '4px', fontFamily: '"Barlow", sans-serif' }}>View Gallery</Link>
+          <Link href="/cinematic/about" style={{ padding: '14px 32px', color: 'rgba(255,255,255,0.5)', fontSize: '12px', fontWeight: 300, textDecoration: 'none', border: '1px solid rgba(255,255,255,0.2)', letterSpacing: '4px', fontFamily: '"Barlow", sans-serif' }}>Learn More</Link>
+        </div>
       </div>
     </div>
   )
