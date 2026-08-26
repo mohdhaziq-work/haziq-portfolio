@@ -1,13 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 
 export default function CyberpunkGallery() {
-  const [mounted, setMounted] = useState(false)
   const [active, setActive] = useState('All')
-  useEffect(() => { setMounted(true) }, [])
-  if (!mounted) return null
   const neon = '#ff00ff'
 
   const works = [
@@ -28,12 +25,18 @@ export default function CyberpunkGallery() {
   return (
     <div style={{ padding: '24px 16px', maxWidth: '900px', margin: '0 auto' }}>
       <div style={{ background: '#0a0a0a', border: `1px solid ${neon}30`, padding: '24px', marginBottom: '24px', textAlign: 'center' }}>
-        <h1 style={{ color: neon, fontSize: '32px', fontWeight: 900, letterSpacing: '4px', textShadow: `0 0 20px ${neon}60` }}>GALLERY</h1>
+        <h1 style={{ color: neon, fontSize: '36px', fontWeight: 900, letterSpacing: '5px', textShadow: `0 0 20px ${neon}60` }}>GALLERY</h1>
+        <p style={{ color: '#4a6a7a', fontSize: '10px', letterSpacing: '2px', marginTop: '8px' }}>OUR CYBER CREATIONS</p>
       </div>
 
       <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '24px' }}>
         {cats.map(c => (
-          <button key={c} onClick={() => setActive(c)} style={{ padding: '8px 16px', fontSize: '9px', fontWeight: 700, letterSpacing: '2px', cursor: 'pointer', background: active === c ? `${neon}20` : 'transparent', color: active === c ? neon : '#4a6a7a', border: `1px solid ${active === c ? neon + '60' : '#222'}` }}>{c}</button>
+          <button key={c} onClick={() => setActive(c)} style={{
+            padding: '8px 18px', fontSize: '9px', fontWeight: 700, letterSpacing: '2px', cursor: 'pointer',
+            background: active === c ? `${neon}20` : 'transparent',
+            color: active === c ? neon : '#4a6a7a',
+            border: `1px solid ${active === c ? neon + '60' : '#222'}`,
+          }}>{c}</button>
         ))}
       </div>
 
@@ -41,11 +44,11 @@ export default function CyberpunkGallery() {
         {filtered.map((w, i) => (
           <div key={i} style={{ background: '#0a0a0a', border: `1px solid ${w.color}30`, overflow: 'hidden' }}>
             <div style={{ height: '100px', background: `${w.color}10`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ width: '32px', height: '32px', border: `2px solid ${w.color}60` }} />
+              <div style={{ width: '28px', height: '28px', border: `2px solid ${w.color}60`, transform: 'rotate(45deg)' }} />
             </div>
-            <div style={{ padding: '12px' }}>
-              <h3 style={{ color: w.color, fontSize: '10px', fontWeight: 700, marginBottom: '4px' }}>{w.title}</h3>
-              <p style={{ color: '#4a6a7a', fontSize: '8px', letterSpacing: '1px' }}>{w.cat}</p>
+            <div style={{ padding: '14px' }}>
+              <h3 style={{ color: w.color, fontSize: '11px', fontWeight: 700, letterSpacing: '1px', marginBottom: '4px' }}>{w.title}</h3>
+              <p style={{ color: '#4a6a7a', fontSize: '8px', letterSpacing: '2px' }}>{w.cat}</p>
             </div>
           </div>
         ))}
