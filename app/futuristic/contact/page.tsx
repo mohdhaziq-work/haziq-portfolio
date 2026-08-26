@@ -3,61 +3,58 @@
 import { useState } from 'react'
 import Link from 'next/link'
 
-export default function Contact() {
+export default function FuturisticContact() {
   const [sent, setSent] = useState(false)
 
   return (
-    <div style={{ padding: '32px 20px', maxWidth: '900px', margin: '0 auto' }}>
-      <div style={{ background: 'rgba(5,5,16,0.9)', borderRadius: '16px', border: '1px solid #00d4ff20', padding: '24px', marginBottom: '24px', textAlign: 'center', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
-        <h1 style={{ color: '#eee', fontSize: '32px', fontWeight: 700 }}>Contact</h1>
+    <div style={{ padding: '24px 20px', maxWidth: '900px', margin: '0 auto' }}>
+      <div style={{ background: 'rgba(0,240,255,0.05)', border: '1px solid rgba(0,240,255,0.2)', padding: '24px', marginBottom: '24px', textAlign: 'center', clipPath: 'polygon(0% 3%, 100% 0%, 100% 97%, 0% 100%)' }}>
+        <h1 style={{ color: '#00f0ff', fontSize: '36px', fontWeight: 900, letterSpacing: '4px' }}>CONTACT</h1>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
-        <div style={{ background: 'rgba(5,5,16,0.9)', borderRadius: '16px', border: '1px solid #00d4ff15', padding: '24px' }}>
-          <h2 style={{ color: '#eee', fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Send Message</h2>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
+        <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', padding: '22px', clipPath: 'polygon(0% 3%, 100% 0%, 100% 97%, 0% 100%)' }}>
+          <h2 style={{ color: '#00f0ff', fontSize: '14px', fontWeight: 700, marginBottom: '16px', letterSpacing: '2px' }}>TRANSMIT</h2>
           {!sent ? (
             <div>
               {['Your Name', 'Email', 'Subject'].map((label, i) => (
                 <div key={i} style={{ marginBottom: '12px' }}>
-                  <label style={{ display: 'block', color: '#eee88', fontSize: '12px', marginBottom: '4px' }}>{label}</label>
-                  <input style={{ width: '100%', padding: '10px 12px', background: '#050510', border: '1px solid #00d4ff20', borderRadius: '8px', color: '#eee', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
+                  <label style={{ display: 'block', color: 'rgba(0,240,255,0.5)', fontSize: '9px', marginBottom: '4px', fontWeight: 600, letterSpacing: '2px' }}>{label}</label>
+                  <input style={{ width: '100%', padding: '10px 12px', background: 'rgba(0,240,255,0.05)', border: '1px solid rgba(0,240,255,0.2)', color: '#fff', fontSize: '12px', outline: 'none', boxSizing: 'border-box', fontFamily: '"Orbitron", sans-serif' }} />
                 </div>
               ))}
               <div style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'block', color: '#eee88', fontSize: '12px', marginBottom: '4px' }}>Message</label>
-                <textarea rows={3} style={{ width: '100%', padding: '10px 12px', background: '#050510', border: '1px solid #00d4ff20', borderRadius: '8px', color: '#eee', fontSize: '14px', outline: 'none', resize: 'vertical', boxSizing: 'border-box' }} />
+                <label style={{ display: 'block', color: 'rgba(0,240,255,0.5)', fontSize: '9px', marginBottom: '4px', fontWeight: 600, letterSpacing: '2px' }}>Message</label>
+                <textarea rows={3} style={{ width: '100%', padding: '10px 12px', background: 'rgba(0,240,255,0.05)', border: '1px solid rgba(0,240,255,0.2)', color: '#fff', fontSize: '12px', outline: 'none', resize: 'vertical', boxSizing: 'border-box', fontFamily: '"Orbitron", sans-serif' }} />
               </div>
-              <button onClick={() => setSent(true)} style={{ width: '100%', padding: '12px', background: '#00d4ff', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Send Message</button>
+              <button onClick={() => setSent(true)} style={{ width: '100%', padding: '12px', background: 'rgba(0,240,255,0.1)', color: '#00f0ff', border: '1px solid #00f0ff', fontSize: '10px', fontWeight: 700, cursor: 'pointer', letterSpacing: '3px', clipPath: 'polygon(5% 0%, 100% 0%, 95% 100%, 0% 100%)' }}>TRANSMIT</button>
             </div>
           ) : (
-            <div style={{ textAlign: 'center', padding: '32px 0' }}>
-              <div style={{ width: '48px', height: '48px', background: '#00d4ff15', borderRadius: '12px', margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00d4ff" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
-              </div>
-              <p style={{ color: '#00d4ff', fontSize: '16px', fontWeight: 600 }}>Message Sent!</p>
-              <p style={{ color: '#eee66', fontSize: '13px', marginTop: '6px' }}>We will reply within 24 hours</p>
+            <div style={{ textAlign: 'center', padding: '36px 0' }}>
+              <p style={{ color: '#00f0ff', fontSize: '14px', fontWeight: 700, letterSpacing: '2px', marginBottom: '8px' }}>TRANSMITTED</p>
+              <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px' }}>We will reply within24 hours</p>
             </div>
           )}
         </div>
 
-        <div style={{ background: 'rgba(5,5,16,0.9)', borderRadius: '16px', border: '1px solid #00d4ff15', padding: '24px' }}>
-          <h2 style={{ color: '#eee', fontSize: '18px', fontWeight: 600, marginBottom: '20px' }}>Info</h2>
+        <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', padding: '22px', clipPath: 'polygon(0% 3%, 100% 0%, 100% 97%, 0% 100%)' }}>
+          <h2 style={{ color: '#00f0ff', fontSize: '14px', fontWeight: 700, marginBottom: '20px', letterSpacing: '2px' }}>DATA</h2>
           {[
-            { label: 'EMAIL', value: 'hello@studio.design' },
+            { label: 'EMAIL', value: 'hello@future.studio' },
             { label: 'PHONE', value: '+91 98765 43210' },
             { label: 'LOCATION', value: 'India' },
             { label: 'HOURS', value: 'Mon-Fri 10AM-6PM' },
           ].map((item, i) => (
             <div key={i} style={{ marginBottom: '16px' }}>
-              <p style={{ color: '#eee44', fontSize: '10px', letterSpacing: '2px', marginBottom: '4px' }}>{item.label}</p>
-              <p style={{ color: '#eee', fontSize: '14px', fontWeight: 500 }}>{item.value}</p>
+              <p style={{ color: 'rgba(0,240,255,0.4)', fontSize: '8px', letterSpacing: '3px', marginBottom: '4px' }}>{item.label}</p>
+              <p style={{ color: '#fff', fontSize: '13px', fontWeight: 500 }}>{item.value}</p>
             </div>
           ))}
         </div>
       </div>
 
       <div style={{ textAlign: 'center' }}>
-        <Link href="/futuristic" style={{ padding: '12px 28px', background: '#00d4ff15', color: '#00d4ff', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>Back Home</Link>
+        <Link href="/futuristic" style={{ padding: '12px 28px', color: 'rgba(255,255,255,0.4)', fontSize: '11px', fontWeight: 500, textDecoration: 'none', border: '1px solid rgba(255,255,255,0.2)', letterSpacing: '2px', clipPath: 'polygon(5% 0%, 100% 0%, 95% 100%, 0% 100%)' }}>Back Home</Link>
       </div>
     </div>
   )
