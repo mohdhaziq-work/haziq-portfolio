@@ -3,61 +3,59 @@
 import { useState } from 'react'
 import Link from 'next/link'
 
-export default function Contact() {
+export default function GeometricContact() {
   const [sent, setSent] = useState(false)
 
   return (
-    <div style={{ padding: '32px 20px', maxWidth: '900px', margin: '0 auto' }}>
-      <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #ff634820', padding: '24px', marginBottom: '24px', textAlign: 'center', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
-        <h1 style={{ color: '#2d3436', fontSize: '32px', fontWeight: 700 }}>Contact</h1>
+    <div style={{ padding: '24px 20px', maxWidth: '900px', margin: '0 auto' }}>
+      <div style={{ background: '#000', padding: '24px', marginBottom: '24px', textAlign: 'center' }}>
+        <h1 style={{ color: '#fff', fontSize: '40px', fontWeight: 900, letterSpacing: '4px' }}>CONTACT</h1>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
-        <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #ff634815', padding: '24px' }}>
-          <h2 style={{ color: '#2d3436', fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Send Message</h2>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
+        <div style={{ background: '#fff', border: '3px solid #000', padding: '22px' }}>
+          <h2 style={{ color: '#000', fontSize: '16px', fontWeight: 800, marginBottom: '16px', letterSpacing: '2px' }}>Send Message</h2>
           {!sent ? (
             <div>
               {['Your Name', 'Email', 'Subject'].map((label, i) => (
                 <div key={i} style={{ marginBottom: '12px' }}>
-                  <label style={{ display: 'block', color: '#2d343688', fontSize: '12px', marginBottom: '4px' }}>{label}</label>
-                  <input style={{ width: '100%', padding: '10px 12px', background: '#f8f9fa', border: '1px solid #ff634820', borderRadius: '8px', color: '#2d3436', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
+                  <label style={{ display: 'block', color: '#999', fontSize: '10px', marginBottom: '4px', fontWeight: 700, letterSpacing: '1px' }}>{label}</label>
+                  <input style={{ width: '100%', padding: '10px 12px', background: '#f8f8f8', border: '2px solid #000', color: '#000', fontSize: '12px', outline: 'none', boxSizing: 'border-box', fontFamily: '"Montserrat", sans-serif' }} />
                 </div>
               ))}
               <div style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'block', color: '#2d343688', fontSize: '12px', marginBottom: '4px' }}>Message</label>
-                <textarea rows={3} style={{ width: '100%', padding: '10px 12px', background: '#f8f9fa', border: '1px solid #ff634820', borderRadius: '8px', color: '#2d3436', fontSize: '14px', outline: 'none', resize: 'vertical', boxSizing: 'border-box' }} />
+                <label style={{ display: 'block', color: '#999', fontSize: '10px', marginBottom: '4px', fontWeight: 700, letterSpacing: '1px' }}>Message</label>
+                <textarea rows={3} style={{ width: '100%', padding: '10px 12px', background: '#f8f8f8', border: '2px solid #000', color: '#000', fontSize: '12px', outline: 'none', resize: 'vertical', boxSizing: 'border-box', fontFamily: '"Montserrat", sans-serif' }} />
               </div>
-              <button onClick={() => setSent(true)} style={{ width: '100%', padding: '12px', background: '#ff6348', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Send Message</button>
+              <button onClick={() => setSent(true)} style={{ width: '100%', padding: '12px', background: '#000', color: '#fff', border: 'none', fontSize: '11px', fontWeight: 800, cursor: 'pointer', letterSpacing: '2px' }}>Send</button>
             </div>
           ) : (
-            <div style={{ textAlign: 'center', padding: '32px 0' }}>
-              <div style={{ width: '48px', height: '48px', background: '#ff634815', borderRadius: '12px', margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff6348" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
-              </div>
-              <p style={{ color: '#ff6348', fontSize: '16px', fontWeight: 600 }}>Message Sent!</p>
-              <p style={{ color: '#2d343666', fontSize: '13px', marginTop: '6px' }}>We will reply within 24 hours</p>
+            <div style={{ textAlign: 'center', padding: '36px 0' }}>
+              <div style={{ width: '48px', height: '48px', background: '#000', margin: '0 auto 14px', clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }} />
+              <p style={{ color: '#000', fontSize: '16px', fontWeight: 800, letterSpacing: '2px' }}>Sent.</p>
+              <p style={{ color: '#999', fontSize: '11px', marginTop: '6px' }}>We will reply within24 hours</p>
             </div>
           )}
         </div>
 
-        <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #ff634815', padding: '24px' }}>
-          <h2 style={{ color: '#2d3436', fontSize: '18px', fontWeight: 600, marginBottom: '20px' }}>Info</h2>
+        <div style={{ background: '#000', border: '3px solid #000', padding: '22px' }}>
+          <h2 style={{ color: '#fff', fontSize: '16px', fontWeight: 800, marginBottom: '20px', letterSpacing: '2px' }}>Info</h2>
           {[
-            { label: 'EMAIL', value: 'hello@studio.design' },
+            { label: 'EMAIL', value: 'hello@geometric.studio' },
             { label: 'PHONE', value: '+91 98765 43210' },
             { label: 'LOCATION', value: 'India' },
             { label: 'HOURS', value: 'Mon-Fri 10AM-6PM' },
           ].map((item, i) => (
             <div key={i} style={{ marginBottom: '16px' }}>
-              <p style={{ color: '#2d343644', fontSize: '10px', letterSpacing: '2px', marginBottom: '4px' }}>{item.label}</p>
-              <p style={{ color: '#2d3436', fontSize: '14px', fontWeight: 500 }}>{item.value}</p>
+              <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '8px', letterSpacing: '3px', marginBottom: '4px' }}>{item.label}</p>
+              <p style={{ color: '#fff', fontSize: '13px', fontWeight: 500 }}>{item.value}</p>
             </div>
           ))}
         </div>
       </div>
 
       <div style={{ textAlign: 'center' }}>
-        <Link href="/geometric" style={{ padding: '12px 28px', background: '#ff634815', color: '#ff6348', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>Back Home</Link>
+        <Link href="/geometric" style={{ padding: '12px 28px', color: '#000', fontSize: '12px', fontWeight: 600, textDecoration: 'none', border: '3px solid #000', letterSpacing: '2px' }}>Back Home</Link>
       </div>
     </div>
   )

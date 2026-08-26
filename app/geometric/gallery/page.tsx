@@ -3,53 +3,57 @@
 import { useState } from 'react'
 import Link from 'next/link'
 
-export default function Gallery() {
+export default function GeometricGallery() {
   const [active, setActive] = useState('All')
 
   const works = [
-    { title: 'Geometric Dashboard', cat: 'Web' },
-    { title: 'Geometric Landing', cat: 'Web' },
-    { title: 'Geometric Portfolio', cat: 'Web' },
-    { title: 'Geometric UI Kit', cat: 'UI' },
-    { title: 'Geometric App', cat: 'App' },
-    { title: 'Geometric E-Commerce', cat: 'Web' },
-    { title: 'Geometric Forms', cat: 'UI' },
-    { title: 'Geometric Blog', cat: 'Web' },
-    { title: 'Geometric Analytics', cat: 'App' },
+    { title: 'Triangle Grid', cat: 'Web' },
+    { title: 'Hex Pattern', cat: 'Web' },
+    { title: 'Diamond App', cat: 'App' },
+    { title: 'Geo Portfolio', cat: 'Web' },
+    { title: 'Shape Shop', cat: 'Web' },
+    { title: 'Grid Admin', cat: 'App' },
+    { title: 'Geo Forms', cat: 'UI' },
+    { title: 'Pattern Cards', cat: 'UI' },
+    { title: 'Geo Dashboard', cat: 'Web' },
   ]
 
-  const cats = ['All', 'Web', 'UI', 'App']
+  const cats = ['All', 'Web', 'App', 'UI']
   const filtered = active === 'All' ? works : works.filter(w => w.cat === active)
 
   return (
-    <div style={{ padding: '32px 20px', maxWidth: '900px', margin: '0 auto' }}>
-      <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #ff634820', padding: '24px', marginBottom: '24px', textAlign: 'center', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
-        <h1 style={{ color: '#2d3436', fontSize: '32px', fontWeight: 700 }}>Gallery</h1>
-        <p style={{ color: '#2d343666', fontSize: '14px', marginTop: '8px' }}>Our geometric creations</p>
+    <div style={{ padding: '24px 20px', maxWidth: '900px', margin: '0 auto' }}>
+      <div style={{ background: '#000', padding: '24px', marginBottom: '24px', textAlign: 'center' }}>
+        <h1 style={{ color: '#fff', fontSize: '40px', fontWeight: 900, letterSpacing: '4px' }}>GALLERY</h1>
       </div>
 
       <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '24px' }}>
         {cats.map(c => (
-          <button key={c} onClick={() => setActive(c)} style={{ padding: '8px 20px', borderRadius: '999px', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 600, background: active === c ? '#ff6348' : '#fff', color: active === c ? '#fff' : '#2d343688', transition: 'all 0.2s' }}>{c}</button>
+          <button key={c} onClick={() => setActive(c)} style={{
+            padding: '10px 18px', fontSize: '11px', fontWeight: 800, cursor: 'pointer', letterSpacing: '1px',
+            background: active === c ? '#000' : '#fff',
+            color: active === c ? '#fff' : '#000',
+            border: active === c ? 'none' : '3px solid #000',
+          }}>{c}</button>
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '24px' }}>
         {filtered.map((w, i) => (
-          <div key={i} style={{ background: '#fff', borderRadius: '12px', border: '1px solid #ff634815', overflow: 'hidden' }}>
-            <div style={{ height: '100px', background: '#ff634810', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#ff634825' }} />
+          <div key={i} style={{ background: '#fff', border: '3px solid #000', overflow: 'hidden' }}>
+            <div style={{ height: '80px', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: '32px', height: '32px', background: '#fff', clipPath: ['polygon(50% 0%, 0% 100%, 100% 100%)', 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)', 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)'][i % 3] }} />
             </div>
-            <div style={{ padding: '12px' }}>
-              <h3 style={{ color: '#2d3436', fontSize: '14px', fontWeight: 600, marginBottom: '4px' }}>{w.title}</h3>
-              <p style={{ color: '#2d343666', fontSize: '12px' }}>{w.cat}</p>
+            <div style={{ padding: '14px' }}>
+              <h3 style={{ color: '#000', fontSize: '13px', fontWeight: 800, marginBottom: '4px', letterSpacing: '1px' }}>{w.title}</h3>
+              <p style={{ color: '#999', fontSize: '10px' }}>{w.cat}</p>
             </div>
           </div>
         ))}
       </div>
 
       <div style={{ textAlign: 'center' }}>
-        <Link href="/geometric" style={{ padding: '12px 28px', background: '#ff634815', color: '#ff6348', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>Back Home</Link>
+        <Link href="/geometric" style={{ padding: '12px 28px', color: '#000', fontSize: '12px', fontWeight: 600, textDecoration: 'none', border: '3px solid #000', letterSpacing: '2px' }}>Back Home</Link>
       </div>
     </div>
   )
