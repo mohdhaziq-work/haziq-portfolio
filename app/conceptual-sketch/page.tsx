@@ -3,54 +3,70 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
-export default function Home() {
+export default function ConceptualSketchHome() {
   const [mounted, setMounted] = useState(false)
+  const [activeTool, setActiveTool] = useState(0)
   useEffect(() => { setMounted(true) }, [])
   if (!mounted) return null
 
+  const tools = [
+    { name: 'Pencil', stroke: '#333' },
+    { name: 'Marker', stroke: '#000' },
+    { name: 'Highlighter', stroke: '#fbbf24' },
+    { name: 'Red Pen', stroke: '#dc2626' },
+  ]
+
   return (
-    <div style={{ padding: '32px 20px', maxWidth: '900px', margin: '0 auto' }}>
-      <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #66620', padding: '32px 24px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
-        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-          <p style={{ color: '#666', fontSize: '12px', fontWeight: 600, letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '12px' }}>CONCEPTUAL SKETCH DESIGN</p>
-          <h1 style={{ color: '#333', fontSize: '40px', fontWeight: 700, marginBottom: '16px', lineHeight: 1.1 }}>Conceptual Sketch</h1>
-          <p style={{ color: '#33388', fontSize: '15px', maxWidth: '480px', margin: '0 auto', lineHeight: 1.7 }}>A complete conceptual sketch design showcase with interactive elements and professional aesthetics.</p>
-        </div>
+    <div style={{ padding: '24px 20px', maxWidth: '900px', margin: '0 auto' }}>
+      <div style={{ background: '#f8f8f8', border: '2px dashed #ccc', borderRadius: '8px', padding: '40px 28px', marginBottom: '24px', textAlign: 'center' }}>
+        <h1 style={{ color: '#333', fontSize: '48px', fontWeight: 400, marginBottom: '14px' }}>Conceptual Sketch</h1>
+        <p style={{ color: '#666', fontSize: '16px', maxWidth: '400px', margin: '0 auto', lineHeight: 1.8 }}>Designs that look like they were sketched on paper. Raw, authentic, and full of character.</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginTop: '24px', marginBottom: '24px' }}>
+      {/* Tool Selector */}
+      <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginBottom: '24px' }}>
+        {tools.map((t, i) => (
+          <button key={i} onClick={() => setActiveTool(i)} style={{
+            padding: '10px 18px', borderRadius: '8px', fontSize: '16px', fontWeight: 400, cursor: 'pointer',
+            background: activeTool === i ? '#f0f0f0' : '#fff',
+            color: activeTool === i ? '#333' : '#999',
+            border: activeTool === i ? `2px solid ${t.stroke}` : '2px dashed #ccc',
+          }}>{t.name}</button>
+        ))}
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px' }}>
         {[
-          { title: 'Principle One', desc: 'Core design philosophy that drives every decision.' },
-          { title: 'Principle Two', desc: 'Attention to detail for cohesive visual experience.' },
-          { title: 'Principle Three', desc: 'User-first approach ensuring accessibility.' },
+          { title: 'Raw', desc: 'Unpolished and authentic.' },
+          { title: 'Quick', desc: 'Fast strokes that capture ideas.' },
+          { title: 'Real', desc: 'Feels like actual paper sketches.' },
         ].map((f, i) => (
-          <div key={i} style={{ background: '#fff', borderRadius: '12px', border: '1px solid #66615', padding: '20px' }}>
-            <div style={{ width: '32px', height: '32px', background: '#66615', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
-              <span style={{ color: '#666', fontSize: '14px', fontWeight: 700 }}>{i + 1}</span>
+          <div key={i} style={{ background: '#fff', border: '2px dashed #ccc', borderRadius: '8px', padding: '20px', textAlign: 'center' }}>
+            <div style={{ width: '48px', height: '48px', margin: '0 auto 12px', border: `2px solid ${tools[activeTool].stroke}`, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ color: tools[activeTool].stroke, fontSize: '20px', fontWeight: 400 }}>{i + 1}</span>
             </div>
-            <h3 style={{ color: '#333', fontSize: '15px', fontWeight: 600, marginBottom: '6px' }}>{f.title}</h3>
-            <p style={{ color: '#33388', fontSize: '13px', lineHeight: 1.6 }}>{f.desc}</p>
+            <h3 style={{ color: '#333', fontSize: '18px', fontWeight: 400, marginBottom: '6px' }}>{f.title}</h3>
+            <p style={{ color: '#999', fontSize: '14px', lineHeight: 1.6 }}>{f.desc}</p>
           </div>
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px' }}>
         {[
           { value: '100+', label: 'Projects' },
-          { value: '100%', label: 'Quality' },
-          { value: '24/7', label: 'Support' },
-          { value: '5.0', label: 'Rating' },
+          { value: '5+', label: 'Years' },
+          { value: '50+', label: 'Clients' },
         ].map((s, i) => (
-          <div key={i} style={{ background: '#fff', borderRadius: '12px', border: '1px solid #66615', padding: '16px', textAlign: 'center' }}>
-            <p style={{ color: '#666', fontSize: '22px', fontWeight: 700 }}>{s.value}</p>
-            <p style={{ color: '#33366', fontSize: '11px', marginTop: '4px' }}>{s.label}</p>
+          <div key={i} style={{ background: '#f8f8f8', border: '2px dashed #ccc', borderRadius: '8px', padding: '18px', textAlign: 'center' }}>
+            <p style={{ color: '#333', fontSize: '28px', fontWeight: 400 }}>{s.value}</p>
+            <p style={{ color: '#999', fontSize: '11px', marginTop: '4px' }}>{s.label}</p>
           </div>
         ))}
       </div>
 
       <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-        <Link href="/conceptual-sketch/gallery" style={{ padding: '12px 28px', background: '#666', color: '#fff', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>View Gallery</Link>
-        <Link href="/conceptual-sketch/about" style={{ padding: '12px 28px', background: '#66615', color: '#666', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>Learn More</Link>
+        <Link href="/conceptual-sketch/gallery" style={{ padding: '14px 28px', background: '#333', color: '#fff', fontSize: '16px', fontWeight: 400, textDecoration: 'none', borderRadius: '8px' }}>View Gallery</Link>
+        <Link href="/conceptual-sketch/about" style={{ padding: '14px 28px', color: '#666', fontSize: '16px', fontWeight: 400, textDecoration: 'none', borderRadius: '8px', border: '2px dashed #ccc' }}>Learn More</Link>
       </div>
     </div>
   )
