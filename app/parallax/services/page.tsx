@@ -3,42 +3,49 @@
 import { useState } from 'react'
 import Link from 'next/link'
 
-export default function Services() {
+export default function ParallaxServices() {
   const [selected, setSelected] = useState<number | null>(null)
 
   const services = [
-    { title: 'Parallax Websites', price: 'Rs 5,000', desc: 'Full parallax themed websites.', features: ['Custom design', 'Responsive', 'Animations', 'SEO'] },
-    { title: 'Parallax UI Kits', price: 'Rs 3,000', desc: 'Component libraries with parallax aesthetics.', features: ['50+ components', 'Figma', 'Dark mode', 'Docs'] },
-    { title: 'Parallax Branding', price: 'Rs 2,500', desc: 'Brand identities with parallax design.', features: ['Logo', 'Colors', 'Guide', 'Assets'] },
+    { title: 'Parallax Websites', price: 'Rs 5,000', desc: 'Websites with immersive parallax scrolling effects.', features: ['Parallax layers', 'Smooth scroll', 'Responsive', 'Animated'] },
+    { title: 'Parallax Landing', price: 'Rs 3,000', desc: 'Landing pages with depth and motion.', features: ['Hero parallax', 'Story scroll', 'Interactive', 'Fast'] },
+    { title: 'Parallax Presentations', price: 'Rs 2,500', desc: 'Presentations that move and flow.', features: ['Slide parallax', 'Transitions', 'Export', 'Animated'] },
   ]
 
   return (
-    <div style={{ padding: '32px 20px', maxWidth: '900px', margin: '0 auto' }}>
-      <div style={{ background: 'rgba(26,26,46,0.9)', borderRadius: '16px', border: '1px solid #667eea20', padding: '24px', marginBottom: '24px', textAlign: 'center', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
-        <h1 style={{ color: '#fff', fontSize: '32px', fontWeight: 700 }}>Services</h1>
+    <div style={{ padding: '80px 20px', maxWidth: '800px', margin: '0 auto' }}>
+      <div style={{ marginBottom: '40px', textAlign: 'center' }}>
+        <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', letterSpacing: '4px', marginBottom: '16px' }}>SERVICES</p>
+        <h1 style={{ color: '#fff', fontSize: '48px', fontWeight: 200 }}>What we offer</h1>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '60px' }}>
         {services.map((s, i) => (
-          <div key={i} onClick={() => setSelected(i)} style={{ background: selected === i ? '#667eea10' : 'rgba(26,26,46,0.9)', borderRadius: '16px', border: '1px solid ' + (selected === i ? '#667eea' : '#667eea15'), padding: '24px', cursor: 'pointer', display: 'flex', flexDirection: 'column', transition: 'all 0.2s' }}>
-            <h3 style={{ color: '#fff', fontSize: '16px', fontWeight: 600, marginBottom: '8px' }}>{s.title}</h3>
-            <p style={{ color: '#667eea', fontSize: '28px', fontWeight: 700, marginBottom: '12px' }}>{s.price}</p>
-            <p style={{ color: '#fff88', fontSize: '13px', lineHeight: 1.6, marginBottom: '12px', flex: 1 }}>{s.desc}</p>
-            <div style={{ marginBottom: '12px' }}>
+          <div key={i} onClick={() => setSelected(i)} style={{
+            padding: '24px', cursor: 'pointer', transition: 'all 0.3s',
+            border: selected === i ? '1px solid rgba(255,255,255,0.3)' : '1px solid rgba(255,255,255,0.1)',
+            background: selected === i ? 'rgba(255,255,255,0.05)' : 'transparent',
+          }}>
+            <h3 style={{ color: '#fff', fontSize: '16px', fontWeight: 400, marginBottom: '8px' }}>{s.title}</h3>
+            <p style={{ color: '#fff', fontSize: '32px', fontWeight: 200, marginBottom: '12px' }}>{s.price}</p>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: 300, lineHeight: 1.6, marginBottom: '12px' }}>{s.desc}</p>
+            <div style={{ marginBottom: '16px' }}>
               {s.features.map((f, j) => (
-                <div key={j} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                  <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#667eea' }} />
-                  <span style={{ color: '#fff88', fontSize: '12px' }}>{f}</span>
-                </div>
+                <p key={j} style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', fontWeight: 300, marginBottom: '4px' }}>{f}</p>
               ))}
             </div>
-            <Link href="/parallax/contact" style={{ display: 'block', textAlign: 'center', padding: '10px', background: '#667eea', color: '#fff', borderRadius: '8px', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}>Get Started</Link>
+            <Link href="/parallax/contact" style={{
+              display: 'block', textAlign: 'center', padding: '12px',
+              background: 'rgba(255,255,255,0.1)', color: '#fff',
+              fontSize: '12px', fontWeight: 400, textDecoration: 'none', letterSpacing: '2px',
+              border: '1px solid rgba(255,255,255,0.2)',
+            }}>Get Started</Link>
           </div>
         ))}
       </div>
 
       <div style={{ textAlign: 'center' }}>
-        <Link href="/parallax" style={{ padding: '12px 28px', background: '#667eea15', color: '#667eea', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>Back Home</Link>
+        <Link href="/parallax" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', fontWeight: 300, textDecoration: 'none', letterSpacing: '2px' }}>Back Home</Link>
       </div>
     </div>
   )
