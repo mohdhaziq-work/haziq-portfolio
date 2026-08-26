@@ -3,53 +3,52 @@
 import { useState } from 'react'
 import Link from 'next/link'
 
-export default function Gallery() {
+export default function MinimalismGallery() {
   const [active, setActive] = useState('All')
 
   const works = [
-    { title: 'Minimalism Dashboard', cat: 'Web' },
-    { title: 'Minimalism Landing', cat: 'Web' },
-    { title: 'Minimalism Portfolio', cat: 'Web' },
-    { title: 'Minimalism UI Kit', cat: 'UI' },
-    { title: 'Minimalism App', cat: 'App' },
-    { title: 'Minimalism E-Commerce', cat: 'Web' },
-    { title: 'Minimalism Forms', cat: 'UI' },
-    { title: 'Minimalism Blog', cat: 'Web' },
-    { title: 'Minimalism Analytics', cat: 'App' },
+    { title: 'Clean Dashboard', cat: 'Web' },
+    { title: 'White Landing', cat: 'Web' },
+    { title: 'Minimal Portfolio', cat: 'Web' },
+    { title: 'Simple UI Kit', cat: 'UI' },
+    { title: 'Clean App', cat: 'App' },
+    { title: 'White E-Commerce', cat: 'Web' },
+    { title: 'Minimal Forms', cat: 'UI' },
+    { title: 'Simple Blog', cat: 'Web' },
+    { title: 'Clean Analytics', cat: 'App' },
   ]
 
   const cats = ['All', 'Web', 'UI', 'App']
   const filtered = active === 'All' ? works : works.filter(w => w.cat === active)
 
   return (
-    <div style={{ padding: '32px 20px', maxWidth: '900px', margin: '0 auto' }}>
-      <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #11120', padding: '24px', marginBottom: '24px', textAlign: 'center', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
-        <h1 style={{ color: '#111', fontSize: '32px', fontWeight: 700 }}>Gallery</h1>
-        <p style={{ color: '#11166', fontSize: '14px', marginTop: '8px' }}>Our minimalism creations</p>
+    <div style={{ padding: '48px 24px', maxWidth: '800px', margin: '0 auto' }}>
+      <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+        <h1 style={{ color: '#111', fontSize: '36px', fontWeight: 300 }}>Gallery</h1>
       </div>
 
-      <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '24px' }}>
+      <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', marginBottom: '40px' }}>
         {cats.map(c => (
-          <button key={c} onClick={() => setActive(c)} style={{ padding: '8px 20px', borderRadius: '999px', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 600, background: active === c ? '#111' : '#fff', color: active === c ? '#fff' : '#11188', transition: 'all 0.2s' }}>{c}</button>
+          <button key={c} onClick={() => setActive(c)} style={{
+            background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px',
+            color: active === c ? '#111' : '#ddd', fontWeight: active === c ? 500 : 300,
+            transition: 'color 0.2s',
+          }}>{c}</button>
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '48px' }}>
         {filtered.map((w, i) => (
-          <div key={i} style={{ background: '#fff', borderRadius: '12px', border: '1px solid #11115', overflow: 'hidden' }}>
-            <div style={{ height: '100px', background: '#11110', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#11125' }} />
-            </div>
-            <div style={{ padding: '12px' }}>
-              <h3 style={{ color: '#111', fontSize: '14px', fontWeight: 600, marginBottom: '4px' }}>{w.title}</h3>
-              <p style={{ color: '#11166', fontSize: '12px' }}>{w.cat}</p>
-            </div>
+          <div key={i}>
+            <div style={{ height: '120px', background: '#f5f5f5', marginBottom: '12px' }} />
+            <h3 style={{ color: '#111', fontSize: '14px', fontWeight: 500, marginBottom: '4px' }}>{w.title}</h3>
+            <p style={{ color: '#ddd', fontSize: '11px' }}>{w.cat}</p>
           </div>
         ))}
       </div>
 
       <div style={{ textAlign: 'center' }}>
-        <Link href="/minimalism" style={{ padding: '12px 28px', background: '#11115', color: '#111', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>Back Home</Link>
+        <Link href="/minimalism" style={{ color: '#bbb', fontSize: '12px', letterSpacing: '2px', textDecoration: 'none' }}>BACK HOME</Link>
       </div>
     </div>
   )
