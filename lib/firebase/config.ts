@@ -56,6 +56,9 @@ if (isFirebaseConfigured) {
     googleProvider = new GoogleAuthProvider()
     // Force account chooser to always show (even if only 1 account logged in)
     googleProvider.setCustomParameters({ prompt: 'select_account' })
+    // IMPORTANT: Only request basic profile — NO extra scopes
+    // Default scopes: email, profile (name, photo)
+    // We do NOT add: contacts, drive, calendar, etc.
   } catch (error) {
     console.error('Firebase initialization error:', error)
   }

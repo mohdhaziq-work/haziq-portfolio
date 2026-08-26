@@ -44,9 +44,31 @@ export default function LoginPopup() {
 
         {/* Text */}
         <h2 className="text-headline text-text-primary text-center mb-2">Login Required</h2>
-        <p className="text-body-sm text-text-secondary text-center mb-6">
+        <p className="text-body-sm text-text-secondary text-center mb-4">
           Sign in with Google to continue. This helps us track your project and keep you updated.
         </p>
+
+        {/* Privacy Info — NEW */}
+        <div className="bg-gray-50 rounded-xl p-4 mb-5">
+          <p className="text-xs text-text-secondary font-medium mb-2">We only access:</p>
+          <ul className="space-y-1.5">
+            <li className="flex items-center gap-2 text-xs text-text-secondary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              Your email address
+            </li>
+            <li className="flex items-center gap-2 text-xs text-text-secondary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              Your name & profile photo
+            </li>
+          </ul>
+          <p className="text-xs text-text-tertiary mt-2">
+            We do NOT access your contacts, files, or any other Google data.
+          </p>
+        </div>
 
         {/* Google Sign-In Button */}
         <button
