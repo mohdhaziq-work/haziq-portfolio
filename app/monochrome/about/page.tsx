@@ -2,45 +2,45 @@
 
 import Link from 'next/link'
 
-export default function About() {
+export default function MonochromeAbout() {
   return (
-    <div style={{ padding: '32px 20px', maxWidth: '900px', margin: '0 auto' }}>
-      <div style={{ background: '#f5f5f5', borderRadius: '16px', border: '1px solid #33320', padding: '32px 24px', marginBottom: '24px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
-        <h1 style={{ color: '#000', fontSize: '32px', fontWeight: 700, marginBottom: '16px' }}>About Monochrome</h1>
-        <p style={{ color: '#00088', fontSize: '15px', lineHeight: 1.8, marginBottom: '16px' }}>We specialize in monochrome design — creating interfaces that are both beautiful and functional.</p>
-        <p style={{ color: '#00088', fontSize: '15px', lineHeight: 1.8 }}>Every project receives our full attention and creative energy.</p>
+    <div style={{ padding: '20px', maxWidth: '900px', margin: '0 auto' }}>
+      <div style={{ background: '#000', padding: '28px 24px', marginBottom: '16px' }}>
+        <h1 style={{ color: '#fff', fontSize: '32px', fontWeight: 700, marginBottom: '12px' }}>ABOUT MONOCHROME</h1>
+        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', lineHeight: 1.8, marginBottom: '8px' }}>We strip away color to reveal the essence of design. Black and white forces focus on form, contrast, and composition.</p>
+        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', lineHeight: 1.8 }}>Constraints breed creativity. One color, infinite expression.</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', marginBottom: '16px' }}>
         {[
-          { title: 'Mission', desc: 'Create designs that inspire and convert.' },
-          { title: 'Vision', desc: 'A web where every site is beautiful and usable.' },
-          { title: 'Values', desc: 'Quality, creativity, and user-first thinking.' },
-          { title: 'Process', desc: 'Research, design, test, iterate, deliver.' },
+          { title: 'Mission', desc: 'Reveal beauty through monochrome constraint.' },
+          { title: 'Vision', desc: 'A web that values form over color.' },
+          { title: 'Values', desc: 'Contrast. Form. Restraint. Timelessness.' },
+          { title: 'Process', desc: 'Design in grayscale, refine contrast, deliver.' },
         ].map((item, i) => (
-          <div key={i} style={{ background: '#f5f5f5', borderRadius: '12px', border: '1px solid #33315', padding: '20px' }}>
-            <h3 style={{ color: '#000', fontSize: '15px', fontWeight: 600, marginBottom: '6px' }}>{item.title}</h3>
-            <p style={{ color: '#00088', fontSize: '13px', lineHeight: 1.6 }}>{item.desc}</p>
+          <div key={i} style={{ background: i % 2 === 0 ? '#000' : '#fff', padding: '16px', border: i % 2 !== 0 ? '1px solid #000' : 'none' }}>
+            <h3 style={{ color: i % 2 === 0 ? '#fff' : '#000', fontSize: '14px', fontWeight: 700, marginBottom: '6px' }}>{item.title}</h3>
+            <p style={{ color: i % 2 === 0 ? 'rgba(255,255,255,0.5)' : '#666', fontSize: '11px', lineHeight: 1.6 }}>{item.desc}</p>
           </div>
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '16px' }}>
         {[
-          { value: '100+', label: 'Projects' },
-          { value: '5+', label: 'Years' },
-          { value: '50+', label: 'Clients' },
-          { value: '24/7', label: 'Support' },
+          { value: '100+', label: 'PROJECTS' },
+          { value: '5+', label: 'YEARS' },
+          { value: '50+', label: 'CLIENTS' },
+          { value: '24/7', label: 'SUPPORT' },
         ].map((s, i) => (
-          <div key={i} style={{ background: '#f5f5f5', borderRadius: '12px', border: '1px solid #33315', padding: '16px', textAlign: 'center' }}>
-            <p style={{ color: '#333', fontSize: '22px', fontWeight: 700 }}>{s.value}</p>
-            <p style={{ color: '#00066', fontSize: '11px', marginTop: '4px' }}>{s.label}</p>
+          <div key={i} style={{ background: ['#000', '#333', '#666', '#999'][i], padding: '14px', textAlign: 'center' }}>
+            <p style={{ color: '#fff', fontSize: '20px', fontWeight: 700 }}>{s.value}</p>
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '8px', letterSpacing: '2px', marginTop: '4px' }}>{s.label}</p>
           </div>
         ))}
       </div>
 
       <div style={{ textAlign: 'center' }}>
-        <Link href="/monochrome" style={{ padding: '12px 28px', background: '#33315', color: '#333', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>Back Home</Link>
+        <Link href="/monochrome" style={{ padding: '10px 24px', color: '#000', fontSize: '12px', fontWeight: 500, textDecoration: 'none', border: '1px solid #000' }}>Back Home</Link>
       </div>
     </div>
   )

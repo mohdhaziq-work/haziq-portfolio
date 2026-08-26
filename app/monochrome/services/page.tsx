@@ -3,42 +3,48 @@
 import { useState } from 'react'
 import Link from 'next/link'
 
-export default function Services() {
+export default function MonochromeServices() {
   const [selected, setSelected] = useState<number | null>(null)
 
   const services = [
-    { title: 'Monochrome Websites', price: 'Rs 5,000', desc: 'Full monochrome themed websites.', features: ['Custom design', 'Responsive', 'Animations', 'SEO'] },
-    { title: 'Monochrome UI Kits', price: 'Rs 3,000', desc: 'Component libraries with monochrome aesthetics.', features: ['50+ components', 'Figma', 'Dark mode', 'Docs'] },
-    { title: 'Monochrome Branding', price: 'Rs 2,500', desc: 'Brand identities with monochrome design.', features: ['Logo', 'Colors', 'Guide', 'Assets'] },
+    { title: 'Mono Websites', price: 'Rs 5,000', desc: 'Websites in pure black and white.', features: ['B&W design', 'High contrast', 'Responsive', 'Timeless'] },
+    { title: 'Mono UI Kits', price: 'Rs 3,000', desc: 'Component libraries in grayscale.', features: ['50+ components', 'Grayscale', 'Figma', 'Docs'] },
+    { title: 'Mono Branding', price: 'Rs 2,500', desc: 'Brand identities in monochrome.', features: ['Logo', 'Colors', 'Guide', 'Assets'] },
   ]
 
   return (
-    <div style={{ padding: '32px 20px', maxWidth: '900px', margin: '0 auto' }}>
-      <div style={{ background: '#f5f5f5', borderRadius: '16px', border: '1px solid #33320', padding: '24px', marginBottom: '24px', textAlign: 'center', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
-        <h1 style={{ color: '#000', fontSize: '32px', fontWeight: 700 }}>Services</h1>
+    <div style={{ padding: '20px', maxWidth: '900px', margin: '0 auto' }}>
+      <div style={{ background: '#000', padding: '20px', marginBottom: '16px' }}>
+        <h1 style={{ color: '#fff', fontSize: '32px', fontWeight: 700 }}>SERVICES</h1>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '16px' }}>
         {services.map((s, i) => (
-          <div key={i} onClick={() => setSelected(i)} style={{ background: selected === i ? '#33310' : '#f5f5f5', borderRadius: '16px', border: '1px solid ' + (selected === i ? '#333' : '#33315'), padding: '24px', cursor: 'pointer', display: 'flex', flexDirection: 'column', transition: 'all 0.2s' }}>
-            <h3 style={{ color: '#000', fontSize: '16px', fontWeight: 600, marginBottom: '8px' }}>{s.title}</h3>
-            <p style={{ color: '#333', fontSize: '28px', fontWeight: 700, marginBottom: '12px' }}>{s.price}</p>
-            <p style={{ color: '#00088', fontSize: '13px', lineHeight: 1.6, marginBottom: '12px', flex: 1 }}>{s.desc}</p>
+          <div key={i} onClick={() => setSelected(i)} style={{
+            background: selected === i ? '#000' : '#fff',
+            padding: '20px', cursor: 'pointer', transition: 'all 0.2s',
+            border: selected === i ? 'none' : '1px solid #000',
+          }}>
+            <h3 style={{ color: selected === i ? '#fff' : '#000', fontSize: '14px', fontWeight: 700, marginBottom: '8px' }}>{s.title}</h3>
+            <p style={{ color: selected === i ? '#fff' : '#000', fontSize: '26px', fontWeight: 700, marginBottom: '10px' }}>{s.price}</p>
+            <p style={{ color: selected === i ? 'rgba(255,255,255,0.5)' : '#666', fontSize: '11px', lineHeight: 1.6, marginBottom: '10px' }}>{s.desc}</p>
             <div style={{ marginBottom: '12px' }}>
               {s.features.map((f, j) => (
-                <div key={j} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                  <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#333' }} />
-                  <span style={{ color: '#00088', fontSize: '12px' }}>{f}</span>
-                </div>
+                <p key={j} style={{ color: selected === i ? 'rgba(255,255,255,0.4)' : '#999', fontSize: '10px', marginBottom: '2px' }}>{f}</p>
               ))}
             </div>
-            <Link href="/monochrome/contact" style={{ display: 'block', textAlign: 'center', padding: '10px', background: '#333', color: '#fff', borderRadius: '8px', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}>Get Started</Link>
+            <Link href="/monochrome/contact" style={{
+              display: 'block', textAlign: 'center', padding: '10px',
+              background: selected === i ? '#fff' : '#000',
+              color: selected === i ? '#000' : '#fff',
+              fontSize: '11px', fontWeight: 700, textDecoration: 'none',
+            }}>Get Started</Link>
           </div>
         ))}
       </div>
 
       <div style={{ textAlign: 'center' }}>
-        <Link href="/monochrome" style={{ padding: '12px 28px', background: '#33315', color: '#333', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>Back Home</Link>
+        <Link href="/monochrome" style={{ padding: '10px 24px', color: '#000', fontSize: '12px', fontWeight: 500, textDecoration: 'none', border: '1px solid #000' }}>Back Home</Link>
       </div>
     </div>
   )
