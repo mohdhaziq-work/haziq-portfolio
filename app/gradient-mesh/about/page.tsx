@@ -2,25 +2,25 @@
 
 import Link from 'next/link'
 
-export default function About() {
+export default function GradientMeshAbout() {
   return (
-    <div style={{ padding: '32px 20px', maxWidth: '900px', margin: '0 auto' }}>
-      <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #667eea20', padding: '32px 24px', marginBottom: '24px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
-        <h1 style={{ color: '#333', fontSize: '32px', fontWeight: 700, marginBottom: '16px' }}>About Gradient Mesh</h1>
-        <p style={{ color: '#33388', fontSize: '15px', lineHeight: 1.8, marginBottom: '16px' }}>We specialize in gradient mesh design — creating interfaces that are both beautiful and functional.</p>
-        <p style={{ color: '#33388', fontSize: '15px', lineHeight: 1.8 }}>Every project receives our full attention and creative energy.</p>
+    <div style={{ padding: '24px 20px', maxWidth: '900px', margin: '0 auto' }}>
+      <div style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.15), rgba(236,72,153,0.15))', borderRadius: '24px', border: '1px solid rgba(139,92,246,0.2)', padding: '36px 28px', marginBottom: '24px' }}>
+        <h1 style={{ color: '#fff', fontSize: '36px', fontWeight: 700, marginBottom: '16px' }}>About Us</h1>
+        <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', lineHeight: 1.8, marginBottom: '12px' }}>We create fluid, organic designs that feel alive. Our work is inspired by nature's gradients — sunsets, oceans, and auroras.</p>
+        <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', lineHeight: 1.8 }}>Every pixel flows into the next, creating seamless visual experiences that captivate and engage.</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', marginBottom: '24px' }}>
         {[
-          { title: 'Mission', desc: 'Create designs that inspire and convert.' },
-          { title: 'Vision', desc: 'A web where every site is beautiful and usable.' },
-          { title: 'Values', desc: 'Quality, creativity, and user-first thinking.' },
-          { title: 'Process', desc: 'Research, design, test, iterate, deliver.' },
+          { title: 'Mission', desc: 'Bring fluid, organic beauty to digital experiences.' },
+          { title: 'Vision', desc: 'A web that flows like water and glows like aurora.' },
+          { title: 'Values', desc: 'Fluidity. Vibrancy. Harmony. Motion.' },
+          { title: 'Process', desc: 'Blend colors, shape forms, animate transitions.' },
         ].map((item, i) => (
-          <div key={i} style={{ background: '#fff', borderRadius: '12px', border: '1px solid #667eea15', padding: '20px' }}>
-            <h3 style={{ color: '#333', fontSize: '15px', fontWeight: 600, marginBottom: '6px' }}>{item.title}</h3>
-            <p style={{ color: '#33388', fontSize: '13px', lineHeight: 1.6 }}>{item.desc}</p>
+          <div key={i} style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', padding: '20px' }}>
+            <h3 style={{ color: '#fff', fontSize: '15px', fontWeight: 600, marginBottom: '8px' }}>{item.title}</h3>
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', lineHeight: 1.6 }}>{item.desc}</p>
           </div>
         ))}
       </div>
@@ -32,15 +32,15 @@ export default function About() {
           { value: '50+', label: 'Clients' },
           { value: '24/7', label: 'Support' },
         ].map((s, i) => (
-          <div key={i} style={{ background: '#fff', borderRadius: '12px', border: '1px solid #667eea15', padding: '16px', textAlign: 'center' }}>
-            <p style={{ color: '#667eea', fontSize: '22px', fontWeight: 700 }}>{s.value}</p>
-            <p style={{ color: '#33366', fontSize: '11px', marginTop: '4px' }}>{s.label}</p>
+          <div key={i} style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.2), rgba(236,72,153,0.15))', borderRadius: '16px', border: '1px solid rgba(139,92,246,0.2)', padding: '18px', textAlign: 'center' }}>
+            <p style={{ background: 'linear-gradient(135deg, #8b5cf6, #ec4899)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontSize: '24px', fontWeight: 700 }}>{s.value}</p>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', marginTop: '4px' }}>{s.label}</p>
           </div>
         ))}
       </div>
 
       <div style={{ textAlign: 'center' }}>
-        <Link href="/gradient-mesh" style={{ padding: '12px 28px', background: '#667eea15', color: '#667eea', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>Back Home</Link>
+        <Link href="/gradient-mesh" style={{ padding: '12px 28px', color: '#fff', fontSize: '13px', textDecoration: 'none', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.2)' }}>Back Home</Link>
       </div>
     </div>
   )
