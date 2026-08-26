@@ -3,42 +3,43 @@
 import { useState } from 'react'
 import Link from 'next/link'
 
-export default function Services() {
+export default function TypographyServices() {
   const [selected, setSelected] = useState<number | null>(null)
 
   const services = [
-    { title: 'Typography Led Websites', price: 'Rs 5,000', desc: 'Full typography led themed websites.', features: ['Custom design', 'Responsive', 'Animations', 'SEO'] },
-    { title: 'Typography Led UI Kits', price: 'Rs 3,000', desc: 'Component libraries with typography led aesthetics.', features: ['50+ components', 'Figma', 'Dark mode', 'Docs'] },
-    { title: 'Typography Led Branding', price: 'Rs 2,500', desc: 'Brand identities with typography led design.', features: ['Logo', 'Colors', 'Guide', 'Assets'] },
+    { title: 'Typographic Websites', price: 'Rs 5,000', desc: 'Websites where typography is the hero.', features: ['Custom type scale', 'Serif + Sans pairing', 'Responsive', 'Elegant'] },
+    { title: 'Type Design', price: 'Rs 3,000', desc: 'Custom lettering and typographic compositions.', features: ['Custom lettering', 'Type specimens', 'Print ready', 'Vector'] },
+    { title: 'Type Branding', price: 'Rs 2,500', desc: 'Brand identities built on typography alone.', features: ['Wordmark', 'Type system', 'Guide', 'Assets'] },
   ]
 
   return (
-    <div style={{ padding: '32px 20px', maxWidth: '900px', margin: '0 auto' }}>
-      <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #11120', padding: '24px', marginBottom: '24px', textAlign: 'center', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
-        <h1 style={{ color: '#111', fontSize: '32px', fontWeight: 700 }}>Services</h1>
+    <div style={{ padding: '48px 20px', maxWidth: '800px', margin: '0 auto' }}>
+      <div style={{ marginBottom: '40px' }}>
+        <p style={{ color: '#999', fontSize: '11px', fontFamily: '"DM Sans", sans-serif', letterSpacing: '4px', textTransform: 'uppercase', marginBottom: '16px' }}>Services</p>
+        <h1 style={{ color: '#111', fontSize: '48px', fontWeight: 400, fontStyle: 'italic' }}>What we<br />offer.</h1>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '48px' }}>
         {services.map((s, i) => (
-          <div key={i} onClick={() => setSelected(i)} style={{ background: selected === i ? '#11110' : '#fff', borderRadius: '16px', border: '1px solid ' + (selected === i ? '#111' : '#11115'), padding: '24px', cursor: 'pointer', display: 'flex', flexDirection: 'column', transition: 'all 0.2s' }}>
-            <h3 style={{ color: '#111', fontSize: '16px', fontWeight: 600, marginBottom: '8px' }}>{s.title}</h3>
-            <p style={{ color: '#111', fontSize: '28px', fontWeight: 700, marginBottom: '12px' }}>{s.price}</p>
-            <p style={{ color: '#11188', fontSize: '13px', lineHeight: 1.6, marginBottom: '12px', flex: 1 }}>{s.desc}</p>
-            <div style={{ marginBottom: '12px' }}>
+          <div key={i} onClick={() => setSelected(i)} style={{
+            padding: '24px', cursor: 'pointer', transition: 'all 0.2s',
+            border: selected === i ? '1px solid #111' : '1px solid #eee',
+          }}>
+            <h3 style={{ color: '#111', fontSize: '18px', fontWeight: 400, fontStyle: 'italic', marginBottom: '8px' }}>{s.title}</h3>
+            <p style={{ color: '#111', fontSize: '32px', fontWeight: 400, fontStyle: 'italic', marginBottom: '12px' }}>{s.price}</p>
+            <p style={{ color: '#999', fontSize: '13px', fontFamily: '"DM Sans", sans-serif', fontWeight: 300, lineHeight: 1.6, marginBottom: '12px' }}>{s.desc}</p>
+            <div style={{ marginBottom: '16px' }}>
               {s.features.map((f, j) => (
-                <div key={j} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                  <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#111' }} />
-                  <span style={{ color: '#11188', fontSize: '12px' }}>{f}</span>
-                </div>
+                <p key={j} style={{ color: '#ccc', fontSize: '12px', fontFamily: '"DM Sans", sans-serif', marginBottom: '4px' }}>{f}</p>
               ))}
             </div>
-            <Link href="/typography/contact" style={{ display: 'block', textAlign: 'center', padding: '10px', background: '#111', color: '#fff', borderRadius: '8px', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}>Get Started</Link>
+            <Link href="/typography/contact" style={{ display: 'block', textAlign: 'center', padding: '12px', background: '#111', color: '#fff', fontSize: '13px', fontFamily: '"DM Sans", sans-serif', fontWeight: 500, textDecoration: 'none' }}>Get Started</Link>
           </div>
         ))}
       </div>
 
       <div style={{ textAlign: 'center' }}>
-        <Link href="/typography" style={{ padding: '12px 28px', background: '#11115', color: '#111', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>Back Home</Link>
+        <Link href="/typography" style={{ color: '#111', fontSize: '14px', fontFamily: '"DM Sans", sans-serif', fontWeight: 300, textDecoration: 'none', borderBottom: '1px solid #ddd', paddingBottom: '4px' }}>Back Home</Link>
       </div>
     </div>
   )

@@ -3,53 +3,56 @@
 import { useState } from 'react'
 import Link from 'next/link'
 
-export default function Gallery() {
+export default function TypographyGallery() {
   const [active, setActive] = useState('All')
 
   const works = [
-    { title: 'Typography Led Dashboard', cat: 'Web' },
-    { title: 'Typography Led Landing', cat: 'Web' },
-    { title: 'Typography Led Portfolio', cat: 'Web' },
-    { title: 'Typography Led UI Kit', cat: 'UI' },
-    { title: 'Typography Led App', cat: 'App' },
-    { title: 'Typography Led E-Commerce', cat: 'Web' },
-    { title: 'Typography Led Forms', cat: 'UI' },
-    { title: 'Typography Led Blog', cat: 'Web' },
-    { title: 'Typography Led Analytics', cat: 'App' },
+    { title: 'Editorial Layout', cat: 'Print' },
+    { title: 'Type Poster', cat: 'Print' },
+    { title: 'Serif Landing', cat: 'Web' },
+    { title: 'Letterpress Blog', cat: 'Web' },
+    { title: 'Type Specimen', cat: 'Print' },
+    { title: 'Typographic Portfolio', cat: 'Web' },
+    { title: 'Font Showcase', cat: 'Web' },
+    { title: 'Type Hierarchy', cat: 'UI' },
+    { title: 'Reading App', cat: 'App' },
   ]
 
-  const cats = ['All', 'Web', 'UI', 'App']
+  const cats = ['All', 'Web', 'Print', 'UI']
   const filtered = active === 'All' ? works : works.filter(w => w.cat === active)
 
   return (
-    <div style={{ padding: '32px 20px', maxWidth: '900px', margin: '0 auto' }}>
-      <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #11120', padding: '24px', marginBottom: '24px', textAlign: 'center', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
-        <h1 style={{ color: '#111', fontSize: '32px', fontWeight: 700 }}>Gallery</h1>
-        <p style={{ color: '#11166', fontSize: '14px', marginTop: '8px' }}>Our typography led creations</p>
+    <div style={{ padding: '48px 20px', maxWidth: '800px', margin: '0 auto' }}>
+      <div style={{ marginBottom: '40px' }}>
+        <p style={{ color: '#999', fontSize: '11px', fontFamily: '"DM Sans", sans-serif', letterSpacing: '4px', textTransform: 'uppercase', marginBottom: '16px' }}>Gallery</p>
+        <h1 style={{ color: '#111', fontSize: '48px', fontWeight: 400, fontStyle: 'italic' }}>Selected<br />Works.</h1>
       </div>
 
-      <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '24px' }}>
+      <div style={{ display: 'flex', gap: '16px', marginBottom: '40px' }}>
         {cats.map(c => (
-          <button key={c} onClick={() => setActive(c)} style={{ padding: '8px 20px', borderRadius: '999px', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 600, background: active === c ? '#111' : '#fff', color: active === c ? '#fff' : '#11188', transition: 'all 0.2s' }}>{c}</button>
+          <button key={c} onClick={() => setActive(c)} style={{
+            background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px',
+            color: active === c ? '#111' : '#ccc', fontFamily: '"DM Sans", sans-serif',
+            fontWeight: active === c ? 500 : 300, borderBottom: active === c ? '1px solid #111' : '1px solid transparent',
+            paddingBottom: '4px',
+          }}>{c}</button>
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '48px' }}>
         {filtered.map((w, i) => (
-          <div key={i} style={{ background: '#fff', borderRadius: '12px', border: '1px solid #11115', overflow: 'hidden' }}>
-            <div style={{ height: '100px', background: '#11110', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#11125' }} />
+          <div key={i}>
+            <div style={{ height: '120px', background: '#f5f5f5', marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ color: '#ddd', fontSize: '36px', fontStyle: 'italic' }}>Aa</span>
             </div>
-            <div style={{ padding: '12px' }}>
-              <h3 style={{ color: '#111', fontSize: '14px', fontWeight: 600, marginBottom: '4px' }}>{w.title}</h3>
-              <p style={{ color: '#11166', fontSize: '12px' }}>{w.cat}</p>
-            </div>
+            <h3 style={{ color: '#111', fontSize: '15px', fontWeight: 400, fontStyle: 'italic', marginBottom: '4px' }}>{w.title}</h3>
+            <p style={{ color: '#ccc', fontSize: '11px', fontFamily: '"DM Sans", sans-serif' }}>{w.cat}</p>
           </div>
         ))}
       </div>
 
       <div style={{ textAlign: 'center' }}>
-        <Link href="/typography" style={{ padding: '12px 28px', background: '#11115', color: '#111', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>Back Home</Link>
+        <Link href="/typography" style={{ color: '#111', fontSize: '14px', fontFamily: '"DM Sans", sans-serif', fontWeight: 300, textDecoration: 'none', borderBottom: '1px solid #ddd', paddingBottom: '4px' }}>Back Home</Link>
       </div>
     </div>
   )

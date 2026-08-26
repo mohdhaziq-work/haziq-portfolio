@@ -3,54 +3,75 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
-export default function Home() {
+export default function TypographyHome() {
   const [mounted, setMounted] = useState(false)
+  const [activeSize, setActiveSize] = useState(1)
   useEffect(() => { setMounted(true) }, [])
   if (!mounted) return null
 
+  const sizes = [
+    { label: 'Caption', size: '14px', weight: 300 },
+    { label: 'Body', size: '18px', weight: 400 },
+    { label: 'Heading', size: '36px', weight: 400 },
+    { label: 'Display', size: '64px', weight: 400 },
+  ]
+
   return (
-    <div style={{ padding: '32px 20px', maxWidth: '900px', margin: '0 auto' }}>
-      <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #11120', padding: '32px 24px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
-        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-          <p style={{ color: '#111', fontSize: '12px', fontWeight: 600, letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '12px' }}>TYPOGRAPHY LED DESIGN</p>
-          <h1 style={{ color: '#111', fontSize: '40px', fontWeight: 700, marginBottom: '16px', lineHeight: 1.1 }}>Typography Led</h1>
-          <p style={{ color: '#11188', fontSize: '15px', maxWidth: '480px', margin: '0 auto', lineHeight: 1.7 }}>A complete typography led design showcase with interactive elements and professional aesthetics.</p>
+    <div style={{ padding: '48px 20px', maxWidth: '800px', margin: '0 auto' }}>
+      <div style={{ marginBottom: '48px' }}>
+        <p style={{ color: '#999', fontSize: '12px', fontFamily: '"DM Sans", sans-serif', letterSpacing: '4px', textTransform: 'uppercase', marginBottom: '16px' }}>Design Studio</p>
+        <h1 style={{ color: '#111', fontSize: '72px', fontWeight: 400, fontStyle: 'italic', lineHeight: 0.9, marginBottom: '20px' }}>Where<br />type<br />speaks.</h1>
+        <p style={{ color: '#666', fontSize: '16px', fontFamily: '"DM Sans", sans-serif', fontWeight: 300, maxWidth: '400px', lineHeight: 1.8 }}>Typography is the foundation of all design. We let letters do the talking.</p>
+      </div>
+
+      {/* Type Scale Demo */}
+      <div style={{ marginBottom: '48px' }}>
+        <p style={{ color: '#999', fontSize: '11px', fontFamily: '"DM Sans", sans-serif', letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '16px' }}>Type Scale</p>
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
+          {sizes.map((s, i) => (
+            <button key={i} onClick={() => setActiveSize(i)} style={{
+              padding: '8px 16px', fontSize: '12px', fontFamily: '"DM Sans", sans-serif', cursor: 'pointer',
+              background: activeSize === i ? '#111' : 'transparent',
+              color: activeSize === i ? '#fff' : '#999',
+              border: activeSize === i ? 'none' : '1px solid #ddd',
+            }}>{s.label}</button>
+          ))}
+        </div>
+        <div style={{ padding: '32px', background: '#f8f8f8', textAlign: 'center' }}>
+          <p style={{ color: '#111', fontSize: sizes[activeSize].size, fontWeight: sizes[activeSize].weight, fontStyle: 'italic' }}>The quick brown fox</p>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginTop: '24px', marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '48px' }}>
         {[
-          { title: 'Principle One', desc: 'Core design philosophy that drives every decision.' },
-          { title: 'Principle Two', desc: 'Attention to detail for cohesive visual experience.' },
-          { title: 'Principle Three', desc: 'User-first approach ensuring accessibility.' },
+          { title: 'Serif', desc: 'Classic elegance with DM Serif Display.', sample: 'Aa', font: '"DM Serif Display", serif' },
+          { title: 'Sans', desc: 'Modern clarity with DM Sans.', sample: 'Aa', font: '"DM Sans", sans-serif' },
+          { title: 'Italic', desc: 'Expressive emphasis through slant.', sample: 'Aa', font: '"DM Serif Display", serif', italic: true },
         ].map((f, i) => (
-          <div key={i} style={{ background: '#fff', borderRadius: '12px', border: '1px solid #11115', padding: '20px' }}>
-            <div style={{ width: '32px', height: '32px', background: '#11115', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
-              <span style={{ color: '#111', fontSize: '14px', fontWeight: 700 }}>{i + 1}</span>
-            </div>
-            <h3 style={{ color: '#111', fontSize: '15px', fontWeight: 600, marginBottom: '6px' }}>{f.title}</h3>
-            <p style={{ color: '#11188', fontSize: '13px', lineHeight: 1.6 }}>{f.desc}</p>
+          <div key={i} style={{ padding: '24px', border: '1px solid #eee' }}>
+            <p style={{ color: '#111', fontSize: '48px', fontWeight: 400, fontStyle: f.italic ? 'italic' : 'normal', fontFamily: f.font, marginBottom: '12px' }}>{f.sample}</p>
+            <h3 style={{ color: '#111', fontSize: '16px', fontWeight: 500, fontFamily: '"DM Sans", sans-serif', marginBottom: '6px' }}>{f.title}</h3>
+            <p style={{ color: '#999', fontSize: '13px', fontFamily: '"DM Sans", sans-serif', fontWeight: 300 }}>{f.desc}</p>
           </div>
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '48px' }}>
         {[
           { value: '100+', label: 'Projects' },
-          { value: '100%', label: 'Quality' },
-          { value: '24/7', label: 'Support' },
-          { value: '5.0', label: 'Rating' },
+          { value: '5+', label: 'Years' },
+          { value: '50+', label: 'Clients' },
         ].map((s, i) => (
-          <div key={i} style={{ background: '#fff', borderRadius: '12px', border: '1px solid #11115', padding: '16px', textAlign: 'center' }}>
-            <p style={{ color: '#111', fontSize: '22px', fontWeight: 700 }}>{s.value}</p>
-            <p style={{ color: '#11166', fontSize: '11px', marginTop: '4px' }}>{s.label}</p>
+          <div key={i} style={{ textAlign: 'center' }}>
+            <p style={{ color: '#111', fontSize: '36px', fontWeight: 400, fontStyle: 'italic' }}>{s.value}</p>
+            <p style={{ color: '#ccc', fontSize: '11px', fontFamily: '"DM Sans", sans-serif', letterSpacing: '3px', textTransform: 'uppercase', marginTop: '4px' }}>{s.label}</p>
           </div>
         ))}
       </div>
 
-      <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-        <Link href="/typography/gallery" style={{ padding: '12px 28px', background: '#111', color: '#fff', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>View Gallery</Link>
-        <Link href="/typography/about" style={{ padding: '12px 28px', background: '#11115', color: '#111', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>Learn More</Link>
+      <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
+        <Link href="/typography/gallery" style={{ padding: '14px 32px', background: '#111', color: '#fff', fontSize: '14px', fontFamily: '"DM Sans", sans-serif', fontWeight: 500, textDecoration: 'none' }}>View Gallery</Link>
+        <Link href="/typography/about" style={{ padding: '14px 32px', color: '#111', fontSize: '14px', fontFamily: '"DM Sans", sans-serif', fontWeight: 300, textDecoration: 'none', border: '1px solid #ddd' }}>Learn More</Link>
       </div>
     </div>
   )

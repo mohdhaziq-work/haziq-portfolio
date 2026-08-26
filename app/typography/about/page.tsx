@@ -2,45 +2,46 @@
 
 import Link from 'next/link'
 
-export default function About() {
+export default function TypographyAbout() {
   return (
-    <div style={{ padding: '32px 20px', maxWidth: '900px', margin: '0 auto' }}>
-      <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #11120', padding: '32px 24px', marginBottom: '24px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
-        <h1 style={{ color: '#111', fontSize: '32px', fontWeight: 700, marginBottom: '16px' }}>About Typography Led</h1>
-        <p style={{ color: '#11188', fontSize: '15px', lineHeight: 1.8, marginBottom: '16px' }}>We specialize in typography led design — creating interfaces that are both beautiful and functional.</p>
-        <p style={{ color: '#11188', fontSize: '15px', lineHeight: 1.8 }}>Every project receives our full attention and creative energy.</p>
+    <div style={{ padding: '48px 20px', maxWidth: '800px', margin: '0 auto' }}>
+      <div style={{ marginBottom: '48px' }}>
+        <p style={{ color: '#999', fontSize: '11px', fontFamily: '"DM Sans", sans-serif', letterSpacing: '4px', textTransform: 'uppercase', marginBottom: '16px' }}>About</p>
+        <h1 style={{ color: '#111', fontSize: '48px', fontWeight: 400, fontStyle: 'italic', lineHeight: 1, marginBottom: '20px' }}>Letters<br />are our<br />medium.</h1>
+        <p style={{ color: '#666', fontSize: '15px', fontFamily: '"DM Sans", sans-serif', fontWeight: 300, lineHeight: 1.8, marginBottom: '12px' }}>We believe typography is the most powerful design tool. A single letter can evoke emotion, convey meaning, and create beauty.</p>
+        <p style={{ color: '#666', fontSize: '15px', fontFamily: '"DM Sans", sans-serif', fontWeight: 300, lineHeight: 1.8 }}>Every project starts with type. We choose fonts that speak, sizes that breathe, and spacing that flows.</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '24px', marginBottom: '48px' }}>
         {[
-          { title: 'Mission', desc: 'Create designs that inspire and convert.' },
-          { title: 'Vision', desc: 'A web where every site is beautiful and usable.' },
-          { title: 'Values', desc: 'Quality, creativity, and user-first thinking.' },
-          { title: 'Process', desc: 'Research, design, test, iterate, deliver.' },
+          { title: 'Mission', desc: 'Let typography do the talking.' },
+          { title: 'Vision', desc: 'A web where type is the hero.' },
+          { title: 'Values', desc: 'Hierarchy. Rhythm. Contrast. Restraint.' },
+          { title: 'Process', desc: 'Choose type, set scale, refine spacing.' },
         ].map((item, i) => (
-          <div key={i} style={{ background: '#fff', borderRadius: '12px', border: '1px solid #11115', padding: '20px' }}>
-            <h3 style={{ color: '#111', fontSize: '15px', fontWeight: 600, marginBottom: '6px' }}>{item.title}</h3>
-            <p style={{ color: '#11188', fontSize: '13px', lineHeight: 1.6 }}>{item.desc}</p>
+          <div key={i} style={{ padding: '20px', borderBottom: '1px solid #eee' }}>
+            <h3 style={{ color: '#111', fontSize: '18px', fontWeight: 400, fontStyle: 'italic', marginBottom: '8px' }}>{item.title}</h3>
+            <p style={{ color: '#999', fontSize: '13px', fontFamily: '"DM Sans", sans-serif', fontWeight: 300, lineHeight: 1.6 }}>{item.desc}</p>
           </div>
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px', marginBottom: '48px' }}>
         {[
           { value: '100+', label: 'Projects' },
           { value: '5+', label: 'Years' },
           { value: '50+', label: 'Clients' },
           { value: '24/7', label: 'Support' },
         ].map((s, i) => (
-          <div key={i} style={{ background: '#fff', borderRadius: '12px', border: '1px solid #11115', padding: '16px', textAlign: 'center' }}>
-            <p style={{ color: '#111', fontSize: '22px', fontWeight: 700 }}>{s.value}</p>
-            <p style={{ color: '#11166', fontSize: '11px', marginTop: '4px' }}>{s.label}</p>
+          <div key={i} style={{ textAlign: 'center' }}>
+            <p style={{ color: '#111', fontSize: '28px', fontWeight: 400, fontStyle: 'italic' }}>{s.value}</p>
+            <p style={{ color: '#ccc', fontSize: '10px', fontFamily: '"DM Sans", sans-serif', letterSpacing: '3px', textTransform: 'uppercase', marginTop: '4px' }}>{s.label}</p>
           </div>
         ))}
       </div>
 
       <div style={{ textAlign: 'center' }}>
-        <Link href="/typography" style={{ padding: '12px 28px', background: '#11115', color: '#111', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>Back Home</Link>
+        <Link href="/typography" style={{ color: '#111', fontSize: '14px', fontFamily: '"DM Sans", sans-serif', fontWeight: 300, textDecoration: 'none', borderBottom: '1px solid #ddd', paddingBottom: '4px' }}>Back Home</Link>
       </div>
     </div>
   )
