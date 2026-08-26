@@ -72,7 +72,10 @@ export default function ServicesPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {SERVICES.map((plan, index) => (
               <AnimatedText as="div" key={plan.id} delay={index * 150}>
-                <div className={`elevated-card p-8 flex flex-col h-full relative ${plan.popular ? 'ring-2 ring-accent' : ''}`}>
+                <div 
+                  className={`elevated-card p-8 flex flex-col h-full relative ${plan.popular ? 'ring-2 ring-accent' : ''}`}
+                  data-tour={`${plan.id}-plan`}
+                >
                   {plan.popular && (
                     <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-accent text-white px-5 py-1 rounded-full text-caption font-bold uppercase tracking-wider">
                       Most Popular
@@ -118,7 +121,7 @@ export default function ServicesPage() {
           </div>
         </Section>
 
-        <Section id="process" background="surface">
+        <Section id="process" background="surface" data-tour="process-section">
           <div className="text-center mb-16">
             <AnimatedText as="span" className="section-overline">Process</AnimatedText>
             <AnimatedText as="h2" delay={100} className="text-display-md text-text-primary mb-4">
