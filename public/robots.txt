@@ -46,6 +46,6 @@ Allow: /
 User-agent: DuckDuckBot
 Allow: /
 
-# Sitemaps for both domains
-Sitemap: https://mohdhaziq-portfolio.vercel.app/sitemap.xml
+# Sitemaps for both domains — Render is PRIMARY, Vercel is TEMPORARY
 Sitemap: https://mohdhaziq-portfolio.onrender.com/sitemap.xml
+Sitemap: https://mohdhaziq-portfolio.vercel.app/sitemap.xml

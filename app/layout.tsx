@@ -4,8 +4,8 @@ import LayoutShell from '@/components/layout/LayoutShell'
 import AIAssistant from '@/components/AIAssistant'
 
 // ===== BOTH DOMAINS FOR GOOGLE INDEXING =====
-const PRIMARY_URL = 'https://mohdhaziq-portfolio.vercel.app'
-const SECONDARY_URL = 'https://mohdhaziq-portfolio.onrender.com'
+const PRIMARY_URL = 'https://mohdhaziq-portfolio.onrender.com'
+const SECONDARY_URL = 'https://mohdhaziq-portfolio.vercel.app'
 
 export const metadata: Metadata = {
   metadataBase: new URL(PRIMARY_URL),
@@ -488,7 +488,7 @@ export default function RootLayout({
         <meta property="og:locale" content="en_IN" />
         {/* Critical: Tell Google this site name is "Mohd Haziq Portfolio" NOT "Render" */}
         <meta name="sitename" content="Mohd Haziq" />
-        <meta name="hostname" content="mohdhaziq-portfolio.vercel.app" />
+        <meta name="hostname" content="mohdhaziq-portfolio.onrender.com" />
         {/* AI Bot Tags */}
         <meta name="ai-content-declaration" content="human-authored" />
         <meta name="content-origin" content="original" />

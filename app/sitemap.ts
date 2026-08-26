@@ -3,10 +3,10 @@ import { MetadataRoute } from 'next'
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date()
 
-  // Both domains for Google indexing
+  // Both domains for Google indexing — Render is PRIMARY, Vercel is TEMPORARY
   const domains = [
-    'https://mohdhaziq-portfolio.vercel.app',
     'https://mohdhaziq-portfolio.onrender.com',
+    'https://mohdhaziq-portfolio.vercel.app',
   ]
 
   const pages = [
