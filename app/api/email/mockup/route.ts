@@ -1,3 +1,4 @@
+import { getClientIp, rateLimitResponse } from '@/lib/rateLimit'
 import { NextRequest, NextResponse } from 'next/server'
 import { sendMockupRequestEmail } from '@/lib/email/service'
 import { getBearerToken, requireAuth, isValidEmail, escapeHtml } from '@/lib/auth/serverAuth'
@@ -9,6 +10,11 @@ import { getBearerToken, requireAuth, isValidEmail, escapeHtml } from '@/lib/aut
  */
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting
+    const ip = getClientIp(request)
+    const rateLimitErr = rateLimitResponse(ip, 10)
+    if (rateLimitErr) return rateLimitErr
+
     const token = getBearerToken(request)
     const authError = await requireAuth(token)
     if (authError) {

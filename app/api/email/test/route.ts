@@ -1,3 +1,4 @@
+import { getClientIp, rateLimitResponse } from '@/lib/rateLimit'
 import { NextRequest, NextResponse } from 'next/server'
 import { getBearerToken, requireAdmin, verifyIdToken, isValidEmail } from '@/lib/auth/serverAuth'
 import {
@@ -47,6 +48,11 @@ export async function POST(request: NextRequest) {
   // Allow admin to test delivery to an external address
   let body: any = {}
   try { body = await request.json() } catch {}
+    // Rate limiting
+    const ip = getClientIp(request)
+    const rateLimitErr = rateLimitResponse(ip, 10)
+    if (rateLimitErr) return rateLimitErr
+
   const to = (body.email && isValidEmail(body.email)) ? body.email : (caller?.email || '')
   const name = body.name || 'Haziq'
 

@@ -7,8 +7,9 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { getBearerToken, requireAuth } from '@/lib/auth/serverAuth'
+import { getClientIp, rateLimitResponse } from '@/lib/rateLimit'
 
-// Allow common image + document types
+// Allow common image types ONLY (security: block executable/script types)
 const ALLOWED_TYPES = [
   'image/jpeg',
   'image/png',
@@ -18,19 +19,6 @@ const ALLOWED_TYPES = [
   'image/avif',
   'image/bmp',
   'application/pdf',
-  'text/plain',
-  'text/markdown',
-  'application/json',
-  'application/javascript',
-  'text/javascript',
-  'text/css',
-  'application/xml',
-  'text/html',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'application/vnd.ms-excel',
-  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  'application/zip',
 ]
 
 // Max file size: 10 MB
@@ -38,6 +26,11 @@ const MAX_SIZE = 10 * 1024 * 1024
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limiting
+    const ip = getClientIp(req)
+    const rateLimitErr = rateLimitResponse(ip)
+    if (rateLimitErr) return rateLimitErr
+
     // Auth guard — must be a signed-in user
     const token = getBearerToken(req)
     const authError = await requireAuth(token)
@@ -69,10 +62,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Use server-side key ONLY (never accept a client-supplied apiKey)
-    const imgbbApiKey =
-      process.env.IMGBB_API_KEY ||
-      process.env.NEXT_PUBLIC_IMGBB_API_KEY ||
-      ''
+    // SECURITY: Never use NEXT_PUBLIC_ prefix for secrets — it exposes them to the frontend
+    const imgbbApiKey = process.env.IMGBB_API_KEY || ''
 
     if (imgbbApiKey) {
       try {

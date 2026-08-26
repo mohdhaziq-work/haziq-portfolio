@@ -5,12 +5,18 @@
 import { NextResponse } from 'next/server'
 import { getUploadedImages } from '@/lib/firebase/firestore'
 import { getBearerToken, requireAuth } from '@/lib/auth/serverAuth'
+import { getClientIp, rateLimitResponse } from '@/lib/rateLimit'
 
 // Force dynamic: always fetch fresh Firestore data (never cache at build time)
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 export async function GET(request: Request) {
+  // Rate limiting
+  const ip = getClientIp(request)
+  const rateLimitErr = rateLimitResponse(ip)
+  if (rateLimitErr) return rateLimitErr
+
   // Auth guard — must be a signed-in user
   const token = getBearerToken(request)
   const authError = await requireAuth(token)

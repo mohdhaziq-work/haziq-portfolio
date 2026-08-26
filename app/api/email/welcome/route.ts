@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sendWelcomeEmail } from '@/lib/email/service'
 import { getBearerToken, requireAuth, isValidEmail } from '@/lib/auth/serverAuth'
+import { getClientIp, rateLimitResponse } from '@/lib/rateLimit'
 
 /**
  * POST /api/email/welcome
@@ -9,6 +10,11 @@ import { getBearerToken, requireAuth, isValidEmail } from '@/lib/auth/serverAuth
  */
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting
+    const ip = getClientIp(request)
+    const rateLimitErr = rateLimitResponse(ip, 10) // 10 emails per minute max
+    if (rateLimitErr) return rateLimitErr
+
     // Auth guard — require a valid signed-in user
     const token = getBearerToken(request)
     const authError = await requireAuth(token)
