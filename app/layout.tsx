@@ -320,7 +320,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="canonical" href={SITE_URL} />
-        <meta name="google-site-verification" content="Et3XMWbEu-1uWfsnyk2cvSOXHkmBkS2RzG8bjI00D9k" />
+        <meta name="google-site-verification" content="wyJMQtoblRtN-73NQVwaPWFa8JwyJXmuzy58ZOdRn2I" />
         <meta name="theme-color" content="#1a73e8" />
         <meta name="apple-mobile-web-app-title" content="Mohd Haziq" />
         <meta name="application-name" content="Mohd Haziq" />
