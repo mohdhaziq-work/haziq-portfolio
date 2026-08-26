@@ -8,18 +8,30 @@ import { cn } from '@/lib/utils'
 import { openInstagramDM } from '@/lib/instagram'
 import { useAuth } from '@/lib/auth/AuthContext'
 
-/* ─────────────────────────────────────────────
-   Unique "Dual Arc" Hamburger Button
-   - Two curved arcs (smile + frown shape)
-   - Morphs into X on open
-   ───────────────────────────────────────────── */
+// Primary nav links (always visible on desktop)
+const PRIMARY_NAV = [
+  { label: 'Home', href: '/' },
+  { label: 'About', href: '/about' },
+  { label: 'Projects', href: '/projects' },
+  { label: 'Services', href: '/services' },
+  { label: 'Contact', href: '/contact' },
+]
+
+// Secondary nav links (in "More" dropdown on tablet)
+const SECONDARY_NAV = [
+  { label: 'Designs', href: '/designs' },
+  { label: 'Free Mockup', href: '/free-mockup' },
+  { label: 'Blog', href: '/blog' },
+  { label: 'Tutorials', href: '/tutorials' },
+]
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileOpen, setIsMobileOpen] = useState(false)
+  const [isMoreOpen, setIsMoreOpen] = useState(false)
   const [visibleItems, setVisibleItems] = useState<Set<number>>(new Set())
   const pathname = usePathname()
-  const { user, isAdmin, isClient, toggleUserPanel, setUserPanelOpen, requireLogin, setShowLoginPopup } = useAuth()
+  const { user, isAdmin, isClient, toggleUserPanel, setUserPanelOpen, setShowLoginPopup } = useAuth()
 
   // Scroll detection
   useEffect(() => {
@@ -31,6 +43,7 @@ export default function Header() {
   // Close sidebar on route change
   useEffect(() => {
     setIsMobileOpen(false)
+    setIsMoreOpen(false)
     setUserPanelOpen(false)
   }, [pathname, setUserPanelOpen])
 
@@ -43,6 +56,14 @@ export default function Header() {
     }
     return () => { document.body.style.overflow = '' }
   }, [isMobileOpen])
+
+  // Close "More" dropdown when clicking outside
+  useEffect(() => {
+    if (!isMoreOpen) return
+    const handleClick = () => setIsMoreOpen(false)
+    document.addEventListener('click', handleClick)
+    return () => document.removeEventListener('click', handleClick)
+  }, [isMoreOpen])
 
   // Staggered nav item animation
   useEffect(() => {
@@ -78,6 +99,9 @@ export default function Header() {
   // Get user initials
   const userInitial = user?.displayName?.charAt(0) || user?.email?.charAt(0).toUpperCase() || 'U'
 
+  // Check if a secondary nav item is active
+  const isSecondaryActive = SECONDARY_NAV.some(link => link.href === pathname)
+
   return (
     <>
       {/* ─── Header Bar ─── */}
@@ -90,22 +114,21 @@ export default function Header() {
         )}
       >
         <div className="section-container">
-          <div className="flex justify-between items-center h-16 md:h-18">
-
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-2.5 group">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo — compact, no text overflow */}
+            <Link href="/" className="flex items-center gap-2 group flex-shrink-0">
               <img
                 src="/logo-haziq.svg"
                 alt="Haziq Logo"
                 className="w-8 h-8 rounded-lg group-hover:scale-105 transition-transform duration-200"
               />
-              <span className="font-bold text-lg text-text-primary tracking-tight">
+              <span className="font-bold text-base text-text-primary tracking-tight hidden sm:block">
                 {SITE.name}
               </span>
             </Link>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-1" data-tour="nav-links">
+            {/* Desktop Navigation — lg screens show all, md screens show primary + More */}
+            <nav className="hidden lg:flex items-center gap-1" data-tour="nav-links">
               {NAV_LINKS.map((link) => {
                 const isActive = pathname === link.href
                 return (
@@ -113,7 +136,7 @@ export default function Header() {
                     key={link.href}
                     href={link.href}
                     className={cn(
-                      'px-4 py-2 rounded-full text-body-sm font-medium transition-all duration-200',
+                      'px-3 py-2 rounded-full text-body-sm font-medium transition-all duration-200 whitespace-nowrap',
                       isActive
                         ? 'bg-accent-light text-accent'
                         : 'text-text-secondary hover:bg-surface-2 hover:text-text-primary'
@@ -125,8 +148,76 @@ export default function Header() {
               })}
             </nav>
 
+            {/* Tablet Navigation — md to lg: Primary links + More dropdown */}
+            <nav className="hidden md:flex lg:hidden items-center gap-1" data-tour="nav-links">
+              {PRIMARY_NAV.map((link) => {
+                const isActive = pathname === link.href
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={cn(
+                      'px-2.5 py-2 rounded-full text-body-sm font-medium transition-all duration-200 whitespace-nowrap',
+                      isActive
+                        ? 'bg-accent-light text-accent'
+                        : 'text-text-secondary hover:bg-surface-2 hover:text-text-primary'
+                    )}
+                  >
+                    {link.label}
+                  </Link>
+                )
+              })}
+              
+              {/* More dropdown */}
+              <div className="relative">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setIsMoreOpen(prev => !prev)
+                  }}
+                  className={cn(
+                    'px-2.5 py-2 rounded-full text-body-sm font-medium transition-all duration-200 flex items-center gap-1',
+                    isSecondaryActive
+                      ? 'bg-accent-light text-accent'
+                      : 'text-text-secondary hover:bg-surface-2 hover:text-text-primary'
+                  )}
+                >
+                  More
+                  <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                    <path d="m6 9 6 6 6-6" />
+                  </svg>
+                </button>
+                
+                {isMoreOpen && (
+                  <div 
+                    className="absolute top-full right-0 mt-2 bg-white rounded-xl shadow-lg border border-border py-2 min-w-[160px] z-50"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {SECONDARY_NAV.map((link) => {
+                      const isActive = pathname === link.href
+                      return (
+                        <Link
+                          key={link.href}
+                          href={link.href}
+                          onClick={() => setIsMoreOpen(false)}
+                          className={cn(
+                            'block px-4 py-2.5 text-body-sm font-medium transition-colors',
+                            isActive
+                              ? 'bg-accent-light text-accent'
+                              : 'text-text-secondary hover:bg-surface-2 hover:text-text-primary'
+                          )}
+                        >
+                          {link.label}
+                        </Link>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            </nav>
+
             {/* Desktop Right Side: User Button + DM */}
-            <div className="hidden md:flex items-center gap-2">
+            <div className="hidden md:flex items-center gap-2 flex-shrink-0">
               {/* User Button */}
               <button
                 onClick={handleUserClick}
