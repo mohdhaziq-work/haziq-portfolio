@@ -5,11 +5,34 @@ import AnimatedText from '@/components/ui/AnimatedText'
 import { TUTORIALS } from '@/lib/tutorial/data'
 import { useTutorial, Language } from '@/lib/tutorial/TutorialContext'
 import { cn } from '@/lib/utils'
+import { useDeviceDetection, getDeviceLabel, getDeviceIcon, type DeviceType } from '@/lib/hooks/useDeviceDetection'
+import { useState, useMemo } from 'react'
 
 const LANG_LABELS: Record<Language, string> = { en: 'English', hi: 'Hindi', hing: 'Hinglish' }
 
 export default function TutorialsPage() {
   const { startTutorial, language, setLanguage } = useTutorial()
+  const deviceInfo = useDeviceDetection()
+  const [selectedDevice, setSelectedDevice] = useState<DeviceType | 'all'>('all')
+
+  // Filter tutorials based on selected device
+  const filteredTutorials = useMemo(() => {
+    if (selectedDevice === 'all') {
+      return TUTORIALS
+    }
+    return TUTORIALS.filter(tutorial => 
+      !tutorial.device || tutorial.device === 'all' || tutorial.device === selectedDevice
+    )
+  }, [selectedDevice])
+
+  // Device options for filter
+  const deviceOptions: { value: DeviceType | 'all'; label: string; icon: string }[] = [
+    { value: 'all', label: 'All Devices', icon: 'M4 6h16M4 10h16M4 14h16M4 18h16' },
+    { value: 'mobile', label: 'Mobile', icon: getDeviceIcon('mobile') },
+    { value: 'tablet', label: 'Tablet', icon: getDeviceIcon('tablet') },
+    { value: 'desktop', label: 'Desktop', icon: getDeviceIcon('desktop') },
+    { value: 'tv', label: 'TV/Large Screen', icon: getDeviceIcon('tv') },
+  ]
 
   return (
     <div className="pt-24">
@@ -22,6 +45,40 @@ export default function TutorialsPage() {
           </AnimatedText>
           <AnimatedText as="p" delay={200} className="text-body-lg text-text-secondary mb-8">
             Interactive walkthrough guides on the live website. No screenshots — see real elements highlighted right where they are.
+          </AnimatedText>
+
+          {/* Device Detection Info */}
+          <AnimatedText as="div" delay={250} className="mb-6">
+            <div className="inline-flex items-center gap-2 bg-accent/10 text-accent px-4 py-2 rounded-full text-body-sm font-medium">
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                <path d={getDeviceIcon(deviceInfo.type)} />
+              </svg>
+              Detected: {getDeviceLabel(deviceInfo.type)} ({deviceInfo.width}x{deviceInfo.height})
+            </div>
+          </AnimatedText>
+
+          {/* Device Filter */}
+          <AnimatedText as="div" delay={275} className="flex items-center justify-center gap-2 mb-6">
+            <span className="text-body-sm text-text-tertiary font-medium">Device:</span>
+            <div className="flex items-center gap-1 bg-surface-2 rounded-lg p-1 flex-wrap justify-center">
+              {deviceOptions.map(option => (
+                <button
+                  key={option.value}
+                  onClick={() => setSelectedDevice(option.value)}
+                  className={cn(
+                    'px-3 py-1.5 rounded-md text-body-sm font-semibold transition-all flex items-center gap-1.5',
+                    selectedDevice === option.value
+                      ? 'bg-white text-accent shadow-sm'
+                      : 'text-text-tertiary hover:text-text-secondary'
+                  )}
+                >
+                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                    <path d={option.icon} />
+                  </svg>
+                  <span className="hidden sm:inline">{option.label}</span>
+                </button>
+              ))}
+            </div>
           </AnimatedText>
 
           {/* Language Selector */}
@@ -50,7 +107,7 @@ export default function TutorialsPage() {
       {/* Tutorial Grid */}
       <Section background="surface">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {TUTORIALS.map((tutorial, index) => (
+          {filteredTutorials.map((tutorial, index) => (
             <AnimatedText as="div" key={tutorial.id} delay={index * 100}>
               <button
                 onClick={() => startTutorial(tutorial)}
@@ -76,6 +133,16 @@ export default function TutorialsPage() {
                   <span className="absolute bottom-3 right-3 bg-black/30 backdrop-blur-sm text-white text-[11px] font-semibold px-2.5 py-1 rounded-full">
                     {tutorial.steps.length} steps
                   </span>
+
+                  {/* Device badge */}
+                  {tutorial.device && tutorial.device !== 'all' && (
+                    <span className="absolute top-3 left-3 bg-black/30 backdrop-blur-sm text-white text-[11px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1">
+                      <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                        <path d={getDeviceIcon(tutorial.device as DeviceType)} />
+                      </svg>
+                      {getDeviceLabel(tutorial.device as DeviceType)}
+                    </span>
+                  )}
                 </div>
 
                 {/* Info */}
@@ -97,6 +164,21 @@ export default function TutorialsPage() {
             </AnimatedText>
           ))}
         </div>
+
+        {/* No tutorials found */}
+        {filteredTutorials.length === 0 && (
+          <div className="text-center py-12">
+            <div className="w-16 h-16 bg-surface-2 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5" className="text-text-tertiary">
+                <path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+              </svg>
+            </div>
+            <h3 className="text-headline text-text-primary mb-2">No tutorials found</h3>
+            <p className="text-body-md text-text-secondary">
+              No tutorials available for {getDeviceLabel(selectedDevice as DeviceType)} device. Try selecting &quot;All Devices&quot;.
+            </p>
+          </div>
+        )}
       </Section>
 
       {/* How It Works */}
@@ -139,6 +221,145 @@ export default function TutorialsPage() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </Section>
+
+      {/* Device-Specific Tips */}
+      <Section background="surface">
+        <div className="max-w-4xl mx-auto">
+          <AnimatedText as="h2" className="text-display-sm text-text-primary mb-8 text-center">
+            Device-Specific <span className="text-accent">Tips</span>
+          </AnimatedText>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Mobile Tips */}
+            <div className="elevated-card p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                  <svg width="20" height="20" fill="none" stroke="#3b82f6" viewBox="0 0 24 24" strokeWidth="2">
+                    <path d={getDeviceIcon('mobile')} />
+                  </svg>
+                </div>
+                <h3 className="font-semibold text-text-primary">Mobile Tips</h3>
+              </div>
+              <ul className="space-y-2 text-body-sm text-text-secondary">
+                <li className="flex items-start gap-2">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" className="flex-shrink-0 mt-0.5">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Swipe left/right to navigate between tutorial steps
+                </li>
+                <li className="flex items-start gap-2">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" className="flex-shrink-0 mt-0.5">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Tap on highlighted elements to interact
+                </li>
+                <li className="flex items-start gap-2">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" className="flex-shrink-0 mt-0.5">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Use pinch-to-zoom for detailed views
+                </li>
+              </ul>
+            </div>
+
+            {/* Tablet Tips */}
+            <div className="elevated-card p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                  <svg width="20" height="20" fill="none" stroke="#8b5cf6" viewBox="0 0 24 24" strokeWidth="2">
+                    <path d={getDeviceIcon('tablet')} />
+                  </svg>
+                </div>
+                <h3 className="font-semibold text-text-primary">Tablet Tips</h3>
+              </div>
+              <ul className="space-y-2 text-body-sm text-text-secondary">
+                <li className="flex items-start gap-2">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" className="flex-shrink-0 mt-0.5">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Works in both portrait and landscape mode
+                </li>
+                <li className="flex items-start gap-2">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" className="flex-shrink-0 mt-0.5">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Split-screen support for multitasking
+                </li>
+                <li className="flex items-start gap-2">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" className="flex-shrink-0 mt-0.5">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Touch and stylus input supported
+                </li>
+              </ul>
+            </div>
+
+            {/* Desktop Tips */}
+            <div className="elevated-card p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                  <svg width="20" height="20" fill="none" stroke="#10b981" viewBox="0 0 24 24" strokeWidth="2">
+                    <path d={getDeviceIcon('desktop')} />
+                  </svg>
+                </div>
+                <h3 className="font-semibold text-text-primary">Desktop Tips</h3>
+              </div>
+              <ul className="space-y-2 text-body-sm text-text-secondary">
+                <li className="flex items-start gap-2">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" className="flex-shrink-0 mt-0.5">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Use keyboard arrows to navigate steps
+                </li>
+                <li className="flex items-start gap-2">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" className="flex-shrink-0 mt-0.5">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Hover over elements for more info
+                </li>
+                <li className="flex items-start gap-2">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" className="flex-shrink-0 mt-0.5">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Full-screen mode available
+                </li>
+              </ul>
+            </div>
+
+            {/* TV Tips */}
+            <div className="elevated-card p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
+                  <svg width="20" height="20" fill="none" stroke="#f97316" viewBox="0 0 24 24" strokeWidth="2">
+                    <path d={getDeviceIcon('tv')} />
+                  </svg>
+                </div>
+                <h3 className="font-semibold text-text-primary">TV/Large Screen Tips</h3>
+              </div>
+              <ul className="space-y-2 text-body-sm text-text-secondary">
+                <li className="flex items-start gap-2">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" className="flex-shrink-0 mt-0.5">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Optimized for viewing from distance
+                </li>
+                <li className="flex items-start gap-2">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" className="flex-shrink-0 mt-0.5">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Larger text and UI elements
+                </li>
+                <li className="flex items-start gap-2">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" className="flex-shrink-0 mt-0.5">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Remote control navigation support
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </Section>

@@ -20,6 +20,7 @@ export interface TutorialData {
   description: Record<Language, string>
   steps: TourStep[]
   color: string
+  device?: 'all' | 'mobile' | 'tablet' | 'desktop' | 'tv'
 }
 
 interface TutorialContextType {

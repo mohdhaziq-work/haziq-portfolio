@@ -14,6 +14,7 @@ export const TUTORIALS: TutorialData[] = [
       hing: 'Portfolio ka poora tour lo. Saare pages aur features live dekho.',
     },
     color: 'bg-accent',
+    device: 'all',
     steps: [
       {
         target: 'hero-section',
@@ -96,6 +97,7 @@ export const TUTORIALS: TutorialData[] = [
       hing: 'Contact ke sabse fast tarike seekho — DM button, contact form, ya sidha Instagram message.',
     },
     color: 'bg-success',
+    device: 'all',
     steps: [
       {
         target: 'dm-btn',
@@ -178,6 +180,7 @@ export const TUTORIALS: TutorialData[] = [
       hing: 'Step-by-step: sign in karo, project details submit karo, aur progress track karo.',
     },
     color: 'bg-warning',
+    device: 'all',
     steps: [
       {
         target: 'user-btn',
@@ -238,6 +241,7 @@ export const TUTORIALS: TutorialData[] = [
       hing: 'Teeno plans samjho — Starter, Business, aur Premium — aur chuno jo aapke business ke liye sahi ho.',
     },
     color: 'bg-lavender',
+    device: 'all',
     steps: [
       {
         target: 'starter-plan',
@@ -298,6 +302,7 @@ export const TUTORIALS: TutorialData[] = [
       hing: 'Jaano ki apne portal mein project status, progress, delivery date aur developer notes kaise dekho.',
     },
     color: 'bg-coral',
+    device: 'all',
     steps: [
       {
         target: 'user-btn',
@@ -342,6 +347,240 @@ export const TUTORIALS: TutorialData[] = [
           hing: 'Developer notes jodta hai jaise "Homepage ho gaya, contact form par kaam chal raha hai." Delivery date bhi dikhta hai.',
         },
         position: 'bottom',
+      },
+    ],
+  },
+  // NEW TUTORIALS
+  {
+    id: 'design-showcase',
+    title: {
+      en: '29 Design Showcase',
+      hi: '29 डिज़ाइन शोकेस',
+      hing: '29 Design Showcase',
+    },
+    description: {
+      en: 'Explore all 29 unique design styles — from Glassmorphism to Cyberpunk, each with full demo pages.',
+      hi: 'सभी 29 यूनिक डिज़ाइन स्टाइल देखें — ग्लासमॉर्फिज्म से साइबरपंक तक, हर एक के साथ फुल डेमो पेज।',
+      hing: 'Saare 29 unique design styles dekho — Glassmorphism se Cyberpunk tak, har ek ke saath full demo pages.',
+    },
+    color: 'bg-gradient-to-r from-purple-500 to-pink-500',
+    device: 'all',
+    steps: [
+      {
+        target: 'nav-links',
+        page: '/',
+        title: { en: 'Go to Designs Page', hi: 'डिज़ाइन पेज पर जाएं', hing: 'Designs page par jao' },
+        description: {
+          en: 'Click "Designs" in the navigation menu. This opens the design showcase with all 29 unique design styles.',
+          hi: 'नेविगेशन मेनू में "Designs" पर क्लिक करें। इससे 29 यूनिक डिज़ाइन स्टाइल वाला शोकेस खुलता है।',
+          hing: 'Navigation menu mein "Designs" par click karo. Isse 29 unique design styles wala showcase khulta hai.',
+        },
+        position: 'bottom',
+      },
+      {
+        target: 'hero-section',
+        page: '/designs',
+        title: { en: 'Browse All Designs', hi: 'सभी डिज़ाइन ब्राउज़ करें', hing: 'Saare designs browse karo' },
+        description: {
+          en: 'Each design card shows a preview, name, and category. Click any design to see its full demo website with multiple pages.',
+          hi: 'हर डिज़ाइन कार्ड में प्रीव्यू, नाम और कैटेगरी दिखती है। किसी भी डिज़ाइन पर क्लिक करें और फुल डेमो वेबसाइट देखें।',
+          hing: 'Har design card mein preview, naam aur category dikhti hai. Kisi bhi design par click karo aur full demo website dekho.',
+        },
+        position: 'bottom',
+      },
+      {
+        target: 'hero-section',
+        page: '/designs',
+        title: { en: 'Filter by Category', hi: 'कैटेगरी से फ़िल्टर करें', hing: 'Category se filter karo' },
+        description: {
+          en: 'Use category filters to find designs by style — Modern, Classic, Creative, Minimal, or Dark themes.',
+          hi: 'कैटेगरी फ़िल्टर से स्टाइल के हिसाब से डिज़ाइन खोजें — मॉडर्न, क्लासिक, क्रिएटिव, मिनिमल, या डार्क थीम।',
+          hing: 'Category filters se style ke hisaab se designs khojo — Modern, Classic, Creative, Minimal, ya Dark themes.',
+        },
+        position: 'bottom',
+      },
+      {
+        target: 'hero-section',
+        page: '/designs',
+        title: { en: 'Each Design Has5 Pages', hi: 'हर डिज़ाइन में 5 पेज हैं', hing: 'Har design mein 5 pages hain' },
+        description: {
+          en: 'Every design includes Home, About, Gallery, Services, and Contact pages — all styled in that unique design language.',
+          hi: 'हर डिज़ाइन में Home, About, Gallery, Services, और Contact पेज हैं — सभी उस यूनिक डिज़ाइन लैंग्वेज में स्टाइल्ड।',
+          hing: 'Har design mein Home, About, Gallery, Services, aur Contact pages hain — sab us unique design language mein styled.',
+        },
+        position: 'bottom',
+      },
+    ],
+  },
+  {
+    id: 'google-signin',
+    title: {
+      en: 'Google Sign-In & Privacy',
+      hi: 'Google साइन-इन और प्राइवेसी',
+      hing: 'Google Sign-In aur Privacy',
+    },
+    description: {
+      en: 'Learn how Google Sign-In works, what data we access, and how your privacy is protected.',
+      hi: 'जानें Google साइन-इन कैसे काम करता है, हम कौन सा डेटा एक्सेस करते हैं, और आपकी प्राइवेसी कैसे सुरक्षित है।',
+      hing: 'Jaano Google Sign-In kaise kaam karta hai, hum kaun sa data access karte hain, aur aapki privacy kaise secure hai.',
+    },
+    color: 'bg-gradient-to-r from-blue-500 to-green-500',
+    device: 'all',
+    steps: [
+      {
+        target: 'user-btn',
+        page: '/',
+        title: { en: 'Click Sign In Button', hi: 'साइन इन बटन पर क्लिक करें', hing: 'Sign In button par click karo' },
+        description: {
+          en: 'Click the Google "G" icon or "Sign In" button in the header. A popup will appear asking you to choose your Google account.',
+          hi: 'हेडर में Google "G" आइकन या "Sign In" बटन पर क्लिक करें। एक पॉपअप आएगा जो आपका Google अकाउंट चुनने को कहेगा।',
+          hing: 'Header mein Google "G" icon ya "Sign In" button par click karo. Ek popup aayega jo aapka Google account chunne ko kahega.',
+        },
+        position: 'bottom',
+      },
+      {
+        target: 'user-btn',
+        page: '/',
+        title: { en: 'What Data We Access', hi: 'हम कौन सा डेटा एक्सेस करते हैं', hing: 'Hum kaun sa data access karte hain' },
+        description: {
+          en: 'We ONLY access: your email address, name, and profile photo. We do NOT access your contacts, files, calendar, or any other Google data.',
+          hi: 'हम केवल एक्सेस करते हैं: आपका ईमेल, नाम और प्रोफ़ाइल फ़ोटो। हम आपके कॉन्टैक्ट्स, फ़ाइलें, कैलेंडर या कोई अन्य Google डेटा एक्सेस नहीं करते।',
+          hing: 'Hum sirf access karte hain: aapka email, naam aur profile photo. Hum aapke contacts, files, calendar ya koi aur Google data access nahi karte.',
+        },
+        position: 'bottom',
+      },
+      {
+        target: 'user-btn',
+        page: '/',
+        title: { en: 'Privacy Policy & Terms', hi: 'प्राइवेसी पॉलिसी और टर्म्स', hing: 'Privacy Policy aur Terms' },
+        description: {
+          en: 'Before signing in, you can read our Privacy Policy and Terms of Service. Links are available in the login popup and footer.',
+          hi: 'साइन इन करने से पहले, आप हमारी प्राइवेसी पॉलिसी और टर्म्स ऑफ़ सर्विस पढ़ सकते हैं। लिंक लॉगिन पॉपअप में उपलब्ध हैं।',
+          hing: 'Sign in karne se pehle, aap hamari Privacy Policy aur Terms of Service padh sakte ho. Links login popup mein available hain.',
+        },
+        position: 'bottom',
+      },
+      {
+        target: 'user-btn',
+        page: '/',
+        title: { en: 'Your Data is Safe', hi: 'आपका डेटा सुरक्षित है', hing: 'Aapka data safe hai' },
+        description: {
+          en: 'Your data is stored securely in Firebase with encryption. We never share your information with third parties. You can delete your account anytime.',
+          hi: 'आपका डेटा Firebase में एन्क्रिप्शन के साथ सुरक्षित रूप से स्टोर है। हम कभी भी आपकी जानकारी तीसरे पक्ष को साझा नहीं करते।',
+          hing: 'Aapka data Firebase mein encryption ke saath secure store hai. Hum kabhi bhi aapki information third parties ko share nahi karte.',
+        },
+        position: 'bottom',
+      },
+    ],
+  },
+  {
+    id: 'user-portal',
+    title: {
+      en: 'User Portal Guide',
+      hi: 'यूज़र पोर्टल गाइड',
+      hing: 'User Portal Guide',
+    },
+    description: {
+      en: 'Learn how to use your client portal — track projects, view status, and manage your requests.',
+      hi: 'अपना क्लाइंट पोर्टल कैसे उपयोग करें — प्रोजेक्ट ट्रैक करें, स्टेटस देखें, और अनुरोध प्रबंधित करें।',
+      hing: 'Apna client portal kaise use karo — projects track karo, status dekho, aur requests manage karo.',
+    },
+    color: 'bg-gradient-to-r from-orange-500 to-red-500',
+    device: 'all',
+    steps: [
+      {
+        target: 'user-btn',
+        page: '/',
+        title: { en: 'Open User Panel', hi: 'यूज़र पैनल खोलें', hing: 'User Panel kholo' },
+        description: {
+          en: 'After signing in, click your profile photo in the header. This opens the User Panel sidebar on the right.',
+          hi: 'साइन इन करने के बाद, हेडर में अपनी प्रोफ़ाइल फ़ोटो पर क्लिक करें। इससे दाईं ओर यूज़र पैनल साइडबार खुलता है।',
+          hing: 'Sign in karne ke baad, header mein apni profile photo par click karo. Isse right side mein User Panel sidebar khulta hai.',
+        },
+        position: 'bottom',
+      },
+      {
+        target: 'hero-section',
+        page: '/',
+        title: { en: 'My Projects Tab', hi: 'माय प्रोजेक्ट्स टैब', hing: 'My Projects tab' },
+        description: {
+          en: 'The "My Projects" tab shows all your submitted projects with business name, plan, status, and progress percentage.',
+          hi: '"My Projects" टैब आपके सभी सबमिट किए प्रोजेक्ट दिखाता है — बिज़नेस नाम, प्लान, स्टेटस और प्रोग्रेस प्रतिशत।',
+          hing: '"My Projects" tab aapke saare submitted projects dikhata hai — business naam, plan, status aur progress percentage.',
+        },
+        position: 'bottom',
+      },
+      {
+        target: 'hero-section',
+        page: '/',
+        title: { en: 'Project Status Colors', hi: 'प्रोजेक्ट स्टेटस कलर', hing: 'Project status colors' },
+        description: {
+          en: 'Status colors: Yellow=Inquiry, Blue=Discussion, Purple=Confirmed, Orange=In Progress, Green=Review, Gold=Delivered.',
+          hi: 'स्टेटस कलर: पीला=इन्क्वायरी, नीला=डिस्कशन, बैंगनी=कन्फर्म्ड, नारंगी=इन प्रोग्रेस, हरा=रिव्यू, सुनहरा=डिलीवर्ड।',
+          hing: 'Status colors: Peela=Inquiry, Neela=Discussion, Baingani=Confirmed, Narangi=In Progress, Hara=Review, Sunhera=Delivered.',
+        },
+        position: 'bottom',
+      },
+      {
+        target: 'hero-section',
+        page: '/',
+        title: { en: 'Developer Notes', hi: 'डेवलपर नोट्स', hing: 'Developer notes' },
+        description: {
+          en: 'The developer adds notes like "Homepage done, working on contact form." These appear in your project details so you know what\'s happening.',
+          hi: 'डेवलपर नोट्स जोड़ता है जैसे "होमपेज हो गया, कॉन्टैक्ट फॉर्म पर काम चल रहा है।" ये आपकी प्रोजेक्ट डिटेल्स में दिखते हैं।',
+          hing: 'Developer notes jodta hai jaise "Homepage ho gaya, contact form par kaam chal raha hai." Ye aapki project details mein dikhte hain.',
+        },
+        position: 'bottom',
+      },
+    ],
+  },
+  {
+    id: 'cookie-consent',
+    title: {
+      en: 'Cookie Consent',
+      hi: 'कुकी सहमति',
+      hing: 'Cookie Consent',
+    },
+    description: {
+      en: 'Understand how cookies work on this website and how to manage your preferences.',
+      hi: 'समझें कि इस वेबसाइट पर कुकीज़ कैसे काम करती हैं और अपनी प्राथमिकताएं कैसे प्रबंधित करें।',
+      hing: 'Samjho ki is website par cookies kaise kaam karti hain aur apni preferences kaise manage karo.',
+    },
+    color: 'bg-gradient-to-r from-yellow-500 to-orange-500',
+    device: 'all',
+    steps: [
+      {
+        target: 'hero-section',
+        page: '/',
+        title: { en: 'Cookie Banner Appears', hi: 'कुकी बैनर दिखता है', hing: 'Cookie banner dikhta hai' },
+        description: {
+          en: 'When you first visit, a cookie consent banner appears at the bottom. It explains that we use cookies for better experience.',
+          hi: 'जब आप पहली बार विज़िट करते हैं, नीचे एक कुकी सहमति बैनर दिखता है। यह बताता है कि हम बेहतर अनुभव के लिए कुकीज़ का उपयोग करते हैं।',
+          hing: 'Jab aap pehli baar visit karte ho, neeche ek cookie consent banner dikhta hai. Ye batata hai ki hum better experience ke liye cookies use karte hain.',
+        },
+        position: 'top',
+      },
+      {
+        target: 'hero-section',
+        page: '/',
+        title: { en: 'Accept or Decline', hi: 'स्वीकार करें या अस्वीकार', hing: 'Accept karo ya Decline' },
+        description: {
+          en: 'Click "Accept All" to allow cookies for analytics and personalization. Click "Decline" to use the site without cookies.',
+          hi: 'एनालिटिक्स और पर्सनलाइज़ेशन के लिए कुकीज़ की अनुमति देने के लिए "Accept All" पर क्लिक करें। बिना कुकीज़ के साइट उपयोग करने के लिए "Decline" पर क्लिक करें।',
+          hing: 'Analytics aur personalization ke liye cookies ki permission dene ke liye "Accept All" par click karo. Bina cookies ke site use karne ke liye "Decline" par click karo.',
+        },
+        position: 'top',
+      },
+      {
+        target: 'hero-section',
+        page: '/',
+        title: { en: 'Learn More in Privacy Policy', hi: 'प्राइवेसी पॉलिसी में और जानें', hing: 'Privacy Policy mein aur jaano' },
+        description: {
+          en: 'Click "Learn more" in the cookie banner to read our full Privacy Policy about how we use cookies and protect your data.',
+          hi: 'कुकी बैनर में "Learn more" पर क्लिक करें और हमारी पूरी प्राइवेसी पॉलिसी पढ़ें।',
+          hing: 'Cookie banner mein "Learn more" par click karo aur hamari full Privacy Policy padho.',
+        },
+        position: 'top',
       },
     ],
   },
