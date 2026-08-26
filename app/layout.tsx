@@ -3,7 +3,8 @@ import './globals.css'
 import LayoutShell from '@/components/layout/LayoutShell'
 import AIAssistant from '@/components/AIAssistant'
 
-const SITE_URL = 'https://mohdhaziq-portfolio.onrender.com'
+// Primary domain for metadata (Google will index both)
+const SITE_URL = 'https://mohdhaziq-portfolio.vercel.app'
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

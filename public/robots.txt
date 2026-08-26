@@ -34,4 +34,6 @@ User-agent: Bingbot
 Allow: /
 Crawl-delay: 1
 
+# Sitemaps for both domains
+Sitemap: https://mohdhaziq-portfolio.vercel.app/sitemap.xml
 Sitemap: https://mohdhaziq-portfolio.onrender.com/sitemap.xml
