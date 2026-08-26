@@ -3,103 +3,55 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
-export default function WatercolorHome() {
+export default function Home() {
   const [mounted, setMounted] = useState(false)
-  const [activeColor, setActiveColor] = useState(0)
-
   useEffect(() => { setMounted(true) }, [])
   if (!mounted) return null
 
-  const palettes = [
-    { name: 'Sunset', colors: ['#ff6b6b', '#ffa500', '#ffd93d', '#ff9a9e'] },
-    { name: 'Ocean', colors: ['#667eea', '#764ba2', '#4facfe', '#00f2fe'] },
-    { name: 'Garden', colors: ['#a8e6cf', '#dcedc1', '#ffd3b6', '#ffaaa5'] },
-  ]
-
-  const current = palettes[activeColor]
-
   return (
-    <div className="min-h-screen" style={{ background: '#fefefe', fontFamily: '"Nunito", sans-serif' }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap');`}</style>
+    <div style={{ padding: '32px 20px', maxWidth: '900px', margin: '0 auto' }}>
+      <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #87ceeb20', padding: '32px 24px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <p style={{ color: '#87ceeb', fontSize: '12px', fontWeight: 600, letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '12px' }}>WATERCOLOR DESIGN</p>
+          <h1 style={{ color: '#5a6c7d', fontSize: '40px', fontWeight: 700, marginBottom: '16px', lineHeight: 1.1 }}>Watercolor</h1>
+          <p style={{ color: '#5a6c7d88', fontSize: '15px', maxWidth: '480px', margin: '0 auto', lineHeight: 1.7 }}>A complete watercolor design showcase with interactive elements and professional aesthetics.</p>
+        </div>
+      </div>
 
-      {/* Hero */}
-      <section className="px-4 py-8 md:py-16">
-        <div className="max-w-4xl mx-auto">
-          <div className="p-6 md:p-10" style={{ background: '#ffffff', borderRadius: '8px', boxShadow: '0 2px 20px rgba(0,0,0,0.04)' }}>
-            <div className="text-center mb-8">
-              <div className="inline-block mb-4 px-4 py-1.5" style={{ background: '#87ceeb20', borderRadius: '9999px' }}>
-                <span className="text-xs font-bold tracking-widest uppercase" style={{ color: '#87ceeb' }}>Watercolor</span>
-              </div>
-              <h1 className="text-4xl md:text-5xl font-light mb-4" style={{ color: '#5a6c7d' }}>
-                Painted Dreams
-              </h1>
-              <p className="text-sm max-w-md mx-auto" style={{ color: '#8fa5b5' }}>
-                Soft, painted watercolor effects that bring warmth and artistic flair to digital design.
-              </p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginTop: '24px', marginBottom: '24px' }}>
+        {[
+          { title: 'Principle One', desc: 'Core design philosophy that drives every decision.' },
+          { title: 'Principle Two', desc: 'Attention to detail for cohesive visual experience.' },
+          { title: 'Principle Three', desc: 'User-first approach ensuring accessibility.' },
+        ].map((f, i) => (
+          <div key={i} style={{ background: '#fff', borderRadius: '12px', border: '1px solid #87ceeb15', padding: '20px' }}>
+            <div style={{ width: '32px', height: '32px', background: '#87ceeb15', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
+              <span style={{ color: '#87ceeb', fontSize: '14px', fontWeight: 700 }}>{i + 1}</span>
             </div>
-
-            {/* Palette Selector */}
-            <div className="flex justify-center gap-3 mb-8">
-              {palettes.map((palette, i) => (
-                <button
-                  key={i}
-                  onClick={() => setActiveColor(i)}
-                  className="px-4 py-2 text-xs font-semibold transition-all"
-                  style={{
-                    background: activeColor === i ? '#5a6c7d' : '#f5f5f5',
-                    color: activeColor === i ? '#fff' : '#8fa5b5',
-                    borderRadius: '9999px',
-                  }}
-                >
-                  {palette.name}
-                </button>
-              ))}
-            </div>
-
-            {/* Watercolor blobs */}
-            <div className="flex justify-center gap-4 mb-8">
-              {current.colors.map((color, i) => (
-                <div key={i} className="w-20 h-20" style={{
-                  background: `radial-gradient(circle, ${color}80 0%, ${color}20 70%, transparent 100%)`,
-                  borderRadius: '60% 40% 50% 50% / 50% 60% 40% 50%',
-                  filter: 'blur(2px)',
-                }} />
-              ))}
-            </div>
-
-            {/* Watercolor card */}
-            <div className="max-w-md mx-auto mb-8 p-6" style={{
-              background: `linear-gradient(135deg, ${current.colors[0]}15, ${current.colors[1]}10, ${current.colors[2]}15)`,
-              borderRadius: '8px',
-              border: `1px solid ${current.colors[0]}20`,
-            }}>
-              <p className="text-lg font-light text-center" style={{ color: '#5a6c7d' }}>
-                &ldquo;Art washes away from the soul the dust of everyday life.&rdquo;
-              </p>
-              <p className="text-xs text-center mt-3" style={{ color: '#8fa5b5' }}>Pablo Picasso</p>
-            </div>
-
-            {/* CTA */}
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link href="/watercolor/gallery" className="px-8 py-3 text-sm font-semibold text-center text-white" style={{
-                background: `linear-gradient(135deg, ${current.colors[0]}, ${current.colors[1]})`,
-                borderRadius: '9999px',
-              }}>
-                View Gallery
-              </Link>
-              <Link href="/designs" className="px-8 py-3 text-sm text-center" style={{ color: '#8fa5b5', border: '1px solid #e8eff5', borderRadius: '9999px' }}>
-                All Designs
-              </Link>
-            </div>
+            <h3 style={{ color: '#5a6c7d', fontSize: '15px', fontWeight: 600, marginBottom: '6px' }}>{f.title}</h3>
+            <p style={{ color: '#5a6c7d88', fontSize: '13px', lineHeight: 1.6 }}>{f.desc}</p>
           </div>
-        </div>
-      </section>
+        ))}
+      </div>
 
-      <section className="px-4 py-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <Link href="/" className="text-xs" style={{ color: '#c5d5e0' }}>Back to Portfolio</Link>
-        </div>
-      </section>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '24px' }}>
+        {[
+          { value: '100+', label: 'Projects' },
+          { value: '100%', label: 'Quality' },
+          { value: '24/7', label: 'Support' },
+          { value: '5.0', label: 'Rating' },
+        ].map((s, i) => (
+          <div key={i} style={{ background: '#fff', borderRadius: '12px', border: '1px solid #87ceeb15', padding: '16px', textAlign: 'center' }}>
+            <p style={{ color: '#87ceeb', fontSize: '22px', fontWeight: 700 }}>{s.value}</p>
+            <p style={{ color: '#5a6c7d66', fontSize: '11px', marginTop: '4px' }}>{s.label}</p>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+        <Link href="/watercolor/gallery" style={{ padding: '12px 28px', background: '#87ceeb', color: '#fff', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>View Gallery</Link>
+        <Link href="/watercolor/about" style={{ padding: '12px 28px', background: '#87ceeb15', color: '#87ceeb', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>Learn More</Link>
+      </div>
     </div>
   )
 }

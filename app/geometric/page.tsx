@@ -3,102 +3,55 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
-export default function GeometricHome() {
+export default function Home() {
   const [mounted, setMounted] = useState(false)
-  const [rotation, setRotation] = useState(0)
-
-  useEffect(() => {
-    setMounted(true)
-    const interval = setInterval(() => setRotation(r => (r + 1) % 360), 50)
-    return () => clearInterval(interval)
-  }, [])
+  useEffect(() => { setMounted(true) }, [])
   if (!mounted) return null
 
   return (
-    <div className="min-h-screen" style={{ background: '#f8f9fa', fontFamily: '"Inter", sans-serif' }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');`}</style>
+    <div style={{ padding: '32px 20px', maxWidth: '900px', margin: '0 auto' }}>
+      <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #ff634820', padding: '32px 24px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <p style={{ color: '#ff6348', fontSize: '12px', fontWeight: 600, letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '12px' }}>GEOMETRIC DESIGN</p>
+          <h1 style={{ color: '#2d3436', fontSize: '40px', fontWeight: 700, marginBottom: '16px', lineHeight: 1.1 }}>Geometric</h1>
+          <p style={{ color: '#2d343688', fontSize: '15px', maxWidth: '480px', margin: '0 auto', lineHeight: 1.7 }}>A complete geometric design showcase with interactive elements and professional aesthetics.</p>
+        </div>
+      </div>
 
-      {/* Hero */}
-      <section className="px-4 py-8 md:py-16">
-        <div className="max-w-4xl mx-auto">
-          <div className="p-6 md:p-10" style={{ background: '#ffffff', borderRadius: '0' }}>
-            <div className="text-center mb-8">
-              <div className="inline-block mb-4 px-4 py-1.5" style={{ background: '#ff634820' }}>
-                <span className="text-xs font-bold tracking-widest uppercase" style={{ color: '#ff6348' }}>Geometric Design</span>
-              </div>
-              <h1 className="text-4xl md:text-6xl font-extrabold mb-4" style={{ color: '#2d3436', letterSpacing: '-2px' }}>
-                Shape Language
-              </h1>
-              <p className="text-sm max-w-md mx-auto" style={{ color: '#636e72' }}>
-                Bold shapes and geometric patterns create structure, rhythm, and visual interest.
-              </p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginTop: '24px', marginBottom: '24px' }}>
+        {[
+          { title: 'Principle One', desc: 'Core design philosophy that drives every decision.' },
+          { title: 'Principle Two', desc: 'Attention to detail for cohesive visual experience.' },
+          { title: 'Principle Three', desc: 'User-first approach ensuring accessibility.' },
+        ].map((f, i) => (
+          <div key={i} style={{ background: '#fff', borderRadius: '12px', border: '1px solid #ff634815', padding: '20px' }}>
+            <div style={{ width: '32px', height: '32px', background: '#ff634815', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
+              <span style={{ color: '#ff6348', fontSize: '14px', fontWeight: 700 }}>{i + 1}</span>
             </div>
-
-            {/* Rotating Geometric Pattern */}
-            <div className="flex justify-center mb-8">
-              <div className="relative w-48 h-48">
-                {[0, 1, 2, 3].map(i => (
-                  <div key={i} className="absolute inset-0 flex items-center justify-center" style={{
-                    transform: `rotate(${rotation + i * 30}deg)`,
-                  }}>
-                    <div style={{
-                      width: 120 + i * 20,
-                      height: 120 + i * 20,
-                      border: `3px solid ${['#ff6348', '#ffa502', '#2ed573', '#1e90ff'][i]}`,
-                      opacity: 0.3 + i * 0.15,
-                      borderRadius: i % 2 === 0 ? '0' : '50%',
-                    }} />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Shape Grid */}
-            <div className="grid grid-cols-4 gap-3 mb-8">
-              {[
-                { shape: 'square', color: '#ff6348' },
-                { shape: 'circle', color: '#ffa502' },
-                { shape: 'triangle', color: '#2ed573' },
-                { shape: 'diamond', color: '#1e90ff' },
-                { shape: 'circle', color: '#ff6348' },
-                { shape: 'square', color: '#ffa502' },
-                { shape: 'diamond', color: '#2ed573' },
-                { shape: 'triangle', color: '#1e90ff' },
-              ].map((item, i) => (
-                <div key={i} className="aspect-square flex items-center justify-center" style={{ background: `${item.color}15` }}>
-                  {item.shape === 'square' && <div className="w-8 h-8" style={{ background: item.color }} />}
-                  {item.shape === 'circle' && <div className="w-8 h-8 rounded-full" style={{ background: item.color }} />}
-                  {item.shape === 'triangle' && (
-                    <div style={{
-                      width: 0, height: 0,
-                      borderLeft: '16px solid transparent',
-                      borderRight: '16px solid transparent',
-                      borderBottom: `28px solid ${item.color}`,
-                    }} />
-                  )}
-                  {item.shape === 'diamond' && <div className="w-6 h-6" style={{ background: item.color, transform: 'rotate(45deg)' }} />}
-                </div>
-              ))}
-            </div>
-
-            {/* CTA */}
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link href="/geometric/gallery" className="px-8 py-3 text-sm font-bold text-center text-white" style={{ background: '#ff6348' }}>
-                View Gallery
-              </Link>
-              <Link href="/designs" className="px-8 py-3 text-sm text-center" style={{ color: '#636e72', border: '2px solid #dfe6e9' }}>
-                All Designs
-              </Link>
-            </div>
+            <h3 style={{ color: '#2d3436', fontSize: '15px', fontWeight: 600, marginBottom: '6px' }}>{f.title}</h3>
+            <p style={{ color: '#2d343688', fontSize: '13px', lineHeight: 1.6 }}>{f.desc}</p>
           </div>
-        </div>
-      </section>
+        ))}
+      </div>
 
-      <section className="px-4 py-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <Link href="/" className="text-xs font-bold" style={{ color: '#b2bec3' }}>Back to Portfolio</Link>
-        </div>
-      </section>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '24px' }}>
+        {[
+          { value: '100+', label: 'Projects' },
+          { value: '100%', label: 'Quality' },
+          { value: '24/7', label: 'Support' },
+          { value: '5.0', label: 'Rating' },
+        ].map((s, i) => (
+          <div key={i} style={{ background: '#fff', borderRadius: '12px', border: '1px solid #ff634815', padding: '16px', textAlign: 'center' }}>
+            <p style={{ color: '#ff6348', fontSize: '22px', fontWeight: 700 }}>{s.value}</p>
+            <p style={{ color: '#2d343666', fontSize: '11px', marginTop: '4px' }}>{s.label}</p>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+        <Link href="/geometric/gallery" style={{ padding: '12px 28px', background: '#ff6348', color: '#fff', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>View Gallery</Link>
+        <Link href="/geometric/about" style={{ padding: '12px 28px', background: '#ff634815', color: '#ff6348', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>Learn More</Link>
+      </div>
     </div>
   )
 }

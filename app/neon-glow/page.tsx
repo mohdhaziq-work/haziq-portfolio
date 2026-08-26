@@ -3,125 +3,55 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
-export default function NeonGlowHome() {
+export default function Home() {
   const [mounted, setMounted] = useState(false)
-  const [pulse, setPulse] = useState(0)
-
-  useEffect(() => {
-    setMounted(true)
-    const interval = setInterval(() => setPulse(p => (p + 1) % 100), 50)
-    return () => clearInterval(interval)
-  }, [])
+  useEffect(() => { setMounted(true) }, [])
   if (!mounted) return null
 
-  const glowIntensity = 0.5 + Math.sin(pulse * 0.1) * 0.3
-
   return (
-    <div className="min-h-screen" style={{ background: '#0a0a0a', fontFamily: '"Inter", sans-serif' }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');`}</style>
+    <div style={{ padding: '32px 20px', maxWidth: '900px', margin: '0 auto' }}>
+      <div style={{ background: '#0a0a0a', borderRadius: '16px', border: '1px solid #ff00ff20', padding: '32px 24px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <p style={{ color: '#ff00ff', fontSize: '12px', fontWeight: 600, letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '12px' }}>NEON GLOW DESIGN</p>
+          <h1 style={{ color: '#fff', fontSize: '40px', fontWeight: 700, marginBottom: '16px', lineHeight: 1.1 }}>Neon Glow</h1>
+          <p style={{ color: '#fff88', fontSize: '15px', maxWidth: '480px', margin: '0 auto', lineHeight: 1.7 }}>A complete neon glow design showcase with interactive elements and professional aesthetics.</p>
+        </div>
+      </div>
 
-      {/* Hero */}
-      <section className="px-4 py-8 md:py-16">
-        <div className="max-w-4xl mx-auto">
-          <div className="p-6 md:p-10" style={{
-            background: '#0a0a0a',
-            border: '1px solid #1a1a1a',
-            borderRadius: '16px',
-          }}>
-            <div className="text-center mb-8">
-              <div className="inline-block mb-4 px-4 py-1.5" style={{
-                background: 'rgba(255,0,255,0.1)',
-                border: '1px solid rgba(255,0,255,0.3)',
-                borderRadius: '9999px',
-              }}>
-                <span className="text-xs font-bold tracking-widest uppercase" style={{ color: '#ff00ff' }}>Neon Glow</span>
-              </div>
-              <h1 className="text-5xl md:text-7xl font-bold mb-4" style={{
-                color: '#ff00ff',
-                textShadow: `0 0 ${20 * glowIntensity}px rgba(255,0,255,${glowIntensity}), 0 0 ${40 * glowIntensity}px rgba(255,0,255,${glowIntensity * 0.5})`,
-              }}>
-                GLOW
-              </h1>
-              <p className="text-sm max-w-md mx-auto" style={{ color: '#666' }}>
-                Luminous neon elements that pulse and glow against dark backgrounds. Electric, bold, unforgettable.
-              </p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginTop: '24px', marginBottom: '24px' }}>
+        {[
+          { title: 'Principle One', desc: 'Core design philosophy that drives every decision.' },
+          { title: 'Principle Two', desc: 'Attention to detail for cohesive visual experience.' },
+          { title: 'Principle Three', desc: 'User-first approach ensuring accessibility.' },
+        ].map((f, i) => (
+          <div key={i} style={{ background: '#0a0a0a', borderRadius: '12px', border: '1px solid #ff00ff15', padding: '20px' }}>
+            <div style={{ width: '32px', height: '32px', background: '#ff00ff15', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
+              <span style={{ color: '#ff00ff', fontSize: '14px', fontWeight: 700 }}>{i + 1}</span>
             </div>
-
-            {/* Neon Text Samples */}
-            <div className="space-y-6 mb-8">
-              {[
-                { text: 'Electric', color: '#ff00ff' },
-                { text: 'Vibrant', color: '#00ffff' },
-                { text: 'Radiant', color: '#ff3e3e' },
-              ].map((item, i) => (
-                <div key={i} className="text-center">
-                  <p className="text-3xl font-bold" style={{
-                    color: item.color,
-                    textShadow: `0 0 10px ${item.color}80, 0 0 20px ${item.color}40, 0 0 40px ${item.color}20`,
-                  }}>
-                    {item.text}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            {/* Neon Buttons */}
-            <div className="flex flex-wrap gap-3 justify-center mb-8">
-              {[
-                { label: 'Magenta', color: '#ff00ff' },
-                { label: 'Cyan', color: '#00ffff' },
-                { label: 'Red', color: '#ff3e3e' },
-                { label: 'Green', color: '#00ff88' },
-              ].map((btn, i) => (
-                <button key={i} className="px-6 py-3 text-sm font-bold transition-all" style={{
-                  background: 'transparent',
-                  color: btn.color,
-                  border: `2px solid ${btn.color}`,
-                  boxShadow: `0 0 10px ${btn.color}40, inset 0 0 10px ${btn.color}10`,
-                  borderRadius: '4px',
-                  textShadow: `0 0 10px ${btn.color}60`,
-                }}>
-                  {btn.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Neon circles */}
-            <div className="flex justify-center gap-6 mb-8">
-              {['#ff00ff', '#00ffff', '#ff3e3e', '#00ff88'].map((color, i) => (
-                <div key={i} className="w-12 h-12 rounded-full" style={{
-                  background: 'transparent',
-                  border: `2px solid ${color}`,
-                  boxShadow: `0 0 10px ${color}60, 0 0 20px ${color}30, inset 0 0 10px ${color}20`,
-                }} />
-              ))}
-            </div>
-
-            {/* CTA */}
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link href="/neon-glow/gallery" className="px-8 py-3 text-sm font-bold text-center" style={{
-                background: 'transparent',
-                color: '#ff00ff',
-                border: '2px solid #ff00ff',
-                boxShadow: '0 0 20px rgba(255,0,255,0.3)',
-                borderRadius: '4px',
-                textShadow: '0 0 10px rgba(255,0,255,0.6)',
-              }}>
-                View Gallery
-              </Link>
-              <Link href="/designs" className="px-8 py-3 text-sm text-center" style={{ color: '#666', border: '1px solid #222', borderRadius: '4px' }}>
-                All Designs
-              </Link>
-            </div>
+            <h3 style={{ color: '#fff', fontSize: '15px', fontWeight: 600, marginBottom: '6px' }}>{f.title}</h3>
+            <p style={{ color: '#fff88', fontSize: '13px', lineHeight: 1.6 }}>{f.desc}</p>
           </div>
-        </div>
-      </section>
+        ))}
+      </div>
 
-      <section className="px-4 py-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <Link href="/" className="text-xs" style={{ color: '#444' }}>Back to Portfolio</Link>
-        </div>
-      </section>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '24px' }}>
+        {[
+          { value: '100+', label: 'Projects' },
+          { value: '100%', label: 'Quality' },
+          { value: '24/7', label: 'Support' },
+          { value: '5.0', label: 'Rating' },
+        ].map((s, i) => (
+          <div key={i} style={{ background: '#0a0a0a', borderRadius: '12px', border: '1px solid #ff00ff15', padding: '16px', textAlign: 'center' }}>
+            <p style={{ color: '#ff00ff', fontSize: '22px', fontWeight: 700 }}>{s.value}</p>
+            <p style={{ color: '#fff66', fontSize: '11px', marginTop: '4px' }}>{s.label}</p>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+        <Link href="/neon-glow/gallery" style={{ padding: '12px 28px', background: '#ff00ff', color: '#fff', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>View Gallery</Link>
+        <Link href="/neon-glow/about" style={{ padding: '12px 28px', background: '#ff00ff15', color: '#ff00ff', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>Learn More</Link>
+      </div>
     </div>
   )
 }

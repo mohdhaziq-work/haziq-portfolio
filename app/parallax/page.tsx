@@ -1,128 +1,57 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
-export default function ParallaxHome() {
+export default function Home() {
   const [mounted, setMounted] = useState(false)
-  const [scrollY, setScrollY] = useState(0)
-  const containerRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    setMounted(true)
-    const handleScroll = () => {
-      if (containerRef.current) {
-        setScrollY(containerRef.current.scrollTop)
-      }
-    }
-    const container = containerRef.current
-    if (container) container.addEventListener('scroll', handleScroll, { passive: true })
-    return () => { if (container) container.removeEventListener('scroll', handleScroll) }
-  }, [])
+  useEffect(() => { setMounted(true) }, [])
   if (!mounted) return null
 
   return (
-    <div ref={containerRef} className="min-h-screen overflow-auto" style={{ fontFamily: '"Inter", sans-serif', perspective: '1px' }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');`}</style>
-
-      {/* Parallax Hero */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden" style={{ background: '#1a1a2e' }}>
-        {/* Background layer - moves slower */}
-        <div className="absolute inset-0" style={{
-          transform: `translateY(${scrollY * 0.3}px)`,
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          opacity: 0.3,
-        }} />
-        
-        {/* Mid layer */}
-        <div className="absolute inset-0" style={{
-          transform: `translateY(${scrollY * 0.5}px)`,
-        }}>
-          {[0, 1, 2, 3, 4].map(i => (
-            <div key={i} className="absolute rounded-full" style={{
-              width: 100 + i * 50,
-              height: 100 + i * 50,
-              background: `rgba(255,255,255,${0.03 + i * 0.01})`,
-              left: `${10 + i * 20}%`,
-              top: `${20 + i * 15}%`,
-            }} />
-          ))}
+    <div style={{ padding: '32px 20px', maxWidth: '900px', margin: '0 auto' }}>
+      <div style={{ background: 'rgba(26,26,46,0.9)', borderRadius: '16px', border: '1px solid #667eea20', padding: '32px 24px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <p style={{ color: '#667eea', fontSize: '12px', fontWeight: 600, letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '12px' }}>PARALLAX DESIGN</p>
+          <h1 style={{ color: '#fff', fontSize: '40px', fontWeight: 700, marginBottom: '16px', lineHeight: 1.1 }}>Parallax</h1>
+          <p style={{ color: '#fff88', fontSize: '15px', maxWidth: '480px', margin: '0 auto', lineHeight: 1.7 }}>A complete parallax design showcase with interactive elements and professional aesthetics.</p>
         </div>
+      </div>
 
-        {/* Foreground content */}
-        <div className="relative z-10 text-center px-4" style={{
-          transform: `translateY(${scrollY * -0.2}px)`,
-        }}>
-          <div className="inline-block mb-4 px-4 py-1.5" style={{
-            background: 'rgba(255,255,255,0.1)',
-            borderRadius: '9999px',
-            border: '1px solid rgba(255,255,255,0.2)',
-          }}>
-            <span className="text-xs font-bold tracking-widest uppercase text-white/80">Parallax Design</span>
-          </div>
-          <h1 className="text-5xl md:text-7xl font-bold text-white mb-4" style={{
-            textShadow: '0 2px 20px rgba(0,0,0,0.3)',
-            transform: `translateY(${scrollY * -0.4}px)`,
-          }}>
-            Depth in Motion
-          </h1>
-          <p className="text-sm text-white/60 max-w-md mx-auto" style={{
-            transform: `translateY(${scrollY * -0.3}px)`,
-          }}>
-            Scroll to experience depth. Layers move at different speeds creating a3D illusion.
-          </p>
-          <div className="mt-8" style={{ transform: `translateY(${scrollY * -0.1}px)` }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" className="mx-auto animate-bounce">
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
-          </div>
-        </div>
-      </section>
-
-      {/* Content sections with parallax */}
-      {[
-        { title: 'Layered Depth', desc: 'Multiple layers at different scroll speeds create the illusion of3D space on a2D screen.', color: '#667eea' },
-        { title: 'Smooth Motion', desc: 'Hardware-accelerated transforms ensure buttery smooth60fps animations.', color: '#764ba2' },
-        { title: 'Storytelling', desc: 'Parallax guides users through your narrative, revealing content as they scroll.', color: '#f093fb' },
-      ].map((section, i) => (
-        <section key={i} className="relative py-20 px-4" style={{ background: i % 2 === 0 ? '#f8f9fa' : '#ffffff' }}>
-          <div className="max-w-4xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-              <div style={{
-                transform: `translateX(${Math.max(0, (scrollY - 600 - i * 400) * 0.1)}px)`,
-                opacity: Math.min(1, Math.max(0, (scrollY - 500 - i * 400) / 200)),
-              }}>
-                <div className="w-12 h-12 mb-4 flex items-center justify-center" style={{ background: `${section.color}20`, borderRadius: '12px' }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={section.color} strokeWidth="2" strokeLinecap="round">
-                    <path d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <h2 className="text-2xl font-bold mb-3" style={{ color: '#1a1a2e' }}>{section.title}</h2>
-                <p className="text-sm leading-relaxed" style={{ color: '#6b7280' }}>{section.desc}</p>
-              </div>
-              <div className="h-48 rounded-2xl" style={{
-                background: `linear-gradient(135deg, ${section.color}40, ${section.color}10)`,
-                transform: `translateX(${Math.max(0, -(scrollY - 600 - i * 400) * 0.1)}px)`,
-              }} />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginTop: '24px', marginBottom: '24px' }}>
+        {[
+          { title: 'Principle One', desc: 'Core design philosophy that drives every decision.' },
+          { title: 'Principle Two', desc: 'Attention to detail for cohesive visual experience.' },
+          { title: 'Principle Three', desc: 'User-first approach ensuring accessibility.' },
+        ].map((f, i) => (
+          <div key={i} style={{ background: 'rgba(26,26,46,0.9)', borderRadius: '12px', border: '1px solid #667eea15', padding: '20px' }}>
+            <div style={{ width: '32px', height: '32px', background: '#667eea15', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
+              <span style={{ color: '#667eea', fontSize: '14px', fontWeight: 700 }}>{i + 1}</span>
             </div>
+            <h3 style={{ color: '#fff', fontSize: '15px', fontWeight: 600, marginBottom: '6px' }}>{f.title}</h3>
+            <p style={{ color: '#fff88', fontSize: '13px', lineHeight: 1.6 }}>{f.desc}</p>
           </div>
-        </section>
-      ))}
+        ))}
+      </div>
 
-      {/* CTA */}
-      <section className="py-16 px-4" style={{ background: '#1a1a2e' }}>
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-2xl font-bold text-white mb-4">Experience the Depth</h2>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/parallax/gallery" className="px-8 py-3 text-sm font-semibold text-center text-white" style={{ background: '#667eea', borderRadius: '12px' }}>
-              View Gallery
-            </Link>
-            <Link href="/designs" className="px-8 py-3 text-sm text-center text-white/60" style={{ border: '1px solid rgba(255,255,255,0.2)', borderRadius: '12px' }}>
-              All Designs
-            </Link>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '24px' }}>
+        {[
+          { value: '100+', label: 'Projects' },
+          { value: '100%', label: 'Quality' },
+          { value: '24/7', label: 'Support' },
+          { value: '5.0', label: 'Rating' },
+        ].map((s, i) => (
+          <div key={i} style={{ background: 'rgba(26,26,46,0.9)', borderRadius: '12px', border: '1px solid #667eea15', padding: '16px', textAlign: 'center' }}>
+            <p style={{ color: '#667eea', fontSize: '22px', fontWeight: 700 }}>{s.value}</p>
+            <p style={{ color: '#fff66', fontSize: '11px', marginTop: '4px' }}>{s.label}</p>
           </div>
-        </div>
-      </section>
+        ))}
+      </div>
+
+      <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+        <Link href="/parallax/gallery" style={{ padding: '12px 28px', background: '#667eea', color: '#fff', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>View Gallery</Link>
+        <Link href="/parallax/about" style={{ padding: '12px 28px', background: '#667eea15', color: '#667eea', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>Learn More</Link>
+      </div>
     </div>
   )
 }

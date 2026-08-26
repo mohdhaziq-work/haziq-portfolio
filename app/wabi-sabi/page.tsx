@@ -3,84 +3,55 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
-export default function WabiSabiHome() {
+export default function Home() {
   const [mounted, setMounted] = useState(false)
-
   useEffect(() => { setMounted(true) }, [])
   if (!mounted) return null
 
   return (
-    <div className="min-h-screen" style={{ background: '#f5f0eb', fontFamily: '"Noto Serif", serif' }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;500;600&display=swap');`}</style>
+    <div style={{ padding: '32px 20px', maxWidth: '900px', margin: '0 auto' }}>
+      <div style={{ background: '#ede8e0', borderRadius: '16px', border: '1px solid #8b735520', padding: '32px 24px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <p style={{ color: '#8b7355', fontSize: '12px', fontWeight: 600, letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '12px' }}>WABI SABI DESIGN</p>
+          <h1 style={{ color: '#4a3f35', fontSize: '40px', fontWeight: 700, marginBottom: '16px', lineHeight: 1.1 }}>Wabi Sabi</h1>
+          <p style={{ color: '#4a3f3588', fontSize: '15px', maxWidth: '480px', margin: '0 auto', lineHeight: 1.7 }}>A complete wabi sabi design showcase with interactive elements and professional aesthetics.</p>
+        </div>
+      </div>
 
-      {/* Hero */}
-      <section className="px-4 py-8 md:py-16">
-        <div className="max-w-4xl mx-auto">
-          <div className="p-6 md:p-10" style={{
-            background: '#ede8e0',
-            borderRadius: '2px',
-            border: '1px solid #d4cbbf',
-          }}>
-            <div className="text-center mb-12">
-              <p className="text-xs tracking-[0.4em] uppercase mb-6" style={{ color: '#a89888' }}>Wabi Sabi</p>
-              <h1 className="text-4xl md:text-5xl font-medium mb-6" style={{ color: '#4a3f35', letterSpacing: '-1px' }}>
-                Imperfect Beauty
-              </h1>
-              <p className="text-sm max-w-md mx-auto leading-relaxed" style={{ color: '#8a7f75' }}>
-                Finding beauty in imperfection. Embracing the worn, the weathered, the authentic. Japanese aesthetics meet digital design.
-              </p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginTop: '24px', marginBottom: '24px' }}>
+        {[
+          { title: 'Principle One', desc: 'Core design philosophy that drives every decision.' },
+          { title: 'Principle Two', desc: 'Attention to detail for cohesive visual experience.' },
+          { title: 'Principle Three', desc: 'User-first approach ensuring accessibility.' },
+        ].map((f, i) => (
+          <div key={i} style={{ background: '#ede8e0', borderRadius: '12px', border: '1px solid #8b735515', padding: '20px' }}>
+            <div style={{ width: '32px', height: '32px', background: '#8b735515', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
+              <span style={{ color: '#8b7355', fontSize: '14px', fontWeight: 700 }}>{i + 1}</span>
             </div>
-
-            {/* Wabi Sabi principles */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-              {[
-                { kanji: '侘', title: 'Wabi', desc: 'Rustic simplicity. Finding richness in austerity.', color: '#8b7355' },
-                { kanji: '寂', title: 'Sabi', desc: 'Beauty of age. Patina tells a story.', color: '#6b8a65' },
-                { kanji: '間', title: 'Ma', desc: 'Negative space. The pause between notes.', color: '#8a7f75' },
-              ].map((item, i) => (
-                <div key={i} className="text-center p-6" style={{
-                  background: '#f5f0eb',
-                  border: '1px solid #d4cbbf',
-                }}>
-                  <p className="text-4xl mb-3" style={{ color: item.color }}>{item.kanji}</p>
-                  <h3 className="text-sm font-medium mb-2" style={{ color: '#4a3f35' }}>{item.title}</h3>
-                  <p className="text-xs leading-relaxed" style={{ color: '#8a7f75' }}>{item.desc}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Texture samples */}
-            <div className="grid grid-cols-4 gap-3 mb-12">
-              {[
-                { bg: '#d4cbbf', label: 'Stone' },
-                { bg: '#c4b8a8', label: 'Wood' },
-                { bg: '#b8a898', label: 'Clay' },
-                { bg: '#a89888', label: 'Earth' },
-              ].map((item, i) => (
-                <div key={i} className="aspect-square flex items-end justify-center p-2" style={{ background: item.bg }}>
-                  <span className="text-[10px]" style={{ color: '#6a5f55' }}>{item.label}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* CTA */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/wabi-sabi/gallery" className="px-8 py-3 text-sm font-medium text-center" style={{ background: '#4a3f35', color: '#f5f0eb' }}>
-                View Gallery
-              </Link>
-              <Link href="/designs" className="px-8 py-3 text-sm text-center" style={{ color: '#8a7f75', border: '1px solid #d4cbbf' }}>
-                All Designs
-              </Link>
-            </div>
+            <h3 style={{ color: '#4a3f35', fontSize: '15px', fontWeight: 600, marginBottom: '6px' }}>{f.title}</h3>
+            <p style={{ color: '#4a3f3588', fontSize: '13px', lineHeight: 1.6 }}>{f.desc}</p>
           </div>
-        </div>
-      </section>
+        ))}
+      </div>
 
-      <section className="px-4 py-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <Link href="/" className="text-xs tracking-widest" style={{ color: '#b8a898' }}>Back to Portfolio</Link>
-        </div>
-      </section>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '24px' }}>
+        {[
+          { value: '100+', label: 'Projects' },
+          { value: '100%', label: 'Quality' },
+          { value: '24/7', label: 'Support' },
+          { value: '5.0', label: 'Rating' },
+        ].map((s, i) => (
+          <div key={i} style={{ background: '#ede8e0', borderRadius: '12px', border: '1px solid #8b735515', padding: '16px', textAlign: 'center' }}>
+            <p style={{ color: '#8b7355', fontSize: '22px', fontWeight: 700 }}>{s.value}</p>
+            <p style={{ color: '#4a3f3566', fontSize: '11px', marginTop: '4px' }}>{s.label}</p>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+        <Link href="/wabi-sabi/gallery" style={{ padding: '12px 28px', background: '#8b7355', color: '#fff', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>View Gallery</Link>
+        <Link href="/wabi-sabi/about" style={{ padding: '12px 28px', background: '#8b735515', color: '#8b7355', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>Learn More</Link>
+      </div>
     </div>
   )
 }

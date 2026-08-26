@@ -3,113 +3,55 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
-export default function OrganicHome() {
+export default function Home() {
   const [mounted, setMounted] = useState(false)
-  const [mousePos, setMousePos] = useState({ x: 50, y: 50 })
-
   useEffect(() => { setMounted(true) }, [])
   if (!mounted) return null
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    setMousePos({
-      x: ((e.clientX - rect.left) / rect.width) * 100,
-      y: ((e.clientY - rect.top) / rect.height) * 100,
-    })
-  }
-
   return (
-    <div className="min-h-screen" style={{ background: '#f0f7f0', fontFamily: '"Nunito", sans-serif' }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');`}</style>
+    <div style={{ padding: '32px 20px', maxWidth: '900px', margin: '0 auto' }}>
+      <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #27ae6020', padding: '32px 24px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <p style={{ color: '#27ae60', fontSize: '12px', fontWeight: 600, letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '12px' }}>ORGANIC DESIGN</p>
+          <h1 style={{ color: '#2d5a27', fontSize: '40px', fontWeight: 700, marginBottom: '16px', lineHeight: 1.1 }}>Organic</h1>
+          <p style={{ color: '#2d5a2788', fontSize: '15px', maxWidth: '480px', margin: '0 auto', lineHeight: 1.7 }}>A complete organic design showcase with interactive elements and professional aesthetics.</p>
+        </div>
+      </div>
 
-      {/* Hero */}
-      <section className="px-4 py-8 md:py-16" onMouseMove={handleMouseMove}>
-        <div className="max-w-4xl mx-auto">
-          <div className="p-6 md:p-10" style={{
-            background: '#ffffff',
-            borderRadius: '32px',
-            boxShadow: '0 4px 30px rgba(0,100,0,0.08)',
-            position: 'relative',
-            overflow: 'hidden',
-          }}>
-            {/* Organic blob that follows cursor */}
-            <div className="absolute pointer-events-none" style={{
-              width: '300px',
-              height: '300px',
-              background: 'radial-gradient(circle, rgba(46,204,113,0.15) 0%, transparent 70%)',
-              borderRadius: '60% 40% 30% 70% / 60% 30% 70% 40%',
-              left: `${mousePos.x}%`,
-              top: `${mousePos.y}%`,
-              transform: 'translate(-50%, -50%)',
-              transition: 'left 0.5s ease, top 0.5s ease',
-            }} />
-
-            <div className="relative z-10 text-center mb-8">
-              <div className="inline-block mb-4 px-4 py-1.5" style={{
-                background: '#2ecc7120',
-                borderRadius: '9999px',
-              }}>
-                <span className="text-xs font-bold tracking-widest uppercase" style={{ color: '#27ae60' }}>Organic Design</span>
-              </div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-4" style={{ color: '#2d5a27' }}>
-                Nature Inspired
-              </h1>
-              <p className="text-sm max-w-md mx-auto" style={{ color: '#6b8a65' }}>
-                Soft curves, natural shapes, and earthy tones. Design that feels alive and connected to nature.
-              </p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginTop: '24px', marginBottom: '24px' }}>
+        {[
+          { title: 'Principle One', desc: 'Core design philosophy that drives every decision.' },
+          { title: 'Principle Two', desc: 'Attention to detail for cohesive visual experience.' },
+          { title: 'Principle Three', desc: 'User-first approach ensuring accessibility.' },
+        ].map((f, i) => (
+          <div key={i} style={{ background: '#fff', borderRadius: '12px', border: '1px solid #27ae6015', padding: '20px' }}>
+            <div style={{ width: '32px', height: '32px', background: '#27ae6015', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
+              <span style={{ color: '#27ae60', fontSize: '14px', fontWeight: 700 }}>{i + 1}</span>
             </div>
-
-            {/* Organic Shapes */}
-            <div className="flex justify-center gap-6 mb-8">
-              {[
-                { radius: '60% 40% 30% 70% / 60% 30% 70% 40%', color: '#2ecc71' },
-                { radius: '30% 70% 70% 30% / 30% 30% 70% 70%', color: '#27ae60' },
-                { radius: '50% 50% 30% 70% / 40% 60% 40% 60%', color: '#1abc9c' },
-              ].map((shape, i) => (
-                <div key={i} className="w-20 h-20" style={{
-                  background: `${shape.color}30`,
-                  borderRadius: shape.radius,
-                  border: `2px solid ${shape.color}40`,
-                }} />
-              ))}
-            </div>
-
-            {/* Organic Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-              {[
-                { title: 'Curves', desc: 'No sharp corners. Everything flows with natural, organic curves.', color: '#2ecc71' },
-                { title: 'Texture', desc: 'Natural textures like wood, stone, and leaves add warmth.', color: '#27ae60' },
-                { title: 'Growth', desc: 'Elements that feel like they grow and evolve naturally.', color: '#1abc9c' },
-              ].map((f, i) => (
-                <div key={i} className="p-5" style={{ background: '#f0f7f0', borderRadius: '24px' }}>
-                  <div className="w-10 h-10 mb-3" style={{
-                    background: `${f.color}20`,
-                    borderRadius: '60% 40% 30% 70% / 60% 30% 70% 40%',
-                  }} />
-                  <h3 className="text-sm font-bold mb-2" style={{ color: '#2d5a27' }}>{f.title}</h3>
-                  <p className="text-xs leading-relaxed" style={{ color: '#6b8a65' }}>{f.desc}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* CTA */}
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link href="/organic/gallery" className="px-8 py-3 text-sm font-bold text-center text-white" style={{ background: '#27ae60', borderRadius: '9999px' }}>
-                View Gallery
-              </Link>
-              <Link href="/designs" className="px-8 py-3 text-sm text-center" style={{ color: '#6b8a65', border: '1px solid #c8e6c9', borderRadius: '9999px' }}>
-                All Designs
-              </Link>
-            </div>
+            <h3 style={{ color: '#2d5a27', fontSize: '15px', fontWeight: 600, marginBottom: '6px' }}>{f.title}</h3>
+            <p style={{ color: '#2d5a2788', fontSize: '13px', lineHeight: 1.6 }}>{f.desc}</p>
           </div>
-        </div>
-      </section>
+        ))}
+      </div>
 
-      <section className="px-4 py-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <Link href="/" className="text-xs" style={{ color: '#a5d6a7' }}>Back to Portfolio</Link>
-        </div>
-      </section>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '24px' }}>
+        {[
+          { value: '100+', label: 'Projects' },
+          { value: '100%', label: 'Quality' },
+          { value: '24/7', label: 'Support' },
+          { value: '5.0', label: 'Rating' },
+        ].map((s, i) => (
+          <div key={i} style={{ background: '#fff', borderRadius: '12px', border: '1px solid #27ae6015', padding: '16px', textAlign: 'center' }}>
+            <p style={{ color: '#27ae60', fontSize: '22px', fontWeight: 700 }}>{s.value}</p>
+            <p style={{ color: '#2d5a2766', fontSize: '11px', marginTop: '4px' }}>{s.label}</p>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+        <Link href="/organic/gallery" style={{ padding: '12px 28px', background: '#27ae60', color: '#fff', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>View Gallery</Link>
+        <Link href="/organic/about" style={{ padding: '12px 28px', background: '#27ae6015', color: '#27ae60', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>Learn More</Link>
+      </div>
     </div>
   )
 }
