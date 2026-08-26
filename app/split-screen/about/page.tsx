@@ -2,45 +2,45 @@
 
 import Link from 'next/link'
 
-export default function About() {
+export default function SplitScreenAbout() {
   return (
-    <div style={{ padding: '32px 20px', maxWidth: '900px', margin: '0 auto' }}>
-      <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #667eea20', padding: '32px 24px', marginBottom: '24px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
-        <h1 style={{ color: '#1a1a2e', fontSize: '32px', fontWeight: 700, marginBottom: '16px' }}>About Split Screen</h1>
-        <p style={{ color: '#1a1a2e88', fontSize: '15px', lineHeight: 1.8, marginBottom: '16px' }}>We specialize in split screen design — creating interfaces that are both beautiful and functional.</p>
-        <p style={{ color: '#1a1a2e88', fontSize: '15px', lineHeight: 1.8 }}>Every project receives our full attention and creative energy.</p>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginBottom: '24px' }}>
-        {[
-          { title: 'Mission', desc: 'Create designs that inspire and convert.' },
-          { title: 'Vision', desc: 'A web where every site is beautiful and usable.' },
-          { title: 'Values', desc: 'Quality, creativity, and user-first thinking.' },
-          { title: 'Process', desc: 'Research, design, test, iterate, deliver.' },
-        ].map((item, i) => (
-          <div key={i} style={{ background: '#fff', borderRadius: '12px', border: '1px solid #667eea15', padding: '20px' }}>
-            <h3 style={{ color: '#1a1a2e', fontSize: '15px', fontWeight: 600, marginBottom: '6px' }}>{item.title}</h3>
-            <p style={{ color: '#1a1a2e88', fontSize: '13px', lineHeight: 1.6 }}>{item.desc}</p>
+    <div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', minHeight: 'calc(100vh - 52px)' }}>
+        <div style={{ background: '#000', padding: '60px 40px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <h1 style={{ color: '#fff', fontSize: '48px', fontWeight: 900, lineHeight: 0.9, letterSpacing: '-2px', marginBottom: '20px' }}>About<br />Us</h1>
+          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px', fontWeight: 400, lineHeight: 1.8 }}>We believe in the power of duality. Every design has two sides — the bold and the subtle, the dark and the light.</p>
+        </div>
+        <div style={{ background: '#fff', padding: '60px 40px', display: 'flex', flexDirection: 'column', justifyContent: 'center', borderLeft: '2px solid #000' }}>
+          <div style={{ marginBottom: '24px' }}>
+            {[
+              { title: 'Mission', desc: 'Create balanced, dual-natured designs.' },
+              { title: 'Vision', desc: 'A web of perfect contrast and harmony.' },
+              { title: 'Values', desc: 'Duality. Balance. Contrast. Clarity.' },
+              { title: 'Process', desc: 'Split, balance, contrast, deliver.' },
+            ].map((item, i) => (
+              <div key={i} style={{ padding: '16px 0', borderBottom: '1px solid #eee' }}>
+                <h3 style={{ color: '#000', fontSize: '16px', fontWeight: 700, marginBottom: '4px' }}>{item.title}</h3>
+                <p style={{ color: '#999', fontSize: '13px', fontWeight: 400 }}>{item.desc}</p>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '24px' }}>
-        {[
-          { value: '100+', label: 'Projects' },
-          { value: '5+', label: 'Years' },
-          { value: '50+', label: 'Clients' },
-          { value: '24/7', label: 'Support' },
-        ].map((s, i) => (
-          <div key={i} style={{ background: '#fff', borderRadius: '12px', border: '1px solid #667eea15', padding: '16px', textAlign: 'center' }}>
-            <p style={{ color: '#667eea', fontSize: '22px', fontWeight: 700 }}>{s.value}</p>
-            <p style={{ color: '#1a1a2e66', fontSize: '11px', marginTop: '4px' }}>{s.label}</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+            {[
+              { value: '100+', label: 'Projects' },
+              { value: '5+', label: 'Years' },
+              { value: '50+', label: 'Clients' },
+              { value: '24/7', label: 'Support' },
+            ].map((s, i) => (
+              <div key={i} style={{ padding: '12px', background: i % 2 === 0 ? '#000' : '#fff', textAlign: 'center' }}>
+                <p style={{ color: i % 2 === 0 ? '#fff' : '#000', fontSize: '20px', fontWeight: 900 }}>{s.value}</p>
+                <p style={{ color: i % 2 === 0 ? 'rgba(255,255,255,0.5)' : '#999', fontSize: '9px', fontWeight: 600, letterSpacing: '2px', marginTop: '4px' }}>{s.label}</p>
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
-
-      <div style={{ textAlign: 'center' }}>
-        <Link href="/split-screen" style={{ padding: '12px 28px', background: '#667eea15', color: '#667eea', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>Back Home</Link>
+      <div style={{ padding: '20px', textAlign: 'center', borderTop: '2px solid #000' }}>
+        <Link href="/split-screen" style={{ color: '#000', fontSize: '13px', fontWeight: 700, textDecoration: 'none' }}>Back Home</Link>
       </div>
     </div>
   )

@@ -3,53 +3,60 @@
 import { useState } from 'react'
 import Link from 'next/link'
 
-export default function Gallery() {
+export default function SplitScreenGallery() {
   const [active, setActive] = useState('All')
 
   const works = [
-    { title: 'Split Screen Dashboard', cat: 'Web' },
-    { title: 'Split Screen Landing', cat: 'Web' },
-    { title: 'Split Screen Portfolio', cat: 'Web' },
-    { title: 'Split Screen UI Kit', cat: 'UI' },
-    { title: 'Split Screen App', cat: 'App' },
-    { title: 'Split Screen E-Commerce', cat: 'Web' },
-    { title: 'Split Screen Forms', cat: 'UI' },
-    { title: 'Split Screen Blog', cat: 'Web' },
-    { title: 'Split Screen Analytics', cat: 'App' },
+    { title: 'Split Landing', cat: 'Web' },
+    { title: 'Dual Portfolio', cat: 'Web' },
+    { title: 'Split App', cat: 'App' },
+    { title: 'Contrast Blog', cat: 'Web' },
+    { title: 'Split Shop', cat: 'Web' },
+    { title: 'Dual Admin', cat: 'App' },
+    { title: 'Split Forms', cat: 'UI' },
+    { title: 'Contrast Cards', cat: 'UI' },
+    { title: 'Split Dashboard', cat: 'Web' },
   ]
 
-  const cats = ['All', 'Web', 'UI', 'App']
+  const cats = ['All', 'Web', 'App', 'UI']
   const filtered = active === 'All' ? works : works.filter(w => w.cat === active)
 
   return (
-    <div style={{ padding: '32px 20px', maxWidth: '900px', margin: '0 auto' }}>
-      <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #667eea20', padding: '24px', marginBottom: '24px', textAlign: 'center', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
-        <h1 style={{ color: '#1a1a2e', fontSize: '32px', fontWeight: 700 }}>Gallery</h1>
-        <p style={{ color: '#1a1a2e66', fontSize: '14px', marginTop: '8px' }}>Our split screen creations</p>
+    <div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', minHeight: '80px' }}>
+        <div style={{ background: '#000', padding: '20px', display: 'flex', alignItems: 'center' }}>
+          <h1 style={{ color: '#fff', fontSize: '32px', fontWeight: 900, letterSpacing: '-1px' }}>Gallery</h1>
+        </div>
+        <div style={{ background: '#fff', padding: '20px', display: 'flex', alignItems: 'center', borderLeft: '2px solid #000' }}>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            {cats.map(c => (
+              <button key={c} onClick={() => setActive(c)} style={{
+                padding: '6px 14px', fontSize: '11px', fontWeight: 700, cursor: 'pointer',
+                background: active === c ? '#000' : 'transparent',
+                color: active === c ? '#fff' : '#999',
+                border: active === c ? 'none' : '1px solid #ddd',
+              }}>{c}</button>
+            ))}
+          </div>
+        </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '24px' }}>
-        {cats.map(c => (
-          <button key={c} onClick={() => setActive(c)} style={{ padding: '8px 20px', borderRadius: '999px', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 600, background: active === c ? '#667eea' : '#fff', color: active === c ? '#fff' : '#1a1a2e88', transition: 'all 0.2s' }}>{c}</button>
-        ))}
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', borderTop: '2px solid #000' }}>
         {filtered.map((w, i) => (
-          <div key={i} style={{ background: '#fff', borderRadius: '12px', border: '1px solid #667eea15', overflow: 'hidden' }}>
-            <div style={{ height: '100px', background: '#667eea10', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#667eea25' }} />
+          <div key={i} style={{ borderRight: (i + 1) % 3 !== 0 ? '2px solid #000' : 'none', borderBottom: '2px solid #000' }}>
+            <div style={{ height: '100px', background: i % 2 === 0 ? '#000' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ color: i % 2 === 0 ? '#fff' : '#000', fontSize: '24px', fontWeight: 900 }}>{i + 1}</span>
             </div>
-            <div style={{ padding: '12px' }}>
-              <h3 style={{ color: '#1a1a2e', fontSize: '14px', fontWeight: 600, marginBottom: '4px' }}>{w.title}</h3>
-              <p style={{ color: '#1a1a2e66', fontSize: '12px' }}>{w.cat}</p>
+            <div style={{ padding: '14px' }}>
+              <h3 style={{ color: '#000', fontSize: '14px', fontWeight: 700, marginBottom: '4px' }}>{w.title}</h3>
+              <p style={{ color: '#999', fontSize: '11px', fontWeight: 400 }}>{w.cat}</p>
             </div>
           </div>
         ))}
       </div>
 
-      <div style={{ textAlign: 'center' }}>
-        <Link href="/split-screen" style={{ padding: '12px 28px', background: '#667eea15', color: '#667eea', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>Back Home</Link>
+      <div style={{ padding: '20px', textAlign: 'center', borderTop: '2px solid #000' }}>
+        <Link href="/split-screen" style={{ color: '#000', fontSize: '13px', fontWeight: 700, textDecoration: 'none' }}>Back Home</Link>
       </div>
     </div>
   )
