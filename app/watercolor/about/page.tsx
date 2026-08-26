@@ -2,45 +2,45 @@
 
 import Link from 'next/link'
 
-export default function About() {
+export default function WatercolorAbout() {
   return (
-    <div style={{ padding: '32px 20px', maxWidth: '900px', margin: '0 auto' }}>
-      <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #87ceeb20', padding: '32px 24px', marginBottom: '24px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
-        <h1 style={{ color: '#5a6c7d', fontSize: '32px', fontWeight: 700, marginBottom: '16px' }}>About Watercolor</h1>
-        <p style={{ color: '#5a6c7d88', fontSize: '15px', lineHeight: 1.8, marginBottom: '16px' }}>We specialize in watercolor design — creating interfaces that are both beautiful and functional.</p>
-        <p style={{ color: '#5a6c7d88', fontSize: '15px', lineHeight: 1.8 }}>Every project receives our full attention and creative energy.</p>
+    <div style={{ padding: '24px 20px', maxWidth: '900px', margin: '0 auto' }}>
+      <div style={{ background: 'radial-gradient(circle at 30% 50%, rgba(255,182,193,0.2), rgba(254,252,250,0.5))', borderRadius: '30px', padding: '36px 28px', marginBottom: '24px' }}>
+        <h1 style={{ color: '#8b6f5e', fontSize: '44px', fontWeight: 600, fontStyle: 'italic', marginBottom: '16px' }}>About Watercolor</h1>
+        <p style={{ color: '#b8a090', fontSize: '15px', lineHeight: 1.8, fontStyle: 'italic', marginBottom: '12px' }}>We paint digital experiences with soft washes of color. Every design feels like a hand-painted masterpiece.</p>
+        <p style={{ color: '#b8a090', fontSize: '15px', lineHeight: 1.8, fontStyle: 'italic' }}>Water bleeds, colors blend, and beauty emerges from the flow.</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', marginBottom: '24px' }}>
         {[
-          { title: 'Mission', desc: 'Create designs that inspire and convert.' },
-          { title: 'Vision', desc: 'A web where every site is beautiful and usable.' },
-          { title: 'Values', desc: 'Quality, creativity, and user-first thinking.' },
-          { title: 'Process', desc: 'Research, design, test, iterate, deliver.' },
+          { title: 'Mission', desc: 'Paint digital with watercolor soul.' },
+          { title: 'Vision', desc: 'A web that feels hand-painted.' },
+          { title: 'Values', desc: 'Softness. Flow. Color. Beauty.' },
+          { title: 'Process', desc: 'Wash, bleed, blend, refine.' },
         ].map((item, i) => (
-          <div key={i} style={{ background: '#fff', borderRadius: '12px', border: '1px solid #87ceeb15', padding: '20px' }}>
-            <h3 style={{ color: '#5a6c7d', fontSize: '15px', fontWeight: 600, marginBottom: '6px' }}>{item.title}</h3>
-            <p style={{ color: '#5a6c7d88', fontSize: '13px', lineHeight: 1.6 }}>{item.desc}</p>
+          <div key={i} style={{ background: 'radial-gradient(circle, rgba(255,182,193,0.1), rgba(254,252,250,0.8))', borderRadius: '20px', padding: '20px' }}>
+            <h3 style={{ color: '#8b6f5e', fontSize: '18px', fontWeight: 600, fontStyle: 'italic', marginBottom: '8px' }}>{item.title}</h3>
+            <p style={{ color: '#b8a090', fontSize: '13px', lineHeight: 1.6, fontStyle: 'italic' }}>{item.desc}</p>
           </div>
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
         {[
           { value: '100+', label: 'Projects' },
           { value: '5+', label: 'Years' },
           { value: '50+', label: 'Clients' },
           { value: '24/7', label: 'Support' },
         ].map((s, i) => (
-          <div key={i} style={{ background: '#fff', borderRadius: '12px', border: '1px solid #87ceeb15', padding: '16px', textAlign: 'center' }}>
-            <p style={{ color: '#87ceeb', fontSize: '22px', fontWeight: 700 }}>{s.value}</p>
-            <p style={{ color: '#5a6c7d66', fontSize: '11px', marginTop: '4px' }}>{s.label}</p>
+          <div key={i} style={{ background: `radial-gradient(circle, ${['rgba(255,182,193,0.2)', 'rgba(173,216,230,0.2)', 'rgba(200,180,255,0.2)', 'rgba(180,210,180,0.2)'][i]}, rgba(254,252,250,0.9))`, borderRadius: '20px', padding: '18px', textAlign: 'center' }}>
+            <p style={{ color: '#8b6f5e', fontSize: '26px', fontWeight: 600, fontStyle: 'italic' }}>{s.value}</p>
+            <p style={{ color: '#b8a090', fontSize: '10px', marginTop: '4px', fontStyle: 'italic' }}>{s.label}</p>
           </div>
         ))}
       </div>
 
       <div style={{ textAlign: 'center' }}>
-        <Link href="/watercolor" style={{ padding: '12px 28px', background: '#87ceeb15', color: '#87ceeb', borderRadius: '10px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>Back Home</Link>
+        <Link href="/watercolor" style={{ padding: '12px 28px', color: '#b8a090', fontSize: '15px', fontWeight: 400, fontStyle: 'italic', textDecoration: 'none', borderRadius: '20px', border: '1px solid rgba(200,180,160,0.3)' }}>Back Home</Link>
       </div>
     </div>
   )
