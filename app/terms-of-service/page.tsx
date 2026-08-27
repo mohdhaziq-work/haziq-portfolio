@@ -128,7 +128,7 @@ export default function TermsOfServicePage() {
         <section className="mb-8">
           <h2 className="text-headline text-text-primary mb-4">10. Governing Law</h2>
           <p className="text-body-md text-text-secondary">
-            These Terms shall be governed and construed in accordance with the laws of India, without regard to its conflict of law provisions. Any disputes arising from these Terms shall be resolved in the courts of Lucknow, Uttar Pradesh, India.
+            These Terms shall be governed and construed in accordance with the laws of India, without regard to its conflict of law provisions. Any disputes arising from these Terms shall be resolved in the courts of Sultanpur, Uttar Pradesh, India.
           </p>
         </section>
 
@@ -148,7 +148,7 @@ export default function TermsOfServicePage() {
             <p className="text-body-md text-text-primary font-medium mb-2">Mohd Haziq Web Development</p>
             <p className="text-body-md text-text-secondary">Email: mohdhaziq1962@gmail.com</p>
             <p className="text-body-md text-text-secondary">Instagram: @haziq.built</p>
-            <p className="text-body-md text-text-secondary">Location: Lucknow, Uttar Pradesh, India</p>
+            <p className="text-body-md text-text-secondary">Location: Sultanpur, Uttar Pradesh, India</p>
           </div>
         </section>
       </div>

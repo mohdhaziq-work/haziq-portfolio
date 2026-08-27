@@ -180,7 +180,7 @@ export default function PrivacyPolicyPage() {
             <p className="text-body-md text-text-primary font-medium mb-2">Mohd Haziq Web Development</p>
             <p className="text-body-md text-text-secondary">Email: mohdhaziq1962@gmail.com</p>
             <p className="text-body-md text-text-secondary">Instagram: @haziq.built</p>
-            <p className="text-body-md text-text-secondary">Location: Lucknow, Uttar Pradesh, India</p>
+            <p className="text-body-md text-text-secondary">Location: Sultanpur, Uttar Pradesh, India</p>
           </div>
         </section>
       </div>

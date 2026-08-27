@@ -36,7 +36,7 @@ RULE (VERY IMPORTANT): Always give a fresh, natural, varied answer for every mes
 ABOUT HAZIQ:
 - Name: Mohd Haziq (also known as Haziq)
 - Age: 16 years old
-- Location: Lucknow, Uttar Pradesh, India (works with businesses all over India)
+- Location: Sultanpur, Uttar Pradesh, India (works with businesses all over India)
 - Role: Professional Web Developer
 - Tagline: "Code. Create. Convert."
 - He builds modern, fast, high-converting websites that help local businesses grow digitally.

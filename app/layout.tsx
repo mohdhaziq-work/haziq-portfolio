@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     default: 'Mohd Haziq - Web Developer | Professional Website Designer India',
     template: '%s | Mohd Haziq Portfolio',
   },
-  description: 'Mohd Haziq is a professional Web Developer from Lucknow, India who builds high-converting websites for businesses. Restaurant websites, coaching websites, gym websites, and custom business websites. Affordable, fast, mobile-friendly. Get a free mockup today.',
+  description: 'Mohd Haziq is a professional Web Developer from Sultanpur, India who builds high-converting websites for businesses. Restaurant websites, coaching websites, gym websites, and custom business websites. Affordable, fast, mobile-friendly. Get a free mockup today.',
   keywords: [
     // Name variations - CRITICAL
     'Mohd Haziq',
@@ -82,7 +82,7 @@ export const metadata: Metadata = {
     'Web Developer India',
     'Indian Web Developer',
     'Freelance Web Developer India',
-    'Web Developer Lucknow',
+    'Web Developer Sultanpur',
     'Web Developer Uttar Pradesh',
   ],
   authors: [{ name: 'Mohd Haziq', url: PRIMARY_URL }],
@@ -148,7 +148,7 @@ const jsonLdFaq = {
       name: 'Who is Mohd Haziq?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Mohd Haziq is a professional Web Developer from Lucknow, Uttar Pradesh, India. He builds high-converting, modern websites for businesses including restaurants, coaching centers, gyms, and custom business websites using Next.js, React, and Tailwind CSS.',
+        text: 'Mohd Haziq is a professional Web Developer from Sultanpur, Uttar Pradesh, India. He builds high-converting, modern websites for businesses including restaurants, coaching centers, gyms, and custom business websites using Next.js, React, and Tailwind CSS.',
       },
     },
     {
@@ -188,7 +188,7 @@ const jsonLdFaq = {
       name: 'Can Mohd Haziq build a website for a local business in India?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yes, Mohd Haziq specializes in websites for local Indian businesses including restaurants, gyms, coaching centers, and service businesses. He is based in Lucknow, Uttar Pradesh and works with businesses across India.',
+        text: 'Yes, Mohd Haziq specializes in websites for local Indian businesses including restaurants, gyms, coaching centers, and service businesses. He is based in Sultanpur, Uttar Pradesh and works with businesses across India.',
       },
     },
     {
@@ -212,7 +212,7 @@ const jsonLdFaq = {
       name: 'Where is Mohd Haziq located?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Mohd Haziq is based in Lucknow, Uttar Pradesh, India. He works with clients across India and internationally.',
+        text: 'Mohd Haziq is based in Sultanpur, Uttar Pradesh, India. He works with clients across India and internationally.',
       },
     },
     {
@@ -259,7 +259,7 @@ const jsonLdPerson = {
   alternateName: ['Haziq', 'Mohammad Haziq', 'Haziq Web Developer', 'Mohd Haziq Developer'],
   url: PRIMARY_URL,
   jobTitle: 'Web Developer',
-  description: 'Mohd Haziq is a professional Web Developer from Lucknow, India who builds high-converting, modern websites for businesses. Specializing in restaurant, coaching, and gym websites using Next.js, React, and Tailwind CSS.',
+  description: 'Mohd Haziq is a professional Web Developer from Sultanpur, India who builds high-converting, modern websites for businesses. Specializing in restaurant, coaching, and gym websites using Next.js, React, and Tailwind CSS.',
   image: `${PRIMARY_URL}/apple-touch-icon.png`,
   sameAs: [
     'https://www.instagram.com/haziq.built',
@@ -278,7 +278,7 @@ const jsonLdPerson = {
   },
   address: {
     '@type': 'PostalAddress',
-    addressLocality: 'Lucknow',
+    addressLocality: 'Sultanpur',
     addressRegion: 'Uttar Pradesh',
     addressCountry: 'IN',
   },
@@ -304,7 +304,7 @@ const jsonLdService = {
   },
   address: {
     '@type': 'PostalAddress',
-    addressLocality: 'Lucknow',
+    addressLocality: 'Sultanpur',
     addressRegion: 'Uttar Pradesh',
     addressCountry: 'IN',
   },
@@ -383,7 +383,7 @@ const jsonLdOrganization = {
   },
   address: {
     '@type': 'PostalAddress',
-    addressLocality: 'Lucknow',
+    addressLocality: 'Sultanpur',
     addressRegion: 'Uttar Pradesh',
     addressCountry: 'IN',
   },

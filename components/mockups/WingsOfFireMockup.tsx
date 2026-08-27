@@ -34,7 +34,7 @@ export default function WingsOfFireMockup() {
           <div className="absolute inset-0 bg-[radial-gradient(400px_200px_at_70%_20%,rgba(224,134,58,.22),transparent)]" />
           <div className="relative">
             <div className="text-[10px] tracking-[0.25em] text-[#e0863a] uppercase font-semibold mb-4">
-              Rooftop Restaurant &amp; Lounge · Hazratganj, Lucknow
+              Rooftop Restaurant &amp; Lounge · Sultanpur
             </div>
             <div className="font-serif text-3xl sm:text-4xl mb-4">
               Good food. <em className="text-[#e0863a]">Great vibes.</em> Rooftop evenings.

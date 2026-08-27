@@ -34,7 +34,7 @@ export const CLIENT_BUSINESSES: ClientBusiness[] = [
     id: 'wings-of-fire',
     name: 'Wings of Fire',
     type: 'Rooftop Restaurant & Lounge',
-    tagline: 'Good food. Great vibes. Rooftop evenings in Lucknow.',
+    tagline: 'Good food. Great vibes. Rooftop evenings in Sultanpur.',
     clientIds: ['WF-WEH7VQ'],
   },
 ]

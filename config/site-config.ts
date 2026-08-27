@@ -19,7 +19,7 @@ export const PERSONAL = {
   dateOfBirth: '', // Format: YYYY-MM-DD (e.g., '2009-05-15')
 
   // Address
-  city: 'Lucknow',
+  city: 'Sultanpur',
   state: 'Uttar Pradesh',
   country: 'India',
   pincode: '',
@@ -411,7 +411,7 @@ export const TESTIMONIALS = [
   },
   {
     name: 'Wings of Fire',
-    business: 'Rooftop Restaurant, Lucknow',
+    business: 'Rooftop Restaurant',
     rating: 5,
     text: 'Our rooftop restaurant website looks amazing. The menu, the photos, the booking button — everything is perfect. More customers now find us online.',
   },
