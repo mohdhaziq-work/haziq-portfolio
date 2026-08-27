@@ -58,7 +58,7 @@ Timestamp: ${new Date().toISOString()}
       {/* Floating Bug Report Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 z-40 w-12 h-12 bg-gray-800 hover:bg-gray-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110"
+        className="fixed bottom-5 left-5 z-40 w-12 h-12 bg-gray-800 hover:bg-gray-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110"
         aria-label="Report a bug"
         title="Report a bug or give feedback"
       >
