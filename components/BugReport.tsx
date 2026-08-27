@@ -22,21 +22,17 @@ export default function BugReport() {
       // Track the bug report
       trackEvent.bugReport()
 
-      // Send via email (using existing email infrastructure)
-      const response = await fetch('/api/email/test', {
+      // Send to bug report API
+      const response = await fetch('/api/bug-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          subject: `[${formData.type.toUpperCase()}] ${formData.title}`,
-          message: `
-Type: ${formData.type}
-Title: ${formData.title}
-Description: ${formData.description}
-Email: ${formData.email || 'Not provided'}
-URL: ${window.location.href}
-User Agent: ${navigator.userAgent}
-Timestamp: ${new Date().toISOString()}
-          `,
+          type: formData.type,
+          title: formData.title,
+          description: formData.description,
+          email: formData.email || 'Not provided',
+          url: window.location.href,
+          userAgent: navigator.userAgent,
         }),
       })
 
