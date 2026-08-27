@@ -6,6 +6,13 @@ import { usePathname, useSearchParams } from 'next/navigation'
 // Google Analytics Measurement ID
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_ID || ''
 
+// Extend Window interface for gtag
+declare global {
+  interface Window {
+    gtag?: (...args: unknown[]) => void
+  }
+}
+
 // Track page views
 export function pageview(url: string) {
   if (!GA_MEASUREMENT_ID || typeof window === 'undefined') return

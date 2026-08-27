@@ -10,11 +10,11 @@ const hits = new Map<string, { count: number; resetAt: number }>()
 // Clean up old entries every 5 minutes
 setInterval(() => {
   const now = Date.now()
-  for (const [ip, rec] of hits) {
+  hits.forEach((rec, ip) => {
     if (now > rec.resetAt) {
       hits.delete(ip)
     }
-  }
+  })
 }, 5 * 60 * 1000)
 
 export function getClientIp(req: Request): string {
