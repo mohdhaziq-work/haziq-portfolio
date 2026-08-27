@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import './globals.css'
 import LayoutShell from '@/components/layout/LayoutShell'
 import AIAssistant from '@/components/AIAssistant'
@@ -530,9 +531,15 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-background text-text-primary antialiased">
-        <GoogleAnalytics />
-        <LayoutShell>{children}</LayoutShell>
-        <AIAssistant />
+        <Suspense fallback={null}>
+          <GoogleAnalytics />
+        </Suspense>
+        <Suspense fallback={null}>
+          <LayoutShell>{children}</LayoutShell>
+        </Suspense>
+        <Suspense fallback={null}>
+          <AIAssistant />
+        </Suspense>
         <CookieConsent />
         <BugReport />
       </body>
