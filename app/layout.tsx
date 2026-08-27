@@ -3,6 +3,8 @@ import './globals.css'
 import LayoutShell from '@/components/layout/LayoutShell'
 import AIAssistant from '@/components/AIAssistant'
 import CookieConsent from '@/components/CookieConsent'
+import GoogleAnalytics from '@/components/GoogleAnalytics'
+import BugReport from '@/components/BugReport'
 
 // ===== BOTH DOMAINS FOR GOOGLE INDEXING =====
 const PRIMARY_URL = 'https://mohdhaziq-portfolio.onrender.com'
@@ -528,9 +530,11 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-background text-text-primary antialiased">
+        <GoogleAnalytics />
         <LayoutShell>{children}</LayoutShell>
         <AIAssistant />
         <CookieConsent />
+        <BugReport />
       </body>
     </html>
   )
