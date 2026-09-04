@@ -489,6 +489,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="canonical" href={PRIMARY_URL} />
         <link rel="manifest" href="/manifest.json" />
+        <meta name="msapplication-config" content="/browserconfig.xml" />
         <meta name="google-site-verification" content="7wOZkZNq9Zr6DLFPZ8Vwuz1kCQr3MU8fNy_Jq6oH7_8" />
         <meta name="theme-color" content="#1a73e8" />
         <meta name="apple-mobile-web-app-title" content="Mohd Haziq" />
