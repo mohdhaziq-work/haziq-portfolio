@@ -4,17 +4,16 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 
 const images = [
-  { src: '/teachers-day-board.png', title: 'Smart Board', style: 'Classroom Board' },
-  { src: '/teachers-day-1-minimal.png', title: 'Minimal Clean', style: 'Minimalist' },
-  { src: '/teachers-day-2-traditional.png', title: 'Indian Traditional', style: 'Traditional' },
-  { src: '/teachers-day-3-watercolor.png', title: 'Watercolor Art', style: 'Watercolor' },
-  { src: '/teachers-day-4-neon.png', title: 'Neon Glow', style: 'Neon' },
-  { src: '/teachers-day-5-vintage.png', title: 'Vintage Retro', style: 'Vintage' },
-  { src: '/teachers-day-6-nature.png', title: 'Nature Garden', style: 'Nature' },
-  { src: '/teachers-day-7-galaxy.png', title: 'Galaxy Space', style: 'Space' },
-  { src: '/teachers-day-8-chalkboard.png', title: 'Chalkboard', style: 'Chalkboard' },
-  { src: '/teachers-day-9-geometric.png', title: 'Geometric', style: 'Modern' },
-  { src: '/teachers-day-10-3d.png', title: '3D Render', style: '3D' },
+  { src: '/td-landscape-1-blue-gold.png', title: 'Royal Blue & Gold', style: 'Classic Elegant' },
+  { src: '/td-landscape-2-white-minimal.png', title: 'White Minimal', style: 'Clean Minimalist' },
+  { src: '/td-landscape-3-indian-traditional.png', title: 'Indian Traditional', style: 'Cultural Festive' },
+  { src: '/td-landscape-4-pink-floral.png', title: 'Pink Floral', style: 'Floral Romance' },
+  { src: '/td-landscape-5-green-nature.png', title: 'Green Nature', style: 'Nature Garden' },
+  { src: '/td-landscape-6-purple-galaxy.png', title: 'Purple Galaxy', style: 'Space Cosmic' },
+  { src: '/td-landscape-7-chalkboard.png', title: 'Chalkboard', style: 'Classroom Classic' },
+  { src: '/td-landscape-8-neon-dark.png', title: 'Neon Glow', style: 'Modern Futuristic' },
+  { src: '/td-landscape-9-orange-warm.png', title: 'Sunset Warm', style: 'Warm Emotional' },
+  { src: '/td-landscape-10-red-rose.png', title: 'Red Rose', style: 'Floral Elegant' },
 ]
 
 export default function TeachersDayPage() {
@@ -45,48 +44,29 @@ export default function TeachersDayPage() {
     }
   }
 
-  const confettiColors = ['#FFD700', '#FF6B35', '#4ECDC4', '#E74C3C', '#9B59B6', '#2ECC71', '#F39C12']
-
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
-        {/* Animated background */}
-        <div className="absolute inset-0 overflow-hidden">
-          {Array.from({ length: 20 }, (_, i) => (
-            <div
-              key={i}
-              className="absolute rounded-full opacity-20 animate-pulse"
-              style={{
-                width: `${10 + Math.random() * 30}px`,
-                height: `${10 + Math.random() * 30}px`,
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                background: `linear-gradient(135deg, ${confettiColors[i % confettiColors.length]}, transparent)`,
-                animationDelay: `${Math.random() * 3}s`,
-                animationDuration: `${3 + Math.random() * 4}s`,
-              }}
-            />
-          ))}
-        </div>
-
-        <div className="relative z-10 w-full max-w-md">
+      <div className="min-h-screen bg-white flex items-center justify-center p-4" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+        <div className="w-full max-w-md">
+          {/* Logo */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-3xl shadow-2xl mb-6 animate-bounce-slow">
-              <span className="text-5xl">🎓</span>
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-6" style={{ background: 'linear-gradient(135deg, #1a73e8, #1557b0)' }}>
+              <span className="text-white text-4xl font-bold">H</span>
             </div>
-            <h1 className="text-3xl font-bold text-white mb-2">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
               Teachers&apos; Day Special
             </h1>
-            <p className="text-purple-200 text-sm">
-              Enter the secret code to unlock
+            <p className="text-sm text-gray-500">
+              Enter password to unlock gallery
             </p>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl">
-            <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Form Card */}
+          <div className="bg-white rounded-2xl p-8" style={{ boxShadow: '0 1px 3px 0 rgba(60,64,67,0.15), 0 4px 8px 3px rgba(60,64,67,0.1)', border: '1px solid #e8eaed' }}>
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-purple-200 mb-3 text-center">
-                  🔐 Secret Password
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Password
                 </label>
                 <input
                   type="password"
@@ -96,200 +76,131 @@ export default function TeachersDayPage() {
                     setError('')
                   }}
                   placeholder="Enter password..."
-                  className="w-full px-6 py-4 bg-white/10 border border-white/30 rounded-2xl text-white text-center text-2xl tracking-[0.5em] placeholder:text-white/30 placeholder:tracking-widest focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all duration-300"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-900 text-center text-xl tracking-[0.3em] placeholder:text-gray-400 placeholder:tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   autoFocus
                   maxLength={10}
+                  style={{ background: '#f8f9fa' }}
                 />
               </div>
 
               {error && (
-                <div className="bg-red-500/20 border border-red-500/50 rounded-xl p-3 text-center">
-                  <p className="text-red-300 text-sm">{error}</p>
+                <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-center">
+                  <p className="text-red-600 text-sm">{error}</p>
                 </div>
               )}
 
               <button
                 type="submit"
-                className="w-full py-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-bold text-lg rounded-2xl hover:from-yellow-500 hover:to-orange-600 transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shadow-lg shadow-orange-500/30"
+                className="w-full py-3 text-white font-medium rounded-full transition-all hover:shadow-lg active:scale-[0.98]"
+                style={{ background: '#1a73e8', boxShadow: '0 1px 3px 0 rgba(60,64,67,0.3), 0 4px 8px 3px rgba(60,64,67,0.15)' }}
               >
-                Unlock Gallery 🎁
+                Unlock Gallery
               </button>
             </form>
 
-            <div className="mt-6 text-center">
-              <p className="text-purple-300 text-xs">
-                Hint: A very special year in history
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-8 text-center">
-            <p className="text-purple-400 text-xs">
-              Made with ❤️ by Mohd Haziq
+            <p className="mt-4 text-center text-xs text-gray-400">
+              Hint: A special year
             </p>
           </div>
+
+          <p className="mt-6 text-center text-xs text-gray-400">
+            Mohd Haziq &copy; {new Date().getFullYear()}
+          </p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900 relative overflow-hidden">
-      {/* Full Screen Image Modal */}
+    <div className="min-h-screen bg-white" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+      {/* Full Screen Image - NO borders, fills entire screen */}
       {selectedImage && (
         <div 
-          className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center cursor-pointer"
+          className="fixed inset-0 z-50 bg-white cursor-pointer"
           onClick={() => setSelectedImage(null)}
         >
-          <div className="relative w-full h-full flex items-center justify-center p-4">
-            <Image
-              src={selectedImage}
-              alt="Teachers' Day Full Screen"
-              fill
-              className="object-contain"
-              priority
-            />
-            <button 
-              className="absolute top-4 right-4 text-white/80 hover:text-white text-4xl z-50 bg-black/50 w-12 h-12 rounded-full flex items-center justify-center"
-              onClick={(e) => {
-                e.stopPropagation()
-                setSelectedImage(null)
-              }}
-            >
-              ✕
-            </button>
-          </div>
+          <Image
+            src={selectedImage}
+            alt="Teachers' Day"
+            fill
+            className="object-contain"
+            priority
+          />
+          <button 
+            className="absolute top-4 right-4 z-50 bg-gray-900/80 hover:bg-gray-900 text-white w-10 h-10 rounded-full flex items-center justify-center transition-all text-sm"
+            onClick={(e) => {
+              e.stopPropagation()
+              setSelectedImage(null)
+            }}
+          >
+            ✕
+          </button>
         </div>
       )}
 
-      {/* Animated Stars Background */}
-      <div className="absolute inset-0">
-        {Array.from({ length: 30 }, (_, i) => (
-          <div
-            key={i}
-            className="absolute animate-twinkle"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              width: `${2 + Math.random() * 3}px`,
-              height: `${2 + Math.random() * 3}px`,
-              background: '#FFD700',
-              borderRadius: '50%',
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${2 + Math.random() * 3}s`,
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Main Content */}
-      <div className="relative z-10 min-h-screen">
-        {/* Header */}
-        <div className={`text-center py-8 sm:py-12 transition-all duration-1000 ${showGallery ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-10'}`}>
-          <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full shadow-2xl mb-4 animate-bounce-slow">
-            <span className="text-3xl sm:text-4xl">🎉</span>
-          </div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-400 to-red-400 mb-3">
-            Happy Teachers&apos; Day!
-          </h1>
-          <p className="text-lg sm:text-xl text-purple-200 font-medium">
-            5th September 2026
-          </p>
-          <p className="text-sm text-purple-300 mt-2">
-            Click any image for full screen view
-          </p>
-        </div>
-
-        {/* Image Gallery */}
-        <div className={`max-w-7xl mx-auto px-4 pb-12 transition-all duration-1000 delay-500 ${showGallery ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {images.map((image, index) => (
-              <div
-                key={index}
-                className="group relative cursor-pointer transform hover:scale-[1.02] transition-all duration-300"
-                onClick={() => setSelectedImage(image.src)}
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                {/* Card */}
-                <div className="relative bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl hover:border-yellow-400/50 transition-all duration-300">
-                  {/* Image */}
-                  <div className="relative aspect-video">
-                    <Image
-                      src={image.src}
-                      alt={image.title}
-                      fill
-                      className="object-cover"
-                    />
-                    {/* Overlay on hover */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <div className="absolute bottom-4 left-4 right-4">
-                        <p className="text-white text-sm font-medium">
-                          Click for full screen
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Title */}
-                  <div className="p-3 sm:p-4">
-                    <h3 className="text-white font-semibold text-sm sm:text-base">
-                      {image.title}
-                    </h3>
-                    <p className="text-purple-300 text-xs sm:text-sm mt-1">
-                      {image.style}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Quote Section */}
-        <div className={`max-w-3xl mx-auto px-4 pb-12 transition-all duration-1000 delay-1000 ${showGallery ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-          <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 sm:p-8 text-center">
-            <p className="text-lg sm:text-xl text-white leading-relaxed italic">
-              🙏 &quot;The mediocre teacher tells. The good teacher explains. The superior teacher demonstrates. The great teacher inspires.&quot;
-            </p>
-            <p className="mt-4 text-purple-300 text-sm">
-              — William Arthur Ward
-            </p>
-            <div className="mt-6 pt-6 border-t border-white/20">
-              <p className="text-yellow-300 font-semibold text-lg">
-                Thank you for being our inspiration! 🌟
-              </p>
+      {/* Header - Portfolio Style */}
+      <div className="border-b" style={{ borderColor: '#e8eaed' }}>
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #1a73e8, #1557b0)' }}>
+              <span className="text-white font-bold">H</span>
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-gray-900">Teachers&apos; Day Gallery</h1>
+              <p className="text-xs text-gray-500">5th September 2026 &middot; Smart Board Ready</p>
             </div>
           </div>
-        </div>
-
-        {/* Footer */}
-        <div className={`text-center pb-8 transition-all duration-1000 delay-1500 ${showGallery ? 'opacity-100' : 'opacity-0'}`}>
-          <p className="text-purple-400 text-sm">
-            Made with ❤️ by Mohd Haziq
+          <p className="text-sm text-gray-600">
+            Click any image for full screen view &middot; All images are landscape (16:9) for smart board
           </p>
         </div>
       </div>
 
-      {/* Custom Animations */}
-      <style jsx global>{`
-        @keyframes twinkle {
-          0%, 100% { opacity: 0.3; transform: scale(1); }
-          50% { opacity: 1; transform: scale(1.5); }
-        }
-        
-        @keyframes bounce-slow {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-10px); }
-        }
-        
-        .animate-twinkle {
-          animation: twinkle ease-in-out infinite;
-        }
-        
-        .animate-bounce-slow {
-          animation: bounce-slow 2s ease-in-out infinite;
-        }
-      `}</style>
+      {/* Gallery Grid */}
+      <div className={`max-w-7xl mx-auto px-6 py-8 transition-all duration-700 ${showGallery ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {images.map((image, index) => (
+            <div
+              key={index}
+              className="group cursor-pointer"
+              onClick={() => setSelectedImage(image.src)}
+            >
+              <div className="bg-white rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1" style={{ boxShadow: '0 1px 3px 0 rgba(60,64,67,0.1)', border: '1px solid #e8eaed' }}>
+                <div className="relative aspect-video overflow-hidden">
+                  <Image
+                    src={image.src}
+                    alt={image.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="absolute bottom-3 left-3">
+                      <span className="bg-white/90 text-gray-900 text-xs font-medium px-3 py-1.5 rounded-full">
+                        Full Screen
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4">
+                  <h3 className="font-semibold text-gray-900 text-sm">{image.title}</h3>
+                  <p className="text-xs text-gray-500 mt-1">{image.style}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Quote */}
+      <div className={`max-w-3xl mx-auto px-6 pb-12 transition-all duration-700 delay-300 ${showGallery ? 'opacity-100' : 'opacity-0'}`}>
+        <div className="text-center py-8 border-t" style={{ borderColor: '#e8eaed' }}>
+          <p className="text-gray-600 italic text-lg">
+            &quot;The mediocre teacher tells. The good teacher explains. The superior teacher demonstrates. The great teacher inspires.&quot;
+          </p>
+          <p className="text-gray-400 text-sm mt-3">— William Arthur Ward</p>
+          <p className="text-blue-600 font-medium mt-4">Thank you, Teachers! 🙏</p>
+        </div>
+      </div>
     </div>
   )
 }
