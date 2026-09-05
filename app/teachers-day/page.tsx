@@ -1,23 +1,34 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
+
+const images = [
+  { src: '/teachers-day-board.png', title: 'Smart Board', style: 'Classroom Board' },
+  { src: '/teachers-day-1-minimal.png', title: 'Minimal Clean', style: 'Minimalist' },
+  { src: '/teachers-day-2-traditional.png', title: 'Indian Traditional', style: 'Traditional' },
+  { src: '/teachers-day-3-watercolor.png', title: 'Watercolor Art', style: 'Watercolor' },
+  { src: '/teachers-day-4-neon.png', title: 'Neon Glow', style: 'Neon' },
+  { src: '/teachers-day-5-vintage.png', title: 'Vintage Retro', style: 'Vintage' },
+  { src: '/teachers-day-6-nature.png', title: 'Nature Garden', style: 'Nature' },
+  { src: '/teachers-day-7-galaxy.png', title: 'Galaxy Space', style: 'Space' },
+  { src: '/teachers-day-8-chalkboard.png', title: 'Chalkboard', style: 'Chalkboard' },
+  { src: '/teachers-day-9-geometric.png', title: 'Geometric', style: 'Modern' },
+  { src: '/teachers-day-10-3d.png', title: '3D Render', style: '3D' },
+]
 
 export default function TeachersDayPage() {
   const [password, setPassword] = useState('')
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [error, setError] = useState('')
-  const [showConfetti, setShowConfetti] = useState(false)
-  const [showImage, setShowImage] = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [showGallery, setShowGallery] = useState(false)
 
   useEffect(() => {
-    // Check if already authenticated
     const auth = sessionStorage.getItem('teachers-day-auth')
     if (auth === 'true') {
       setIsAuthenticated(true)
-      setTimeout(() => setShowConfetti(true), 500)
-      setTimeout(() => setShowImage(true), 1000)
+      setTimeout(() => setShowGallery(true), 500)
     }
   }, [])
 
@@ -27,25 +38,14 @@ export default function TeachersDayPage() {
       setIsAuthenticated(true)
       sessionStorage.setItem('teachers-day-auth', 'true')
       setError('')
-      setTimeout(() => setShowConfetti(true), 300)
-      setTimeout(() => setShowImage(true), 800)
+      setTimeout(() => setShowGallery(true), 300)
     } else {
       setError('Wrong password! Try again.')
       setPassword('')
-      inputRef.current?.focus()
     }
   }
 
-  // Confetti particles
   const confettiColors = ['#FFD700', '#FF6B35', '#4ECDC4', '#E74C3C', '#9B59B6', '#2ECC71', '#F39C12']
-  const confettiParticles = Array.from({ length: 50 }, (_, i) => ({
-    id: i,
-    left: Math.random() * 100,
-    delay: Math.random() * 3,
-    duration: 3 + Math.random() * 4,
-    color: confettiColors[i % confettiColors.length],
-    size: 6 + Math.random() * 8,
-  }))
 
   if (!isAuthenticated) {
     return (
@@ -70,20 +70,18 @@ export default function TeachersDayPage() {
         </div>
 
         <div className="relative z-10 w-full max-w-md">
-          {/* Logo/Icon */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-3xl shadow-2xl mb-6 transform hover:rotate-12 transition-transform duration-300">
+            <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-3xl shadow-2xl mb-6 animate-bounce-slow">
               <span className="text-5xl">🎓</span>
             </div>
             <h1 className="text-3xl font-bold text-white mb-2">
               Teachers&apos; Day Special
             </h1>
             <p className="text-purple-200 text-sm">
-              Enter the secret code to unlock the surprise
+              Enter the secret code to unlock
             </p>
           </div>
 
-          {/* Password Form */}
           <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
@@ -91,7 +89,6 @@ export default function TeachersDayPage() {
                   🔐 Secret Password
                 </label>
                 <input
-                  ref={inputRef}
                   type="password"
                   value={password}
                   onChange={(e) => {
@@ -115,11 +112,10 @@ export default function TeachersDayPage() {
                 type="submit"
                 className="w-full py-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-bold text-lg rounded-2xl hover:from-yellow-500 hover:to-orange-600 transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shadow-lg shadow-orange-500/30"
               >
-                Unlock Surprise 🎁
+                Unlock Gallery 🎁
               </button>
             </form>
 
-            {/* Hint */}
             <div className="mt-6 text-center">
               <p className="text-purple-300 text-xs">
                 Hint: A very special year in history
@@ -127,7 +123,6 @@ export default function TeachersDayPage() {
             </div>
           </div>
 
-          {/* Footer */}
           <div className="mt-8 text-center">
             <p className="text-purple-400 text-xs">
               Made with ❤️ by Mohd Haziq
@@ -140,26 +135,30 @@ export default function TeachersDayPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900 relative overflow-hidden">
-      {/* Confetti Animation */}
-      {showConfetti && (
-        <div className="fixed inset-0 pointer-events-none z-50">
-          {confettiParticles.map((particle) => (
-            <div
-              key={particle.id}
-              className="absolute animate-confetti-fall"
-              style={{
-                left: `${particle.left}%`,
-                top: '-5%',
-                width: `${particle.size}px`,
-                height: `${particle.size}px`,
-                background: particle.color,
-                borderRadius: Math.random() > 0.5 ? '50%' : '2px',
-                animationDelay: `${particle.delay}s`,
-                animationDuration: `${particle.duration}s`,
-                transform: `rotate(${Math.random() * 360}deg)`,
-              }}
+      {/* Full Screen Image Modal */}
+      {selectedImage && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center cursor-pointer"
+          onClick={() => setSelectedImage(null)}
+        >
+          <div className="relative w-full h-full flex items-center justify-center p-4">
+            <Image
+              src={selectedImage}
+              alt="Teachers' Day Full Screen"
+              fill
+              className="object-contain"
+              priority
             />
-          ))}
+            <button 
+              className="absolute top-4 right-4 text-white/80 hover:text-white text-4xl z-50 bg-black/50 w-12 h-12 rounded-full flex items-center justify-center"
+              onClick={(e) => {
+                e.stopPropagation()
+                setSelectedImage(null)
+              }}
+            >
+              ✕
+            </button>
+          </div>
         </div>
       )}
 
@@ -184,42 +183,73 @@ export default function TeachersDayPage() {
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-4">
+      <div className="relative z-10 min-h-screen">
         {/* Header */}
-        <div className={`text-center mb-8 transition-all duration-1000 ${showImage ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-10'}`}>
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full shadow-2xl mb-4 animate-bounce-slow">
-            <span className="text-4xl">🎉</span>
+        <div className={`text-center py-8 sm:py-12 transition-all duration-1000 ${showGallery ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-10'}`}>
+          <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full shadow-2xl mb-4 animate-bounce-slow">
+            <span className="text-3xl sm:text-4xl">🎉</span>
           </div>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-400 to-red-400 mb-4">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-400 to-red-400 mb-3">
             Happy Teachers&apos; Day!
           </h1>
-          <p className="text-xl sm:text-2xl text-purple-200 font-medium">
+          <p className="text-lg sm:text-xl text-purple-200 font-medium">
             5th September 2026
+          </p>
+          <p className="text-sm text-purple-300 mt-2">
+            Click any image for full screen view
           </p>
         </div>
 
-        {/* Main Image */}
-        <div className={`relative w-full max-w-4xl transition-all duration-1000 delay-500 ${showImage ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}>
-          {/* Decorative Frame */}
-          <div className="absolute -inset-4 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 rounded-3xl opacity-75 blur-lg animate-pulse" />
-          
-          <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-2 shadow-2xl">
-            <Image
-              src="/teachers-day-board.png"
-              alt="Happy Teachers' Day - A tribute to our amazing teachers"
-              width={1200}
-              height={800}
-              className="w-full h-auto rounded-xl"
-              priority
-            />
+        {/* Image Gallery */}
+        <div className={`max-w-7xl mx-auto px-4 pb-12 transition-all duration-1000 delay-500 ${showGallery ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {images.map((image, index) => (
+              <div
+                key={index}
+                className="group relative cursor-pointer transform hover:scale-[1.02] transition-all duration-300"
+                onClick={() => setSelectedImage(image.src)}
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                {/* Card */}
+                <div className="relative bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl hover:border-yellow-400/50 transition-all duration-300">
+                  {/* Image */}
+                  <div className="relative aspect-video">
+                    <Image
+                      src={image.src}
+                      alt={image.title}
+                      fill
+                      className="object-cover"
+                    />
+                    {/* Overlay on hover */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="absolute bottom-4 left-4 right-4">
+                        <p className="text-white text-sm font-medium">
+                          Click for full screen
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Title */}
+                  <div className="p-3 sm:p-4">
+                    <h3 className="text-white font-semibold text-sm sm:text-base">
+                      {image.title}
+                    </h3>
+                    <p className="text-purple-300 text-xs sm:text-sm mt-1">
+                      {image.style}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Message */}
-        <div className={`mt-8 text-center max-w-2xl transition-all duration-1000 delay-1000 ${showImage ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-          <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 sm:p-8">
-            <p className="text-lg sm:text-xl text-white leading-relaxed">
-              🙏 <em>&quot;The mediocre teacher tells. The good teacher explains. The superior teacher demonstrates. The great teacher inspires.&quot;</em>
+        {/* Quote Section */}
+        <div className={`max-w-3xl mx-auto px-4 pb-12 transition-all duration-1000 delay-1000 ${showGallery ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+          <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 sm:p-8 text-center">
+            <p className="text-lg sm:text-xl text-white leading-relaxed italic">
+              🙏 &quot;The mediocre teacher tells. The good teacher explains. The superior teacher demonstrates. The great teacher inspires.&quot;
             </p>
             <p className="mt-4 text-purple-300 text-sm">
               — William Arthur Ward
@@ -228,55 +258,23 @@ export default function TeachersDayPage() {
               <p className="text-yellow-300 font-semibold text-lg">
                 Thank you for being our inspiration! 🌟
               </p>
-              <p className="text-purple-200 text-sm mt-2">
-                From your loving students
-              </p>
             </div>
           </div>
         </div>
 
-        {/* Decorative Elements */}
-        <div className={`flex items-center gap-4 mt-8 transition-all duration-1000 delay-1500 ${showImage ? 'opacity-100' : 'opacity-0'}`}>
-          {['📚', '🍎', '✏️', '🎒', '🎓'].map((emoji, i) => (
-            <span
-              key={i}
-              className="text-3xl sm:text-4xl animate-float"
-              style={{ animationDelay: `${i * 0.3}s` }}
-            >
-              {emoji}
-            </span>
-          ))}
-        </div>
-
         {/* Footer */}
-        <div className={`mt-8 transition-all duration-1000 delay-2000 ${showImage ? 'opacity-100' : 'opacity-0'}`}>
+        <div className={`text-center pb-8 transition-all duration-1000 delay-1500 ${showGallery ? 'opacity-100' : 'opacity-0'}`}>
           <p className="text-purple-400 text-sm">
-            Made with ❤️ by Mohd Haziq | For the best teachers in the world
+            Made with ❤️ by Mohd Haziq
           </p>
         </div>
       </div>
 
       {/* Custom Animations */}
       <style jsx global>{`
-        @keyframes confetti-fall {
-          0% {
-            transform: translateY(0) rotate(0deg);
-            opacity: 1;
-          }
-          100% {
-            transform: translateY(100vh) rotate(720deg);
-            opacity: 0;
-          }
-        }
-        
         @keyframes twinkle {
           0%, 100% { opacity: 0.3; transform: scale(1); }
           50% { opacity: 1; transform: scale(1.5); }
-        }
-        
-        @keyframes float {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-20px); }
         }
         
         @keyframes bounce-slow {
@@ -284,16 +282,8 @@ export default function TeachersDayPage() {
           50% { transform: translateY(-10px); }
         }
         
-        .animate-confetti-fall {
-          animation: confetti-fall linear infinite;
-        }
-        
         .animate-twinkle {
           animation: twinkle ease-in-out infinite;
-        }
-        
-        .animate-float {
-          animation: float 3s ease-in-out infinite;
         }
         
         .animate-bounce-slow {
