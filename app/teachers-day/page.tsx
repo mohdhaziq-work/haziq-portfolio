@@ -14,6 +14,11 @@ const images = [
   { src: '/td-landscape-8-neon-dark.png', title: 'Neon Glow', style: 'Modern Futuristic' },
   { src: '/td-landscape-9-orange-warm.png', title: 'Sunset Warm', style: 'Warm Emotional' },
   { src: '/td-landscape-10-red-rose.png', title: 'Red Rose', style: 'Floral Elegant' },
+  { src: '/td-board-1.png', title: 'Paper Flower Board', style: 'Board Decoration' },
+  { src: '/td-board-2.png', title: 'Heart Thank You', style: 'Board Decoration' },
+  { src: '/td-board-3.png', title: 'Smart Board Display', style: 'Board Decoration' },
+  { src: '/td-board-4.png', title: 'Message Tree', style: 'Board Decoration' },
+  { src: '/td-board-5.png', title: 'Garden Theme', style: 'Board Decoration' },
 ]
 
 export default function TeachersDayPage() {
