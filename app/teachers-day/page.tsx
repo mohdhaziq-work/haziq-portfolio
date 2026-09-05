@@ -205,7 +205,7 @@ export default function TeachersDayPage() {
           
           <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-2 shadow-2xl">
             <Image
-              src="/teachers-day.png"
+              src="/teachers-day-board.png"
               alt="Happy Teachers' Day - A tribute to our amazing teachers"
               width={1200}
               height={800}
