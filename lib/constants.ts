@@ -55,14 +55,32 @@ export const NAV_LINKS = [
   { label: 'Contact', href: '/contact' },
 ] as const
 
-// ==================== PROJECTS ====================
+// ==================== PROJECTS (Real Projects) ====================
 export const PROJECTS = [
+  {
+    id: 'class10-learning-hub',
+    title: 'Class 10 Learning Hub',
+    category: 'Education',
+    description: 'A complete learning platform for Class 10 students with study materials, notes, quizzes, and resources for all subjects.',
+    longDescription: 'Class 10 Learning Hub is a comprehensive educational platform designed to help students prepare for their board exams. It features organized study materials for all subjects, downloadable notes, practice quizzes, and a clean interface that makes learning accessible and enjoyable. Built with modern web technologies for fast performance and mobile responsiveness.',
+    techStack: ['HTML5', 'CSS3', 'JavaScript', 'Responsive Design'],
+    features: ['All Subjects Covered', 'Downloadable Notes', 'Practice Quizzes', 'Mobile Responsive', 'Fast Loading', 'Clean UI'],
+    liveUrl: 'https://class10-learning-hub.onrender.com',
+    githubUrl: 'https://github.com/mohdhaziq-work',
+    thumbnail: IMAGES.projectThumbnails.class10LearningHub,
+    accent: '#2563eb',
+    bgColor: '#f0f4ff',
+  },
+] as const
+
+// ==================== DEMO WEBSITES (Portfolio Demos) ====================
+export const DEMO_WEBSITES = [
   {
     id: 'spice-garden',
     title: 'Spice Garden',
     category: 'Restaurant',
     description: 'A luxury dining experience reimagined for the web. Royal Awadhi cuisine meets modern design with a gold-black aesthetic, digital menu, and seamless reservation system.',
-    longDescription: 'Spice Garden is a premium restaurant website built to convert hungry visitors into paying customers. Featuring a royal gold-and-black theme, an interactive digital menu with Veg/Non-Veg filters, auto-rotating testimonials, and a smart newsletter system. Every element is designed to make the user feel the luxury before they even walk through the door.',
+    longDescription: 'Spice Garden is a premium restaurant website built to convert hungry visitors into paying customers. Featuring a royal gold-and-black theme, an interactive digital menu with Veg/Non-Veg filters, auto-rotating testimonials, and a smart newsletter system.',
     techStack: ['Tailwind CSS', 'AOS Animations', 'Vanilla JS', 'Google Fonts'],
     features: ['Digital Menu with Filters', 'Testimonial Slider', 'Newsletter Integration', 'Multi-Page Layout', 'SEO Optimized', 'Mobile Responsive'],
     liveUrl: 'https://mohdhaziq-work.github.io/spice-garden-restaurant/',
@@ -76,7 +94,7 @@ export const PROJECTS = [
     title: 'Success Academy',
     category: 'Education',
     description: 'An enterprise-grade educational portal with student dashboards, admin management, and a multi-step admission system. Trust through technology.',
-    longDescription: 'Success Academy redefines how coaching centers present themselves online. It features a complete student portal with login system, multi-step admission form, admin dashboard for managing students and requests, and a LocalStorage-based CRUD database. The design follows enterprise SaaS patterns to build instant credibility.',
+    longDescription: 'Success Academy redefines how coaching centers present themselves online. It features a complete student portal with login system, multi-step admission form, admin dashboard for managing students and requests, and a LocalStorage-based CRUD database.',
     techStack: ['Alpine.js', 'Tailwind CSS', 'LocalStorage DB', 'CSS Architecture'],
     features: ['Multi-Step Admission Form', 'Student/Admin Login Portal', 'CRUD Database System', 'Role-Based Dashboard', 'Enterprise CSS System', 'Progressive UX'],
     liveUrl: 'https://mohdhaziq-work.github.io/success-academy-coaching/',
@@ -90,7 +108,7 @@ export const PROJECTS = [
     title: 'Power Fitness',
     category: 'Fitness',
     description: 'An aggressive, high-energy gym website with neon-dark aesthetics, BMI calculator, membership pricing, and a member console. Designed to convert.',
-    longDescription: 'Power Fitness is built around one goal: conversion. The neon-red-on-black design creates urgency and excitement. It features a functional BMI calculator, three-tier membership pricing, a member dashboard console, and component-based architecture with dynamic sidebar injection. Every pixel is optimized to turn visitors into members.',
+    longDescription: 'Power Fitness is built around one goal: conversion. The neon-red-on-black design creates urgency and excitement. It features a functional BMI calculator, three-tier membership pricing, a member dashboard console.',
     techStack: ['Alpine.js', 'Component Architecture', 'Tailwind CSS', 'Custom Design System'],
     features: ['BMI Calculator Tool', '3-Tier Pricing System', 'Member Dashboard Console', 'Component Injection System', 'Glassmorphism Sidebar', 'Neon Dark Theme'],
     liveUrl: 'https://mohdhaziq-work.github.io/power-fitness-gym/',

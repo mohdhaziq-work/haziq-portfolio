@@ -40,41 +40,13 @@ export const PERSONAL = {
 // IMAGES (Apni Photos Ke Links Yahan Daalo)
 // ============================================================
 export const IMAGES = {
-  /**
-   * PROFILE PHOTO:
-   * - Apni ek achhi photo upload karo ImgBB.com par
-   * - Ya PostImages.org par
-   * - Ya apni hosting par
-   * - Direct link paste karo
-   * 
-   * Example: 'https://i.ibb.co/xxxxx/my-photo.jpg'
-   */
   profilePhoto: '',
-
-  /**
-   * HERO SECTION PHOTO (Home Page Right Side):
-   * - Ek professional photo ya illustration
-   */
   heroPhoto: '',
-
-  /**
-   * OG IMAGE (Jab kisi ko link bhejoge toh ye dikhega):
-   * - 1200x630 size recommended
-   */
   ogImage: '',
-
-  /**
-   * FAVICON (Browser Tab Icon):
-   * - 32x32 ya 64x64 .ico ya .png
-   */
   favicon: '/favicon.ico',
 
-  /**
-   * PROJECT THUMBNAILS:
-   * - Har project ke liye ek screenshot
-   * - Upload karo ImgBB.com par aur link daalo
-   */
   projectThumbnails: {
+    class10LearningHub: '/projects/class10-learning-hub.png',
     spiceGarden: '/projects/spice-garden.png',
     successAcademy: '/projects/success-academy.png',
     powerFitness: '/projects/power-fitness.png',

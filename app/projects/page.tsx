@@ -1,6 +1,6 @@
 'use client'
 
-import { PROJECTS } from '@/lib/constants'
+import { PROJECTS, DEMO_WEBSITES } from '@/lib/constants'
 import Section from '@/components/ui/Section'
 import AnimatedText from '@/components/ui/AnimatedText'
 import { openInstagramDM } from '@/lib/instagram'
@@ -22,6 +22,7 @@ type ProjectItem = {
 
 export default function ProjectsPage() {
   const projects: ProjectItem[] = PROJECTS.map(p => ({ ...p }))
+  const demos: ProjectItem[] = DEMO_WEBSITES.map(p => ({ ...p }))
 
   return (
     <div className="pt-24">
@@ -33,7 +34,20 @@ export default function ProjectsPage() {
             Mohd Haziq <span className="text-accent">Portfolio</span>
           </AnimatedText>
           <AnimatedText as="p" delay={200} className="text-body-lg text-text-secondary">
-            Each project is built with a specific business goal — converting visitors into customers.
+            Real projects built for real businesses, plus demo websites showcasing different design styles.
+          </AnimatedText>
+        </div>
+      </Section>
+
+      {/* ===== REAL PROJECTS ===== */}
+      <Section background="white" padding="small">
+        <div className="text-center max-w-2xl mx-auto mb-8">
+          <AnimatedText as="span" className="section-overline">Live Projects</AnimatedText>
+          <AnimatedText as="h2" delay={100} className="text-display-sm text-text-primary mb-4">
+            Real <span className="text-accent">Projects</span>
+          </AnimatedText>
+          <AnimatedText as="p" delay={200} className="text-body-md text-text-secondary">
+            Production-ready applications built for real users and businesses.
           </AnimatedText>
         </div>
       </Section>
@@ -68,9 +82,6 @@ export default function ProjectsPage() {
                       <span className="font-bold text-4xl tracking-tight" style={{ color: project.accent }}>
                         {project.title}
                       </span>
-                      <p className="text-body-sm mt-2 opacity-50" style={{ color: project.accent }}>
-                        Screenshot placeholder
-                      </p>
                     </div>
                   </div>
                 )}
@@ -135,8 +146,79 @@ export default function ProjectsPage() {
         </Section>
       ))}
 
-      {/* CTA */}
+      {/* ===== DEMO WEBSITES ===== */}
+      <Section background="white" padding="small">
+        <div className="text-center max-w-2xl mx-auto mb-8 pt-8">
+          <AnimatedText as="span" className="section-overline">Design Showcase</AnimatedText>
+          <AnimatedText as="h2" delay={100} className="text-display-sm text-text-primary mb-4">
+            Demo <span className="text-accent">Websites</span>
+          </AnimatedText>
+          <AnimatedText as="p" delay={200} className="text-body-md text-text-secondary">
+            Showcasing different design styles and industries. These are demos of what I can build for your business.
+          </AnimatedText>
+        </div>
+      </Section>
+
+      {/* Demo Websites Grid */}
       <Section background="surface">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {demos.map((demo, index) => (
+            <AnimatedText key={demo.id} as="div" delay={index * 100}>
+              <a
+                href={demo.liveUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block group"
+              >
+                <div className="elevated-card p-0 overflow-hidden">
+                  <div className="relative aspect-video overflow-hidden" style={{ backgroundColor: demo.bgColor }}>
+                    {demo.thumbnail ? (
+                      <img
+                        src={demo.thumbnail}
+                        alt={`${demo.title} screenshot`}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <span className="font-bold text-2xl" style={{ color: demo.accent }}>
+                          {demo.title}
+                        </span>
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
+                        <span className="bg-white/90 text-gray-900 text-xs font-medium px-3 py-1.5 rounded-full">
+                          View Demo
+                        </span>
+                        <span className="bg-white/90 text-gray-900 text-xs font-medium px-3 py-1.5 rounded-full">
+                          {demo.category}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-5">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="chip chip-active text-xs">{demo.category}</span>
+                    </div>
+                    <h3 className="font-bold text-text-primary text-lg mb-2">{demo.title}</h3>
+                    <p className="text-body-sm text-text-secondary line-clamp-2 mb-4">{demo.description}</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {demo.techStack.slice(0, 3).map((tech) => (
+                        <span key={tech} className="text-xs px-2 py-1 bg-surface-2 rounded-full text-text-tertiary">
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </AnimatedText>
+          ))}
+        </div>
+      </Section>
+
+      {/* CTA */}
+      <Section background="white">
         <div className="text-center max-w-2xl mx-auto">
           <AnimatedText as="h2" className="text-display-sm text-text-primary mb-4">
             Like what you see?
